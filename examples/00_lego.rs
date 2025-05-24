@@ -1,4 +1,4 @@
-use anvil::{Axis, Cuboid, Cylinder, Part, Point3D, length};
+use anvil::{Axis3D, Cuboid, Cylinder, Part, Point3D, length};
 
 fn construct() -> Part {
     let block_width = length!(16 mm);
@@ -16,7 +16,7 @@ fn construct() -> Part {
             stud_distance / 2.,
             (block_height + stud_height) / 2.,
         ))
-        .circular_pattern(Axis::z(), 4);
+        .circular_pattern(Axis3D::z(), 4);
     let inner_block = Cuboid::from_dim(
         block_width - thickness,
         block_width - thickness,

@@ -3,7 +3,7 @@ use core::f64;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Length, Plane, Point2D, quantities::Axis};
+use crate::{Length, Plane, Point2D, quantities::Axis3D};
 
 /// A one-dimensional object in two-dimensional space.
 #[derive(Debug, PartialEq, Clone)]
@@ -63,7 +63,7 @@ impl Edge {
         }
         match self {
             Edge::Circle(center, radius) => {
-                let axis = Axis {
+                let axis = Axis3D {
                     origin: center.to_3d(plane),
                     direction: plane.normal(),
                 };

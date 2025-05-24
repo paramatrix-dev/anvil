@@ -3,9 +3,9 @@ use std::ops::{Add, Div, Mul, Sub};
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::Length;
+use crate::{Error, Length};
 
-use super::{IntoF64, Vec3};
+use super::Dir3D;
 
 /// A location in three-dimensional space.
 #[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
@@ -35,12 +35,12 @@ impl Point3D {
     /// ```rust
     /// use anvil::{length, Point3D};
     ///
-    /// let point = Point3D::from_mm(1, 2, 3);
+    /// let point = Point3D::from_mm(1., 2., 3.);
     /// assert_eq!(point.x, length!(1 mm));
     /// assert_eq!(point.y, length!(2 mm));
     /// assert_eq!(point.z, length!(3 mm));
     /// ```
-    pub fn from_mm<T: IntoF64, U: IntoF64, V: IntoF64>(x: T, y: U, z: V) -> Self {
+    pub fn from_mm(x: f64, y: f64, z: f64) -> Self {
         Point3D {
             x: Length::from_mm(x),
             y: Length::from_mm(y),
@@ -53,12 +53,12 @@ impl Point3D {
     /// ```rust
     /// use anvil::{length, Point3D};
     ///
-    /// let point = Point3D::from_m(1, 2, 3);
+    /// let point = Point3D::from_m(1., 2., 3.);
     /// assert_eq!(point.x, length!(1 m));
     /// assert_eq!(point.y, length!(2 m));
     /// assert_eq!(point.z, length!(3 m));
     /// ```
-    pub fn from_m<T: IntoF64, U: IntoF64, V: IntoF64>(x: T, y: U, z: V) -> Self {
+    pub fn from_m(x: f64, y: f64, z: f64) -> Self {
         Point3D {
             x: Length::from_m(x),
             y: Length::from_m(y),
@@ -73,13 +73,30 @@ impl Point3D {
     /// use core::f64;
     /// use anvil::{Length, Point3D};
     ///
-    /// let point = Point3D::from_m(0, 1, 1);
+    /// let point = Point3D::from_m(0., 1., 1.);
     /// assert_eq!(point.distance_to_origin(), Length::from_m(f64::sqrt(2.)))
     /// ```
     pub fn distance_to_origin(&self) -> Length {
         Length::from_m(f64::sqrt(
             f64::powi(self.x.m(), 2) + f64::powi(self.y.m(), 2) + f64::powi(self.z.m(), 2),
         ))
+    }
+
+    /// Return the direction this point lies in with respect to another point.
+    ///
+    /// ```rust
+    /// use anvil::{Dir3D, Error, point, Point3D};
+    ///
+    /// let p = point!(1 m, 1 m, 1 m);
+    /// assert_eq!(p.direction_from(&Point3D::origin()), Dir3D::try_from(1., 1., 1.));
+    /// assert_eq!(p.direction_from(&p), Err(Error::ZeroVector));
+    /// ```
+    pub fn direction_from(&self, other: &Point3D) -> Result<Dir3D, Error> {
+        Dir3D::try_from(
+            (self.x - other.x).m(),
+            (self.y - other.y).m(),
+            (self.z - other.z).m(),
+        )
     }
 
     pub(crate) fn to_occt_point(self) -> UniquePtr<ffi::gp_Pnt> {
@@ -121,32 +138,6 @@ impl Div<f64> for Point3D {
     type Output = Point3D;
     fn div(self, other: f64) -> Point3D {
         Point3D::new(self.x / other, self.y / other, self.z / other)
-    }
-}
-
-impl Div<Length> for Point3D {
-    type Output = Vec3;
-    /// Divide this `Point3D` by a `Length` to receive a `Vec3`.
-    /// ```rust
-    /// use anvil::{length, point, Vec3};
-    ///
-    /// assert_eq!(point!(2 m, 4 m, 6 m) / length!(2 m), Vec3::from((1., 2., 3.)))
-    /// ```
-    fn div(self, other: Length) -> Vec3 {
-        Vec3::from((self.x / other, self.y / other, self.z / other))
-    }
-}
-
-impl Div<&Length> for Point3D {
-    type Output = Vec3;
-    /// Divide this `Point3D` by a `&Length` to receive a `Vec3`.
-    /// ```rust
-    /// use anvil::{length, point, Vec3};
-    ///
-    /// assert_eq!(point!(2 m, 4 m, 6 m) / &length!(2 m), Vec3::from((1., 2., 3.)))
-    /// ```
-    fn div(self, other: &Length) -> Vec3 {
-        Vec3::from((self.x / other, self.y / other, self.z / other))
     }
 }
 

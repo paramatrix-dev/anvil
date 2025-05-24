@@ -9,7 +9,7 @@ use cxx::UniquePtr;
 use opencascade_sys::ffi;
 use tempfile::NamedTempFile;
 
-use crate::{angle, Angle, Axis, Error, Length, Point3D};
+use crate::{angle, Angle, Axis3D, Error, Length, Point3D};
 
 /// A 3D object in space.
 pub struct Part {
@@ -57,27 +57,27 @@ impl Part {
         }
     }
 
-    /// Create multiple instances of the `Sketch` spaced evenly around a point.
+    /// Create multiple instances of the `Part` spaced evenly around a point.
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{angle, Axis, Cuboid, point};
+    /// use anvil::{angle, Axis3D, Cuboid, point};
     ///
     /// let cuboid = Cuboid::from_corners(point!(1 m, 1 m, 0 m), point!(2 m, 2 m, 1 m));
     /// assert_eq!(
-    ///     cuboid.circular_pattern(Axis::z(), 4),
+    ///     cuboid.circular_pattern(Axis3D::z(), 4),
     ///     cuboid
-    ///         .add(&cuboid.rotate_around(Axis::z(), angle!(90 deg)))
-    ///         .add(&cuboid.rotate_around(Axis::z(), angle!(180 deg)))
-    ///         .add(&cuboid.rotate_around(Axis::z(), angle!(270 deg)))
+    ///         .add(&cuboid.rotate_around(Axis3D::z(), angle!(90 deg)))
+    ///         .add(&cuboid.rotate_around(Axis3D::z(), angle!(180 deg)))
+    ///         .add(&cuboid.rotate_around(Axis3D::z(), angle!(270 deg)))
     /// )
     /// ```
-    pub fn circular_pattern(&self, axis: Axis, n: u8) -> Self {
-        let angle_step = angle!(360 deg) / n as f64;
+    pub fn circular_pattern(&self, around: Axis3D, instances: u8) -> Self {
+        let angle_step = angle!(360 deg) / instances as f64;
         let mut new_shape = self.clone();
-        let mut angle = angle!(0 deg);
-        for _ in 0..n {
-            new_shape = new_shape.add(&self.rotate_around(axis.clone(), angle));
+        let mut angle = angle!(0);
+        for _ in 0..instances {
+            new_shape = new_shape.add(&self.rotate_around(around.clone(), angle));
             angle = angle + angle_step;
         }
         new_shape
@@ -103,6 +103,41 @@ impl Part {
             _ => Part { inner: None },
         }
     }
+
+    /// Create multiple instances of the `Part` spaced evenly until a point.
+    ///
+    /// ```rust
+    /// use anvil::{Cuboid, length, point};
+    ///
+    /// let cuboid = Cuboid::from_m(1., 1., 1.);
+    /// assert_eq!(
+    ///     cuboid.linear_pattern(&point!(4 m, 0 m, 0 m), 5),
+    ///     cuboid
+    ///         .add(&cuboid.move_to(point!(1 m, 0 m, 0 m)))
+    ///         .add(&cuboid.move_to(point!(2 m, 0 m, 0 m)))
+    ///         .add(&cuboid.move_to(point!(3 m, 0 m, 0 m)))
+    ///         .add(&cuboid.move_to(point!(4 m, 0 m, 0 m)))
+    /// )
+    /// ```
+    pub fn linear_pattern(&self, until: &Point3D, instances: u8) -> Self {
+        let start = match self.center() {
+            Ok(p) => p,
+            Err(_) => return self.clone(),
+        };
+        let axis = match Axis3D::between(start, *until) {
+            Ok(axis) => axis,
+            Err(_) => return self.clone(),
+        };
+
+        let len_step = (start - *until).distance_to_origin() / instances as f64;
+        let mut new_part = self.clone();
+        let mut pos = Length::zero();
+        for _ in 0..instances {
+            pos = pos + len_step;
+            new_part = new_part.add(&self.move_to(axis.point_at(&pos)));
+        }
+        new_part
+    }
     /// Return a clone of this `Part` with the center moved to a specified point.
     ///
     /// # Example
@@ -126,21 +161,21 @@ impl Part {
             None => Self { inner: None },
         }
     }
-    /// Return a clone of this `Part` rotated around an `Axis`.
+    /// Return a clone of this `Part` rotated around an `Axis3D`.
     ///
     /// For positive angles, the right-hand-rule applies for the direction of rotation.
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{angle, Axis, Cuboid, Point3D};
+    /// use anvil::{angle, Axis3D, Cuboid, point, Point3D};
     ///
-    /// let cuboid = Cuboid::from_corners(Point3D::origin(), Point3D::from_m(1, 1, 1));
+    /// let cuboid = Cuboid::from_corners(Point3D::origin(), point!(1 m, 1 m , 1 m));
     /// assert_eq!(
-    ///     cuboid.rotate_around(Axis::x(), angle!(90 deg)),
-    ///     Cuboid::from_corners(Point3D::origin(), Point3D::from_m(1, -1, 1))
+    ///     cuboid.rotate_around(Axis3D::x(), angle!(90 deg)),
+    ///     Cuboid::from_corners(Point3D::origin(), point!(1 m, -1 m , 1 m))
     /// )
     /// ```
-    pub fn rotate_around(&self, axis: Axis, angle: Angle) -> Self {
+    pub fn rotate_around(&self, axis: Axis3D, angle: Angle) -> Self {
         match &self.inner {
             Some(inner) => {
                 let mut transform = ffi::new_transform();
@@ -434,20 +469,12 @@ mod tests {
     }
 
     #[test]
-    fn write_stl() {
-        let cuboid = Cuboid::from_m(1., 2., 3.);
-        assert!(cuboid
-            .write_stl("/Users/tk/user/dev/anvil/local/out.stl")
-            .is_ok());
-    }
-
-    #[test]
     fn part_moved_twice() {
         let part = Cuboid::from_m(1., 1., 1.);
         assert_eq!(
-            part.move_to(Point3D::from_m(1, 1, 1))
-                .move_to(Point3D::from_m(2, 2, 2)),
-            Cuboid::from_m(1., 1., 1.).move_to(Point3D::from_m(2, 2, 2)),
+            part.move_to(Point3D::from_m(1., 1., 1.))
+                .move_to(Point3D::from_m(2., 2., 2.)),
+            Cuboid::from_m(1., 1., 1.).move_to(Point3D::from_m(2., 2., 2.)),
         )
     }
 
@@ -455,7 +482,7 @@ mod tests {
     fn move_after_rotate_should_not_reset_rotate() {
         let part = Cuboid::from_m(1., 1., 2.);
         assert_eq!(
-            part.rotate_around(Axis::y(), angle!(90 deg))
+            part.rotate_around(Axis3D::y(), angle!(90 deg))
                 .move_to(Point3D::origin()),
             Cuboid::from_m(2., 1., 1.)
         )

@@ -1,8 +1,8 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use crate::Length;
+use crate::{Error, Length};
 
-use super::{IntoF64, Plane, Point3D};
+use super::{Dir2D, Plane, Point3D};
 
 /// A location in two-dimensional space.
 #[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
@@ -29,11 +29,11 @@ impl Point2D {
     /// ```rust
     /// use anvil::{length, Point2D};
     ///
-    /// let point = Point2D::from_mm(1, 2);
+    /// let point = Point2D::from_mm(1., 2.);
     /// assert_eq!(point.x, length!(1 mm));
     /// assert_eq!(point.y, length!(2 mm));
     /// ```
-    pub fn from_mm<T: IntoF64, U: IntoF64>(x: T, y: U) -> Self {
+    pub fn from_mm(x: f64, y: f64) -> Self {
         Point2D {
             x: Length::from_mm(x),
             y: Length::from_mm(y),
@@ -45,11 +45,11 @@ impl Point2D {
     /// ```rust
     /// use anvil::{length, Point2D};
     ///
-    /// let point = Point2D::from_m(1, 2);
+    /// let point = Point2D::from_m(1., 2.);
     /// assert_eq!(point.x, length!(1 m));
     /// assert_eq!(point.y, length!(2 m));
     /// ```
-    pub fn from_m<T: IntoF64, U: IntoF64>(x: T, y: U) -> Self {
+    pub fn from_m(x: f64, y: f64) -> Self {
         Point2D {
             x: Length::from_m(x),
             y: Length::from_m(y),
@@ -63,13 +63,26 @@ impl Point2D {
     /// use core::f64;
     /// use anvil::{Length, Point2D};
     ///
-    /// let point = Point2D::from_m(1, 1);
+    /// let point = Point2D::from_m(1., 1.);
     /// assert_eq!(point.distance_to_origin(), Length::from_m(f64::sqrt(2.)))
     /// ```
     pub fn distance_to_origin(&self) -> Length {
         Length::from_m(f64::sqrt(
             f64::powi(self.x.m(), 2) + f64::powi(self.y.m(), 2),
         ))
+    }
+
+    /// Return the direction this point lies in with respect to another point.
+    ///
+    /// ```rust
+    /// use anvil::{Dir2D, Error, point, Point2D};
+    ///
+    /// let p = point!(1 m, 1 m);
+    /// assert_eq!(p.direction_from(&Point2D::origin()), Dir2D::try_from(1., 1.));
+    /// assert_eq!(p.direction_from(&p), Err(Error::ZeroVector));
+    /// ```
+    pub fn direction_from(&self, other: &Self) -> Result<Dir2D, Error> {
+        Dir2D::try_from((self.x - other.x).m(), (self.y - other.y).m())
     }
 
     /// Return the global position of this `Point2D` given the `Plane` it is located on.
@@ -127,45 +140,45 @@ impl Div<f64> for Point2D {
 /// // Construct a Point2D from two length values
 /// assert_eq!(
 ///     point!(1 m, 2 m),
-///     Point2D::new(Length::from_m(1), Length::from_m(2))
+///     Point2D::new(Length::from_m(1.), Length::from_m(2.))
 /// );
 /// assert_eq!(
 ///     point!(1 cm, 2.1 mm),
-///     Point2D::new(Length::from_cm(1), Length::from_mm(2.1))
+///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
 /// );
 ///
 /// // Construct a Point2D from three length values
 /// assert_eq!(
 ///     point!(1 m, 2 m, 3 m),
-///     Point3D::new(Length::from_m(1), Length::from_m(2), Length::from_m(3))
+///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
 /// );
 ///
 /// // Use explicit expressions to construct a Point2D
 /// assert_eq!(
 ///     point!(length!(1 cm), 2.1 mm),
-///     Point2D::new(Length::from_cm(1), Length::from_mm(2.1))
+///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
 /// );
 /// assert_eq!(
 ///     point!(1 cm, length!(2.1 mm)),
-///     Point2D::new(Length::from_cm(1), Length::from_mm(2.1))
+///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
 /// );
 /// assert_eq!(
 ///     point!(length!(1 cm), length!(2.1 mm)),
-///     Point2D::new(Length::from_cm(1), Length::from_mm(2.1))
+///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
 /// );
 ///
 /// // Use explicit expressions to construct a Point2D
 /// assert_eq!(
 ///     point!(length!(1 m), 2 m, 3 m),
-///     Point3D::new(Length::from_m(1), Length::from_m(2), Length::from_m(3))
+///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
 /// );
 /// assert_eq!(
 ///     point!(1 m, length!(2 m), 3 m),
-///     Point3D::new(Length::from_m(1), Length::from_m(2), Length::from_m(3))
+///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
 /// );
 /// assert_eq!(
 ///     point!(1 m, 2 m, length!(3 m)),
-///     Point3D::new(Length::from_m(1), Length::from_m(2), Length::from_m(3))
+///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
 /// );
 /// ```
 #[macro_export]
@@ -199,6 +212,8 @@ macro_rules! point {
 
 #[cfg(test)]
 mod tests {
+    use crate::Dir3D;
+
     use super::*;
 
     #[test]
@@ -230,7 +245,12 @@ mod tests {
 
     #[test]
     fn to_3d_origin() {
-        let plane = Plane::new(Point3D::from_m(1., 2., 3.), (1., 1., 0.), (0., 0., 1.)).unwrap();
+        let plane = Plane::new(
+            Point3D::from_m(1., 2., 3.),
+            Dir3D::try_from(1., 1., 0.).unwrap(),
+            Dir3D::try_from(0., 0., 1.).unwrap(),
+        )
+        .unwrap();
         let point = Point2D::origin();
 
         assert_eq!(point.to_3d(&plane), plane.origin());
@@ -246,7 +266,12 @@ mod tests {
 
     #[test]
     fn to_3d_different_point() {
-        let plane = Plane::new(Point3D::origin(), (1., 0., -1.), (0., 1., 0.)).unwrap();
+        let plane = Plane::new(
+            Point3D::origin(),
+            Dir3D::try_from(1., 0., -1.).unwrap(),
+            Dir3D::try_from(0., 1., 0.).unwrap(),
+        )
+        .unwrap();
         let point = Point2D::from_mm(f64::sqrt(2.), 5.);
 
         let right = Point3D::from_mm(1., 5., -1.);

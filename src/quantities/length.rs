@@ -1,7 +1,5 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use super::into_f64::IntoF64;
-
 /// A physical length (i.e. a distance).
 ///
 /// Length exists to remove ambiguity about distance units, which are not supported by default by
@@ -56,10 +54,8 @@ impl Length {
     /// let len = Length::from_m(3.2);
     /// assert_eq!(len.mm(), 3200.);
     /// ```
-    pub fn from_m<T: IntoF64>(value: T) -> Self {
-        Self {
-            meters: value.into_f64(),
-        }
+    pub fn from_m(value: f64) -> Self {
+        Self { meters: value }
     }
     /// Return the value of this length in millimeters.
     pub fn m(&self) -> f64 {
@@ -74,8 +70,8 @@ impl Length {
     /// let len = Length::from_yd(1.);
     /// assert_eq!(len.m(), 0.9144);
     /// ```
-    pub fn from_yd<T: IntoF64>(value: T) -> Self {
-        Self::from_m(value.into_f64() * 0.9144)
+    pub fn from_yd(value: f64) -> Self {
+        Self::from_m(value * 0.9144)
     }
     /// Return the value of this length in yards.
     pub fn yd(&self) -> f64 {
@@ -90,8 +86,8 @@ impl Length {
     /// let len = Length::from_ft(1.);
     /// assert_eq!(len.cm(), 30.48);
     /// ```
-    pub fn from_ft<T: IntoF64>(value: T) -> Self {
-        Self::from_m(value.into_f64() * 0.3048)
+    pub fn from_ft(value: f64) -> Self {
+        Self::from_m(value * 0.3048)
     }
     /// Return the value of this length in feet.
     pub fn ft(&self) -> f64 {
@@ -106,8 +102,8 @@ impl Length {
     /// let len = Length::from_dm(5.1);
     /// assert_eq!(len.mm(), 510.);
     /// ```
-    pub fn from_dm<T: IntoF64>(value: T) -> Self {
-        Self::from_m(value.into_f64() / 10.)
+    pub fn from_dm(value: f64) -> Self {
+        Self::from_m(value / 10.)
     }
     /// Return the value of this length in decimeters.
     pub fn dm(&self) -> f64 {
@@ -122,8 +118,8 @@ impl Length {
     /// let len = Length::from_in(1.);
     /// assert_eq!(len.cm(), 2.54);
     /// ```
-    pub fn from_in<T: IntoF64>(value: T) -> Self {
-        Self::from_m(value.into_f64() * 0.0254)
+    pub fn from_in(value: f64) -> Self {
+        Self::from_m(value * 0.0254)
     }
     /// Return the value of this length in inches.
     ///
@@ -141,8 +137,8 @@ impl Length {
     /// let len = Length::from_cm(5.1);
     /// assert_eq!(len.mm(), 51.);
     /// ```
-    pub fn from_cm<T: IntoF64>(value: T) -> Self {
-        Self::from_m(value.into_f64() / 100.)
+    pub fn from_cm(value: f64) -> Self {
+        Self::from_m(value / 100.)
     }
     /// Return the value of this length in centimeters.
     pub fn cm(&self) -> f64 {
@@ -157,8 +153,8 @@ impl Length {
     /// let len = Length::from_mm(5.4);
     /// assert_eq!(len.m(), 0.0054);
     /// ```
-    pub fn from_mm<T: IntoF64>(value: T) -> Self {
-        Self::from_m(value.into_f64() / 1000.)
+    pub fn from_mm(value: f64) -> Self {
+        Self::from_m(value / 1000.)
     }
     /// Return the value of this length in millimeters.
     pub fn mm(&self) -> f64 {
@@ -274,14 +270,14 @@ pub fn is_zero(lengths: &[Length]) -> bool {
 /// ```rust
 /// use anvil::{length, Length};
 ///
-/// assert_eq!(length!(1 yd), Length::from_yd(1));
-/// assert_eq!(length!(5 m), Length::from_m(5));
+/// assert_eq!(length!(1 yd), Length::from_yd(1.));
+/// assert_eq!(length!(5 m), Length::from_m(5.));
 /// assert_eq!(length!(5.1 m), Length::from_m(5.1));
-/// assert_eq!(length!(1 ft), Length::from_ft(1));
-/// assert_eq!(length!(1 dm), Length::from_dm(1));
-/// assert_eq!(length!(1 in), Length::from_in(1));
+/// assert_eq!(length!(1 ft), Length::from_ft(1.));
+/// assert_eq!(length!(1 dm), Length::from_dm(1.));
+/// assert_eq!(length!(1 in), Length::from_in(1.));
 /// assert_eq!(length!(2 cm), Length::from_cm(2.));
-/// assert_eq!(length!(1 mm), Length::from_mm(1));
+/// assert_eq!(length!(1 mm), Length::from_mm(1.));
 /// assert_eq!(length!(0), Length::zero());
 /// ```
 #[macro_export]

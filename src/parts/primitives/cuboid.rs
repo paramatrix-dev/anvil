@@ -1,9 +1,6 @@
 use opencascade_sys::ffi;
 
-use crate::{
-    Length, Part, Point3D,
-    quantities::{IntoF64, is_zero},
-};
+use crate::{Length, Part, Point3D, quantities::is_zero};
 
 /// Builder for a cuboidal `Part`.
 ///
@@ -79,11 +76,11 @@ impl Cuboid {
     /// use anvil::{Cuboid, length, Point3D, Part};
     ///
     /// assert_eq!(
-    ///     Cuboid::from_m(1, 2, 3.),
+    ///     Cuboid::from_m(1., 2., 3.),
     ///     Cuboid::from_dim(length!(1 m), length!(2 m), length!(3 m))
     /// )
     /// ```
-    pub fn from_m<T: IntoF64, U: IntoF64, V: IntoF64>(x: T, y: U, z: V) -> Part {
+    pub fn from_m(x: f64, y: f64, z: f64) -> Part {
         Self::from_dim(Length::from_m(x), Length::from_m(y), Length::from_m(z))
     }
     /// Construct a centered cuboidal `Part` directly from the x, y, and z millimeter values.
@@ -100,7 +97,7 @@ impl Cuboid {
     ///     Cuboid::from_dim(length!(1 mm), length!(2 mm), length!(3 mm))
     /// )
     /// ```
-    pub fn from_mm<T: IntoF64, U: IntoF64, V: IntoF64>(x: T, y: U, z: V) -> Part {
+    pub fn from_mm(x: f64, y: f64, z: f64) -> Part {
         Self::from_dim(Length::from_mm(x), Length::from_mm(y), Length::from_mm(z))
     }
 }

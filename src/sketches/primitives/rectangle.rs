@@ -1,4 +1,4 @@
-use crate::{Length, Path, Point2D, Sketch, quantities::IntoF64};
+use crate::{Length, Path, Point2D, Sketch};
 
 /// Builder for a rectangular `Sketch`.
 ///
@@ -59,11 +59,11 @@ impl Rectangle {
     /// use anvil::{length, Rectangle};
     ///
     /// assert_eq!(
-    ///     Rectangle::from_m(1, 2),
+    ///     Rectangle::from_m(1., 2.),
     ///     Rectangle::from_dim(length!(1 m), length!(2 m))
     /// )
     /// ```
-    pub fn from_m<T: IntoF64, U: IntoF64>(x: T, y: U) -> Sketch {
+    pub fn from_m(x: f64, y: f64) -> Sketch {
         Self::from_dim(Length::from_m(x), Length::from_m(y))
     }
 
@@ -77,11 +77,11 @@ impl Rectangle {
     /// use anvil::{length, Rectangle};
     ///
     /// assert_eq!(
-    ///     Rectangle::from_mm(1, 2),
+    ///     Rectangle::from_mm(1., 2.),
     ///     Rectangle::from_dim(length!(1 mm), length!(2 mm))
     /// )
     /// ```
-    pub fn from_mm<T: IntoF64, U: IntoF64>(x: T, y: U) -> Sketch {
+    pub fn from_mm(x: f64, y: f64) -> Sketch {
         Self::from_dim(Length::from_mm(x), Length::from_mm(y))
     }
 }

@@ -1,8 +1,6 @@
 use core::f64;
 use std::ops::{Add, Div, Mul, Sub};
 
-use super::into_f64::IntoF64;
-
 /// A physical angle (i.e. a distance).
 ///
 /// Angle exists to remove ambiguity about angle units, which are not supported by default by
@@ -52,10 +50,8 @@ impl Angle {
     /// let angle = Angle::from_rad(f64::consts::PI);
     /// assert_eq!(angle.deg(), 180.);
     /// ```
-    pub fn from_rad<T: IntoF64>(value: T) -> Self {
-        Angle {
-            rad: value.into_f64(),
-        }
+    pub fn from_rad(value: f64) -> Self {
+        Angle { rad: value }
     }
     /// Return the value of this angle in radians.
     pub fn rad(&self) -> f64 {
@@ -68,12 +64,12 @@ impl Angle {
     /// use core::f64;
     /// use anvil::Angle;
     ///
-    /// let angle = Angle::from_deg(180);
+    /// let angle = Angle::from_deg(180.);
     /// assert_eq!(angle.rad(), f64::consts::PI);
     /// ```
-    pub fn from_deg<T: IntoF64>(value: T) -> Self {
+    pub fn from_deg(value: f64) -> Self {
         Angle {
-            rad: value.into_f64() / 360. * f64::consts::TAU,
+            rad: value / 360. * f64::consts::TAU,
         }
     }
     /// Return the value of this angle in degrees.

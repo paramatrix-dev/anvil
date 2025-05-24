@@ -3,7 +3,7 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{angle, Angle, Axis, Error, Length, Part, Plane, Point2D, Point3D};
+use crate::{angle, Angle, Axis2D, Axis3D, Error, Length, Part, Plane, Point2D, Point3D};
 
 use super::Edge;
 
@@ -108,7 +108,7 @@ impl Sketch {
         let mut new_shape = self.clone();
         let mut angle = angle!(0 deg);
         for _ in 0..instances {
-            new_shape = new_shape.add(&self.rotate_around(around.clone(), angle));
+            new_shape = new_shape.add(&self.rotate_around(around, angle));
             angle = angle + angle_step;
         }
         new_shape
@@ -131,7 +131,41 @@ impl Sketch {
         new_actions.push(SketchAction::Intersect(other.clone()));
         Self(new_actions)
     }
-    /// Return a clone of this `Sketch` with the center moved to a specified point.
+
+    /// Create multiple instances of the `Sketch` spaced evenly until a point.
+    ///
+    /// ```rust
+    /// use anvil::{Rectangle, length, point};
+    ///
+    /// let rect = Rectangle::from_m(1., 1.);
+    /// assert_eq!(
+    ///     rect.linear_pattern(&point!(4 m, 0 m), 5),
+    ///     rect
+    ///         .add(&rect.move_to(point!(1 m, 0 m)))
+    ///         .add(&rect.move_to(point!(2 m, 0 m)))
+    ///         .add(&rect.move_to(point!(3 m, 0 m)))
+    ///         .add(&rect.move_to(point!(4 m, 0 m)))
+    /// )
+    /// ```
+    pub fn linear_pattern(&self, until: &Point2D, instances: u8) -> Self {
+        let start = match self.center() {
+            Ok(p) => p,
+            Err(_) => return self.clone(),
+        };
+        let axis = match Axis2D::between(start, *until) {
+            Ok(axis) => axis,
+            Err(_) => return self.clone(),
+        };
+
+        let len_step = (start - *until).distance_to_origin() / instances as f64;
+        let mut new_part = self.clone();
+        let mut pos = Length::zero();
+        for _ in 0..instances {
+            pos = pos + len_step;
+            new_part = new_part.add(&self.move_to(axis.point_at(&pos)));
+        }
+        new_part
+    }
     ///
     /// # Example
     /// ```rust
@@ -155,10 +189,10 @@ impl Sketch {
     /// ```rust
     /// use anvil::{angle, length, Point2D, Rectangle};
     ///
-    /// let sketch = Rectangle::from_dim(length!(1 m), length!(2 m)).move_to(Point2D::from_m(1, 1));
+    /// let sketch = Rectangle::from_dim(length!(1 m), length!(2 m)).move_to(Point2D::from_m(1., 1.));
     /// assert_eq!(
     ///     sketch.rotate(angle!(90 deg)),
-    ///     Rectangle::from_dim(length!(2 m), length!(1 m)).move_to(Point2D::from_m(1, 1))
+    ///     Rectangle::from_dim(length!(2 m), length!(1 m)).move_to(Point2D::from_m(1., 1.))
     /// )
     /// ```
     pub fn rotate(&self, angle: Angle) -> Self {
@@ -175,10 +209,10 @@ impl Sketch {
     /// ```rust
     /// use anvil::{angle, Point2D, Rectangle};
     ///
-    /// let sketch = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1, 1));
+    /// let sketch = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 1.));
     /// assert_eq!(
     ///     sketch.rotate_around(Point2D::origin(), angle!(90 deg)),
-    ///     Rectangle::from_corners(Point2D::origin(), Point2D::from_m(-1, 1))
+    ///     Rectangle::from_corners(Point2D::origin(), Point2D::from_m(-1., 1.))
     /// )
     /// ```
     pub fn rotate_around(&self, point: Point2D, angle: Angle) -> Self {
@@ -242,7 +276,7 @@ impl Sketch {
         let shape = self.to_occt(plane)?;
         let mut make_solid = ffi::BRepPrimAPI_MakePrism_ctor(
             &shape,
-            &(plane.normal() * thickness.m()).to_occt_vec(),
+            &(plane.normal() * thickness).to_occt_vec(),
             false,
             true,
         );
@@ -379,7 +413,7 @@ impl SketchAction {
                 Some(shape) => {
                     let mut transform = ffi::new_transform();
                     transform.pin_mut().SetRotation(
-                        &Axis {
+                        &Axis3D {
                             origin: point.to_3d(plane),
                             direction: plane.normal(),
                         }
@@ -479,8 +513,8 @@ mod tests {
     #[test]
     fn ne_different_sketches() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(Point2D::from_m(2, 2)),
-            Circle::from_radius(length!(1 m)).move_to(Point2D::from_m(2, 2)),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(Point2D::from_m(2., 2.)),
+            Circle::from_radius(length!(1 m)).move_to(Point2D::from_m(2., 2.)),
         )
     }
 
