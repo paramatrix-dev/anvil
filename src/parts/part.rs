@@ -469,14 +469,6 @@ mod tests {
     }
 
     #[test]
-    fn write_stl() {
-        let cuboid = Cuboid::from_m(1., 2., 3.);
-        assert!(cuboid
-            .write_stl("/Users/tk/user/dev/anvil/local/out.stl")
-            .is_ok());
-    }
-
-    #[test]
     fn part_moved_twice() {
         let part = Cuboid::from_m(1., 1., 1.);
         assert_eq!(

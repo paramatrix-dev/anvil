@@ -3,7 +3,7 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{angle, Angle, Axis3D, Error, Length, Part, Plane, Point2D, Point3D};
+use crate::{angle, Angle, Axis2D, Axis3D, Error, Length, Part, Plane, Point2D, Point3D};
 
 use super::Edge;
 
@@ -130,6 +130,41 @@ impl Sketch {
         let mut new_actions = self.0.clone();
         new_actions.push(SketchAction::Intersect(other.clone()));
         Self(new_actions)
+    }
+
+    /// Create multiple instances of the `Sketch` spaced evenly until a point.
+    ///
+    /// ```rust
+    /// use anvil::{Rectangle, length, point};
+    ///
+    /// let rect = Rectangle::from_m(1., 1.);
+    /// assert_eq!(
+    ///     rect.linear_pattern(&point!(4 m, 0 m), 5),
+    ///     rect
+    ///         .add(&rect.move_to(point!(1 m, 0 m)))
+    ///         .add(&rect.move_to(point!(2 m, 0 m)))
+    ///         .add(&rect.move_to(point!(3 m, 0 m)))
+    ///         .add(&rect.move_to(point!(4 m, 0 m)))
+    /// )
+    /// ```
+    pub fn linear_pattern(&self, until: &Point2D, instances: u8) -> Self {
+        let start = match self.center() {
+            Ok(p) => p,
+            Err(_) => return self.clone(),
+        };
+        let axis = match Axis2D::between(start, *until) {
+            Ok(axis) => axis,
+            Err(_) => return self.clone(),
+        };
+
+        let len_step = (start - *until).distance_to_origin() / instances as f64;
+        let mut new_part = self.clone();
+        let mut pos = Length::zero();
+        for _ in 0..instances {
+            pos = pos + len_step;
+            new_part = new_part.add(&self.move_to(axis.point_at(&pos)));
+        }
+        new_part
     }
     ///
     /// # Example
