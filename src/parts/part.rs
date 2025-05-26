@@ -111,7 +111,7 @@ impl Part {
     ///
     /// let cuboid = Cuboid::from_m(1., 1., 1.);
     /// assert_eq!(
-    ///     cuboid.linear_pattern(&point!(4 m, 0 m, 0 m), 5),
+    ///     cuboid.linear_pattern(point!(4 m, 0 m, 0 m), 5),
     ///     cuboid
     ///         .add(&cuboid.move_to(point!(1 m, 0 m, 0 m)))
     ///         .add(&cuboid.move_to(point!(2 m, 0 m, 0 m)))
@@ -119,22 +119,22 @@ impl Part {
     ///         .add(&cuboid.move_to(point!(4 m, 0 m, 0 m)))
     /// )
     /// ```
-    pub fn linear_pattern(&self, until: &Point3D, instances: u8) -> Self {
+    pub fn linear_pattern(&self, until: Point3D, instances: u8) -> Self {
         let start = match self.center() {
             Ok(p) => p,
             Err(_) => return self.clone(),
         };
-        let axis = match Axis3D::between(start, *until) {
+        let axis = match Axis3D::between(start, until) {
             Ok(axis) => axis,
             Err(_) => return self.clone(),
         };
 
-        let len_step = (start - *until).distance_to_origin() / instances as f64;
+        let len_step = (start - until).distance_to_origin() / instances as f64;
         let mut new_part = self.clone();
         let mut pos = Length::zero();
         for _ in 0..instances {
             pos = pos + len_step;
-            new_part = new_part.add(&self.move_to(axis.point_at(&pos)));
+            new_part = new_part.add(&self.move_to(axis.point_at(pos)));
         }
         new_part
     }

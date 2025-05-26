@@ -78,15 +78,15 @@ impl Point2D {
     /// use anvil::{Dir2D, Error, point, Point2D};
     ///
     /// let p = point!(1 m, 1 m);
-    /// assert_eq!(p.direction_from(&Point2D::origin()), Dir2D::try_from(1., 1.));
-    /// assert_eq!(p.direction_from(&p), Err(Error::ZeroVector));
+    /// assert_eq!(p.direction_from(Point2D::origin()), Dir2D::try_from(1., 1.));
+    /// assert_eq!(p.direction_from(p), Err(Error::ZeroVector));
     /// ```
-    pub fn direction_from(&self, other: &Self) -> Result<Dir2D, Error> {
+    pub fn direction_from(&self, other: Self) -> Result<Dir2D, Error> {
         Dir2D::try_from((self.x - other.x).m(), (self.y - other.y).m())
     }
 
     /// Return the global position of this `Point2D` given the `Plane` it is located on.
-    pub fn to_3d(&self, plane: &Plane) -> Point3D {
+    pub fn to_3d(&self, plane: Plane) -> Point3D {
         plane.origin() + plane.x() * self.x + plane.y() * self.y
     }
 }
@@ -253,7 +253,7 @@ mod tests {
         .unwrap();
         let point = Point2D::origin();
 
-        assert_eq!(point.to_3d(&plane), plane.origin());
+        assert_eq!(point.to_3d(plane), plane.origin());
     }
 
     #[test]
@@ -261,7 +261,7 @@ mod tests {
         let plane = Plane::xy();
         let point = Point2D::from_m(1., 2.);
 
-        assert_eq!(point.to_3d(&plane), Point3D::from_m(1., 2., 0.));
+        assert_eq!(point.to_3d(plane), Point3D::from_m(1., 2., 0.));
     }
 
     #[test]
@@ -275,8 +275,8 @@ mod tests {
         let point = Point2D::from_mm(f64::sqrt(2.), 5.);
 
         let right = Point3D::from_mm(1., 5., -1.);
-        assert!((point.to_3d(&plane).x.m() - right.x.m()).abs() < 1e-9);
-        assert!((point.to_3d(&plane).y.m() - right.y.m()).abs() < 1e-9);
-        assert!((point.to_3d(&plane).z.m() - right.z.m()).abs() < 1e-9);
+        assert!((point.to_3d(plane).x.m() - right.x.m()).abs() < 1e-9);
+        assert!((point.to_3d(plane).y.m() - right.y.m()).abs() < 1e-9);
+        assert!((point.to_3d(plane).z.m() - right.z.m()).abs() < 1e-9);
     }
 }

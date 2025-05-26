@@ -167,19 +167,6 @@ impl Div<Angle> for Angle {
     }
 }
 
-impl Div<&Angle> for Angle {
-    type Output = f64;
-    /// Divide a `Angle` by another `&Angle`.
-    /// ```rust
-    /// use anvil::angle;
-    ///
-    /// assert_eq!(angle!(6 deg) / &angle!(2 deg), 3.)
-    /// ```
-    fn div(self, other: &Angle) -> f64 {
-        self.rad / other.rad
-    }
-}
-
 /// Macro for simplifying `Angle` construction for static values.
 ///
 /// Create an angle with the correct unit by invoking `angle!([value] [unit])`.

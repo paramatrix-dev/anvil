@@ -88,10 +88,10 @@ impl Point3D {
     /// use anvil::{Dir3D, Error, point, Point3D};
     ///
     /// let p = point!(1 m, 1 m, 1 m);
-    /// assert_eq!(p.direction_from(&Point3D::origin()), Dir3D::try_from(1., 1., 1.));
-    /// assert_eq!(p.direction_from(&p), Err(Error::ZeroVector));
+    /// assert_eq!(p.direction_from(Point3D::origin()), Dir3D::try_from(1., 1., 1.));
+    /// assert_eq!(p.direction_from(p), Err(Error::ZeroVector));
     /// ```
-    pub fn direction_from(&self, other: &Point3D) -> Result<Dir3D, Error> {
+    pub fn direction_from(&self, other: Point3D) -> Result<Dir3D, Error> {
         Dir3D::try_from(
             (self.x - other.x).m(),
             (self.y - other.y).m(),

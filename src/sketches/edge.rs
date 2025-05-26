@@ -57,7 +57,7 @@ impl Edge {
         }
     }
 
-    pub(crate) fn to_occt(&self, plane: &Plane) -> Option<UniquePtr<ffi::TopoDS_Edge>> {
+    pub(crate) fn to_occt(&self, plane: Plane) -> Option<UniquePtr<ffi::TopoDS_Edge>> {
         if self.len() == Length::zero() {
             return None;
         }

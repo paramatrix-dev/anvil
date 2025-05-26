@@ -3,7 +3,7 @@ use crate::Error;
 use super::{Axis3D, Point3D, dir3d::Dir3D};
 
 /// A 2D plane in 3D space.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Plane(Point3D, Dir3D, Dir3D);
 impl Plane {
     /// Construct the `Plane` spaned by the x and y axes.
