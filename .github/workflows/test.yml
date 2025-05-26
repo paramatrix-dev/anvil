@@ -11,12 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Rust
-        uses: actions/setup-rust@v1
-        with:
-          rust-version: stable
+        uses: actions/checkout@v4
 
       - name: Build the Rust project
         run: cargo build --verbose
