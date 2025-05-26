@@ -1,9 +1,9 @@
 name: clippy
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'main'
+      - main
 
 jobs:
   clippy:
@@ -38,4 +38,4 @@ jobs:
             ${{ runner.os }}-cargo-target-
 
       - name: Build the Rust project
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings
