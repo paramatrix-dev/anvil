@@ -3,7 +3,7 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{angle, Angle, Axis2D, Axis3D, Error, Length, Part, Plane, Point2D, Point3D};
+use crate::{Angle, Axis2D, Axis3D, Error, Length, Part, Plane, Point2D, Point3D, angle};
 
 use super::Edge;
 
@@ -456,8 +456,8 @@ impl SketchAction {
 #[cfg(test)]
 mod tests {
     use crate::{
-        angle, length, sketches::primitives::Circle, Cuboid, Cylinder, Path, Point2D, Point3D,
-        Rectangle,
+        Cuboid, Cylinder, Path, Point2D, Point3D, Rectangle, angle, length,
+        sketches::primitives::Circle,
     };
 
     use super::*;
