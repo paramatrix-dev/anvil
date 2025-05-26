@@ -9,7 +9,7 @@ use cxx::UniquePtr;
 use opencascade_sys::ffi;
 use tempfile::NamedTempFile;
 
-use crate::{angle, Angle, Axis3D, Error, Length, Point3D};
+use crate::{Angle, Axis3D, Error, Length, Point3D, angle};
 
 /// A 3D object in space.
 pub struct Part {
@@ -405,7 +405,7 @@ fn round(x: f64, n_digits: u8) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{length, Cuboid, Point3D, Sphere};
+    use crate::{Cuboid, Point3D, Sphere, length};
 
     #[test]
     fn eq_both_none() {
