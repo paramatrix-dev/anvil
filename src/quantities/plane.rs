@@ -52,19 +52,33 @@ impl Plane {
     pub fn origin(&self) -> Point3D {
         self.0
     }
-    /// Return a the x-axis direction of this `Plane`.
-    pub fn x_axis(&self) -> Dir3D {
+    /// Return the direction of the x-axis of this `Plane`.
+    pub fn x(&self) -> Dir3D {
         self.1
     }
-    /// Return a the y-axis direction of this `Plane`.
-    pub fn y_axis(&self) -> Dir3D {
+    /// Return the x-axis of this `Plane`.
+    pub fn x_axis(&self) -> Axis3D {
+        Axis3D {
+            origin: self.origin(),
+            direction: self.x(),
+        }
+    }
+    /// Return the direction of the y-axis of this `Plane`.
+    pub fn y(&self) -> Dir3D {
         self.2
     }
-    /// Return a `Dir3D` that is orthogonal to this plane.
-    pub fn normal(&self) -> Dir3D {
-        self.x_axis().cross(self.y_axis())
+    /// Return the y-axis of this `Plane`.
+    pub fn y_axis(&self) -> Axis3D {
+        Axis3D {
+            origin: self.origin(),
+            direction: self.y(),
+        }
     }
-    /// Return an `Axis3D` that is orthogonal to this plane and crosses its origin.
+    /// Return the `Dir3D` that is orthogonal to this plane.
+    pub fn normal(&self) -> Dir3D {
+        self.x().cross(self.y())
+    }
+    /// Return the `Axis3D` that is orthogonal to this plane and crosses its origin.
     pub fn normal_axis(&self) -> Axis3D {
         Axis3D {
             origin: self.origin(),

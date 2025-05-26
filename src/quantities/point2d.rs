@@ -87,7 +87,7 @@ impl Point2D {
 
     /// Return the global position of this `Point2D` given the `Plane` it is located on.
     pub fn to_3d(&self, plane: &Plane) -> Point3D {
-        plane.origin() + plane.x_axis() * self.x + plane.y_axis() * self.y
+        plane.origin() + plane.x() * self.x + plane.y() * self.y
     }
 }
 
