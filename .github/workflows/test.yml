@@ -1,0 +1,33 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-version: stable
+
+      - name: Build the Rust project
+        run: cargo build --verbose
+
+      - name: Set up Python (for pre-commit)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit on all files
+        run: pre-commit run --all-files
