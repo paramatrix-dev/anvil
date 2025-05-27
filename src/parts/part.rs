@@ -77,7 +77,7 @@ impl Part {
         let mut new_shape = self.clone();
         let mut angle = angle!(0);
         for _ in 0..instances {
-            new_shape = new_shape.add(&self.rotate_around(around.clone(), angle));
+            new_shape = new_shape.add(&self.rotate_around(around, angle));
             angle = angle + angle_step;
         }
         new_shape
