@@ -38,6 +38,20 @@ impl Path {
         self.add_edge(Edge::Line(self.cursor, point))
     }
 
+    /// Add a circle section to the end of this `Path` two points.
+    ///
+    /// # Example
+    /// ```rust
+    /// use anvil::{Edge, Path, point};
+    ///
+    /// let path = Path::at(point!(0 m, 0 m)).arc_points(point!(1 m, 1 m), point!(0 m, 2 m));
+    /// assert_eq!(path.cursor(), point!(0 m, 2 m));
+    /// assert_eq!(path.edges(), vec![Edge::Arc(point!(0 m, 0 m), point!(1 m, 1 m), point!(0 m, 2 m))]);
+    /// ```
+    pub fn arc_points(&self, mid: Point2D, end: Point2D) -> Self {
+        self.add_edge(Edge::Arc(self.cursor, mid, end))
+    }
+
     /// Connect the end of this `Path` to its start with a straight line and return the resulting `Sketch`.
     pub fn close(self) -> Sketch {
         if self.start() == self.end() {
@@ -87,6 +101,16 @@ impl Path {
             Some(edge) => edge.end(),
             None => self.cursor,
         }
+    }
+
+    /// Return the edges in this `Path`.
+    pub fn edges(&self) -> Vec<Edge> {
+        self.edges.clone()
+    }
+
+    /// Return the current cursor position of this `Path`.
+    pub fn cursor(&self) -> Point2D {
+        self.cursor
     }
 
     fn add_edge(&self, edge: Edge) -> Self {
