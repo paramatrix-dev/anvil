@@ -26,7 +26,7 @@ impl Sketch {
 
     /// Return true if this `Sketch` is empty.
     pub fn is_empty(&self) -> bool {
-        self.to_occt(&Plane::xy()).is_err()
+        self.to_occt(Plane::xy()).is_err()
     }
 
     /// Return the area occupied by this `Sketch` in square meters.
@@ -41,7 +41,7 @@ impl Sketch {
     /// assert!((sketch.area() - 6.).abs() < 1e-9)
     /// ```
     pub fn area(&self) -> f64 {
-        match self.to_occt(&Plane::xy()) {
+        match self.to_occt(Plane::xy()) {
             Ok(occt) => occt_area(&occt),
             Err(_) => 0.,
         }
@@ -61,7 +61,7 @@ impl Sketch {
     /// assert_eq!(Sketch::empty().center(), Err(Error::EmptySketch));
     /// ```
     pub fn center(&self) -> Result<Point2D, Error> {
-        let occt = self.to_occt(&Plane::xy())?;
+        let occt = self.to_occt(Plane::xy())?;
         let point_3d = occt_center(&occt);
         Ok(Point2D {
             x: point_3d.x,
@@ -139,7 +139,7 @@ impl Sketch {
     ///
     /// let rect = Rectangle::from_m(1., 1.);
     /// assert_eq!(
-    ///     rect.linear_pattern(&point!(4 m, 0 m), 5),
+    ///     rect.linear_pattern(point!(4 m, 0 m), 5),
     ///     rect
     ///         .add(&rect.move_to(point!(1 m, 0 m)))
     ///         .add(&rect.move_to(point!(2 m, 0 m)))
@@ -147,22 +147,22 @@ impl Sketch {
     ///         .add(&rect.move_to(point!(4 m, 0 m)))
     /// )
     /// ```
-    pub fn linear_pattern(&self, until: &Point2D, instances: u8) -> Self {
+    pub fn linear_pattern(&self, until: Point2D, instances: u8) -> Self {
         let start = match self.center() {
             Ok(p) => p,
             Err(_) => return self.clone(),
         };
-        let axis = match Axis2D::between(start, *until) {
+        let axis = match Axis2D::between(start, until) {
             Ok(axis) => axis,
             Err(_) => return self.clone(),
         };
 
-        let len_step = (start - *until).distance_to_origin() / instances as f64;
+        let len_step = (start - until).distance_to_origin() / instances as f64;
         let mut new_part = self.clone();
         let mut pos = Length::zero();
         for _ in 0..instances {
             pos = pos + len_step;
-            new_part = new_part.add(&self.move_to(axis.point_at(&pos)));
+            new_part = new_part.add(&self.move_to(axis.point_at(pos)));
         }
         new_part
     }
@@ -264,11 +264,11 @@ impl Sketch {
     ///
     /// let sketch = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 2.));
     /// assert_eq!(
-    ///     sketch.extrude(&Plane::xy(), length!(3 m)),
+    ///     sketch.extrude(Plane::xy(), length!(3 m)),
     ///     Ok(Cuboid::from_corners(Point3D::origin(), Point3D::from_m(1., 2., 3.)))
     /// );
     /// ```
-    pub fn extrude(&self, plane: &Plane, thickness: Length) -> Result<Part, Error> {
+    pub fn extrude(&self, plane: Plane, thickness: Length) -> Result<Part, Error> {
         if thickness == Length::zero() {
             return Err(Error::EmptySketch);
         }
@@ -288,7 +288,7 @@ impl Sketch {
         Self(vec![SketchAction::AddEdges(edges)])
     }
 
-    pub(crate) fn to_occt(&self, plane: &Plane) -> Result<UniquePtr<ffi::TopoDS_Shape>, Error> {
+    pub(crate) fn to_occt(&self, plane: Plane) -> Result<UniquePtr<ffi::TopoDS_Shape>, Error> {
         let mut occt = None;
         for action in &self.0 {
             occt = action.apply(occt, plane);
@@ -307,7 +307,7 @@ impl PartialEq for Sketch {
             return false;
         }
 
-        match self.intersect(other).to_occt(&Plane::xy()) {
+        match self.intersect(other).to_occt(Plane::xy()) {
             Ok(intersection) => {
                 (occt_area(&intersection) - self.area()).abs() < 1e-7
                     && (occt_area(&intersection) - other.area()).abs() < 1e-7
@@ -317,7 +317,7 @@ impl PartialEq for Sketch {
     }
 }
 
-fn edges_to_occt(edges: &[Edge], plane: &Plane) -> Result<UniquePtr<ffi::TopoDS_Shape>, Error> {
+fn edges_to_occt(edges: &[Edge], plane: Plane) -> Result<UniquePtr<ffi::TopoDS_Shape>, Error> {
     let occt_edges: Vec<UniquePtr<ffi::TopoDS_Edge>> = edges
         .iter()
         .filter_map(|edge| edge.to_occt(plane))
@@ -366,7 +366,7 @@ impl SketchAction {
     pub fn apply(
         &self,
         sketch: Option<UniquePtr<ffi::TopoDS_Shape>>,
-        plane: &Plane,
+        plane: Plane,
     ) -> Option<UniquePtr<ffi::TopoDS_Shape>> {
         match self {
             SketchAction::Add(other) => match (sketch, other.to_occt(plane).ok()) {
@@ -522,14 +522,14 @@ mod tests {
     fn intersect_non_overlapping() {
         let sketch1 = Rectangle::from_corners(Point2D::from_m(1., 1.), Point2D::from_m(2., 2.));
         let sketch2 = Rectangle::from_corners(Point2D::from_m(-1., -1.), Point2D::from_m(-2., -2.));
-        assert!(sketch1.intersect(&sketch2).to_occt(&Plane::xy()).is_err())
+        assert!(sketch1.intersect(&sketch2).to_occt(Plane::xy()).is_err())
     }
 
     #[test]
     fn extrude_empty_sketch() {
         let sketch = Sketch::empty();
         assert_eq!(
-            sketch.extrude(&Plane::xy(), length!(5 m)),
+            sketch.extrude(Plane::xy(), length!(5 m)),
             Err(Error::EmptySketch)
         )
     }
@@ -538,7 +538,7 @@ mod tests {
     fn extrude_zero_thickness() {
         let sketch = Rectangle::from_dim(length!(1 m), length!(2 m));
         assert_eq!(
-            sketch.extrude(&Plane::xy(), Length::zero()),
+            sketch.extrude(Plane::xy(), Length::zero()),
             Err(Error::EmptySketch)
         )
     }
@@ -551,7 +551,7 @@ mod tests {
             .line_to(Point2D::from_m(0., 2.))
             .close();
         assert_eq!(
-            sketch.extrude(&Plane::xz(), Length::from_m(-3.)),
+            sketch.extrude(Plane::xz(), Length::from_m(-3.)),
             Ok(Cuboid::from_corners(
                 Point3D::origin(),
                 Point3D::from_m(1., 3., 2.)
@@ -563,7 +563,7 @@ mod tests {
     fn extrude_cylinder() {
         let sketch = Circle::from_radius(length!(1 m));
         assert_eq!(
-            sketch.extrude(&Plane::xy(), length!(2 m)),
+            sketch.extrude(Plane::xy(), length!(2 m)),
             Ok(Cylinder::from_radius(length!(1 m), length!(2 m))
                 .move_to(Point3D::from_m(0., 0., 1.)))
         )

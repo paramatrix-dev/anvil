@@ -6,7 +6,7 @@ use crate::Error;
 use super::{Dir3D, Length, Point3D};
 
 /// An axis in 3D space.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Axis3D {
     /// A point contained in the axis.
     pub origin: Point3D,
@@ -36,7 +36,7 @@ impl Axis3D {
     /// assert!(Axis3D::between(point!(1 m, 1 m, 1 m), point!(1 m, 1 m, 1 m)).is_err())
     /// ```
     pub fn between(origin: Point3D, other: Point3D) -> Result<Self, Error> {
-        let direction = other.direction_from(&origin)?;
+        let direction = other.direction_from(origin)?;
         Ok(Self { origin, direction })
     }
 
@@ -72,11 +72,11 @@ impl Axis3D {
     ///
     /// let axis = Axis3D::x();
     /// assert_eq!(
-    ///     axis.point_at(&length!(5 m)),
+    ///     axis.point_at(length!(5 m)),
     ///     point!(5 m, 0 m, 0 m),
     /// )
     /// ```
-    pub fn point_at(&self, distance: &Length) -> Point3D {
+    pub fn point_at(&self, distance: Length) -> Point3D {
         self.origin + self.direction * distance
     }
 

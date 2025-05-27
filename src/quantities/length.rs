@@ -1,5 +1,7 @@
 use std::ops::{Add, Div, Mul, Sub};
 
+use super::{Dir2D, Dir3D, Point2D, Point3D};
+
 /// A physical length (i.e. a distance).
 ///
 /// Length exists to remove ambiguity about distance units, which are not supported by default by
@@ -228,7 +230,7 @@ impl Div<f64> for Length {
 
 impl Div<Length> for Length {
     type Output = f64;
-    /// Divide a `Length` by another `Length`.
+    /// Divide this `Length` by another `Length`.
     /// ```rust
     /// use anvil::length;
     ///
@@ -239,16 +241,39 @@ impl Div<Length> for Length {
     }
 }
 
-impl Div<&Length> for Length {
-    type Output = f64;
-    /// Divide a `Length` by another `Length`.
-    /// ```rust
-    /// use anvil::length;
+impl Mul<Dir2D> for Length {
+    type Output = Point2D;
+    /// Multiply this `Length` with a `Dir2D` to get a `Point2D`.
     ///
-    /// assert_eq!(length!(6 m) / &length!(2 m), 3.)
+    /// ```rust
+    /// use anvil::{Dir2D, length, point};
+    ///
+    /// let dir2 = Dir2D::try_from(1., 0.).unwrap();
+    /// assert_eq!(
+    ///     length!(2 m) * dir2,
+    ///     point!(2 m, 0 m)
+    /// )
     /// ```
-    fn div(self, other: &Length) -> f64 {
-        self.meters / other.meters
+    fn mul(self, other: Dir2D) -> Point2D {
+        other * self
+    }
+}
+
+impl Mul<Dir3D> for Length {
+    type Output = Point3D;
+    /// Multiply this `Length` with a `Dir3D` to get a `Poin3D`.
+    ///
+    /// ```rust
+    /// use anvil::{Dir3D, length, point};
+    ///
+    /// let dir3 = Dir3D::try_from(1., 0., 0.).unwrap();
+    /// assert_eq!(
+    ///     length!(2 m) * dir3,
+    ///     point!(2 m, 0 m, 0 m)
+    /// )
+    /// ```
+    fn mul(self, other: Dir3D) -> Point3D {
+        other * self
     }
 }
 

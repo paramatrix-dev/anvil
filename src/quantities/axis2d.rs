@@ -3,7 +3,7 @@ use crate::Error;
 use super::{Dir2D, Length, Point2D};
 
 /// An axis in 2D space.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Axis2D {
     /// A point contained in the axis.
     pub origin: Point2D,
@@ -33,7 +33,7 @@ impl Axis2D {
     /// assert!(Axis2D::between(point!(1 m, 1 m), point!(1 m, 1 m)).is_err())
     /// ```
     pub fn between(origin: Point2D, other: Point2D) -> Result<Self, Error> {
-        let direction = other.direction_from(&origin)?;
+        let direction = other.direction_from(origin)?;
         Ok(Self { origin, direction })
     }
 
@@ -61,11 +61,11 @@ impl Axis2D {
     ///
     /// let axis = Axis2D::x();
     /// assert_eq!(
-    ///     axis.point_at(&length!(5 m)),
+    ///     axis.point_at(length!(5 m)),
     ///     point!(5 m, 0 m),
     /// )
     /// ```
-    pub fn point_at(&self, distance: &Length) -> Point2D {
+    pub fn point_at(&self, distance: Length) -> Point2D {
         self.origin + self.direction * distance
     }
 }
