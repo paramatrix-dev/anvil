@@ -3,16 +3,13 @@ use core::f64;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Length, Plane, Point2D, quantities::Axis3D};
+use crate::{Length, Plane, Point2D};
 
 /// A one-dimensional object in two-dimensional space.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Edge {
     /// A circle section defined by the start point, a mid point and the end point.
     Arc(Point2D, Point2D, Point2D),
-
-    /// A circle at a center with a radius.
-    Circle(Point2D, Length),
 
     /// A line between two points.
     Line(Point2D, Point2D),
@@ -30,7 +27,6 @@ impl Edge {
     pub fn start(&self) -> Point2D {
         match self {
             Self::Arc(start, _, _) => *start,
-            Self::Circle(center, _) => *center,
             Self::Line(start, _) => *start,
         }
     }
@@ -46,7 +42,6 @@ impl Edge {
     pub fn end(&self) -> Point2D {
         match self {
             Self::Arc(_, _, end) => *end,
-            Self::Circle(center, _) => *center,
             Self::Line(_, end) => *end,
         }
     }
@@ -105,7 +100,6 @@ impl Edge {
 
                 Length::from_m(r * angle)
             }
-            Self::Circle(_, radius) => *radius * f64::consts::TAU,
             Self::Line(start, end) => {
                 let diff = *start - *end;
                 Length::from_m(f64::sqrt(diff.x.m().powi(2) + diff.y.m().powi(2)))
@@ -133,15 +127,6 @@ impl Edge {
                     .pin_mut()
                     .Edge(),
                 ))
-            }
-            Self::Circle(center, radius) => {
-                let axis = Axis3D {
-                    origin: center.to_3d(plane),
-                    direction: plane.normal(),
-                };
-                let circle = ffi::gp_Circ_ctor(&axis.to_occt_ax2(), radius.m());
-                let mut constructor = ffi::BRepBuilderAPI_MakeEdge_circle(&circle);
-                Some(ffi::TopoDS_Edge_to_owned(constructor.pin_mut().Edge()))
             }
             Self::Line(start, end) => {
                 let mut constructor = ffi::BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(
