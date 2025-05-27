@@ -1,4 +1,4 @@
-use crate::Point2D;
+use crate::{Length, Point2D};
 
 use super::{Edge, Sketch};
 
@@ -36,6 +36,19 @@ impl Path {
     /// ```
     pub fn line_to(&self, point: Point2D) -> Self {
         self.add_edge(Edge::Line(self.cursor, point))
+    }
+
+    /// Add a line to the end of this `Path` that extends by a specified amount in x and y direction.
+    ///
+    /// # Example
+    /// ```rust
+    /// use anvil::{length, Path, point};
+    ///
+    /// let path = Path::at(point!(1 m, 2 m)).line_by(length!(3 m), length!(4 m));
+    /// assert_eq!(path.end(), point!(4 m, 6 m))
+    /// ```
+    pub fn line_by(&self, dx: Length, dy: Length) -> Self {
+        self.add_edge(Edge::Line(self.cursor, self.cursor + Point2D::new(dx, dy)))
     }
 
     /// Add a circle section to the end of this `Path` two points.
