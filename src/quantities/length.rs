@@ -163,6 +163,19 @@ impl Length {
         self.m() * 1000.
     }
 
+    /// Return the absolute value of this `Length`.
+    ///
+    /// ```rust
+    /// use anvil::length;
+    ///
+    /// assert_eq!(length!(-5 m).abs(), length!(5 m));
+    /// assert_eq!(length!(5 m).abs(), length!(5 m));
+    /// ```
+    pub fn abs(&self) -> Self {
+        Self {
+            meters: self.meters.abs(),
+        }
+    }
     /// Return the smaller of two lengths.
     ///
     /// # Example
