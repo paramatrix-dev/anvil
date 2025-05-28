@@ -69,3 +69,67 @@ impl Mul<Length> for Dir2D {
         }
     }
 }
+
+/// Macro for simplifying `Dir2D` and `Dir3D` construction for static values.
+///
+/// ```rust
+/// use anvil::{dir, Dir2D, Dir3D};
+///
+/// // For Dir2D
+/// assert_eq!(dir!(3, 4), Dir2D::try_from(3., 4.).unwrap());
+/// assert_eq!(dir!(3., 4.), Dir2D::try_from(3., 4.).unwrap());
+/// // dir!(0, 0); <- this raises a compile error
+///
+/// // For Dir3D
+/// assert_eq!(dir!(3, 4, 5), Dir3D::try_from(3., 4., 5.).unwrap());
+/// assert_eq!(dir!(3., 4., 5.), Dir3D::try_from(3., 4., 5.).unwrap());
+/// // dir!(0, 0, 0); // <- this raises a compile error
+/// ```
+#[macro_export]
+macro_rules! dir {
+    ( 0., 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( $x:literal, $y:literal ) => {
+        $crate::Dir2D::try_from($x as f64, $y as f64)
+            .expect("macro already checked for zero values")
+    };
+
+    ( 0., 0., 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0., 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0, 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0., 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0, 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0, 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0., 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0, 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( $x:literal, $y:literal, $z:literal ) => {
+        $crate::Dir3D::try_from($x as f64, $y as f64, $z as f64)
+            .expect("macro already checked for zero values")
+    };
+}
