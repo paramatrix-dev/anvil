@@ -1,4 +1,4 @@
-use crate::{Length, Point2D};
+use crate::{Angle, Axis2D, Dir2D, Length, Point2D};
 
 use super::{Edge, Sketch};
 
@@ -49,6 +49,53 @@ impl Path {
     /// ```
     pub fn line_by(&self, dx: Length, dy: Length) -> Self {
         self.add_edge(Edge::Line(self.cursor, self.cursor + Point2D::new(dx, dy)))
+    }
+
+    /// Append a circle section to this `Path` that curves the Path by a certain angle.
+    ///
+    /// A positive radius curves the path to the left and a negative radius to the right. A positive
+    /// angle ensures the path is smooth while a negative angle creates a sharp corner in the other
+    /// direction.
+    ///
+    /// If the path was empty before, the arc starts in positive x-direction.
+    ///
+    /// # Example
+    /// ```rust
+    /// use anvil::{angle, Circle, Edge, length, Path, point, Rectangle, Plane};
+    ///
+    /// let sketch = Path::at(point!(1 m, 1 m))
+    ///     .arc_by(length!(-1 m), angle!(180 deg))
+    ///     .line_by(length!(-2 m), length!(0))
+    ///     .arc_by(length!(-1 m), angle!(30 deg))
+    ///     .arc_by(length!(-1 m), angle!(150 deg)) // arcs can be split into sections
+    ///     .close();
+    ///
+    /// assert_eq!(
+    ///     sketch,
+    ///     Rectangle::from_dim(length!(2 m), length!(2 m))
+    ///         .add(&Circle::from_radius(length!(1 m)).move_to(point!(1 m, 0 m)))
+    ///         .add(&Circle::from_radius(length!(1 m)).move_to(point!(-1 m, 0 m)))
+    /// )
+    /// ```
+    pub fn arc_by(&self, radius: Length, angle: Angle) -> Self {
+        if radius == Length::zero() || angle == Angle::zero() {
+            return self.clone();
+        }
+        let center = self.cursor + self.end_direction().rotate(Angle::from_deg(270.)) * radius;
+        let direction_factor = radius / radius.abs();
+
+        let cursor_center_axis =
+            Axis2D::between(center, self.cursor).expect("zero radius already checked");
+        let interim_point = cursor_center_axis
+            .direction
+            .rotate(angle / 2. * direction_factor)
+            * radius;
+        let end_point = cursor_center_axis
+            .direction
+            .rotate(angle * direction_factor)
+            * radius;
+
+        self.add_edge(Edge::Arc(self.cursor, interim_point, end_point))
     }
 
     /// Add a circle section to the end of this `Path` two points.
@@ -113,6 +160,31 @@ impl Path {
         match self.edges.iter().last() {
             Some(edge) => edge.end(),
             None => self.cursor,
+        }
+    }
+
+    /// Return the direction the last element of this `Path` is pointing to.
+    ///
+    /// If the path is empty, a `Dir2D` parallel to the positive x-direction is returned.
+    ///
+    /// ```rust
+    /// use anvil::{Path, dir, point};
+    ///
+    /// assert_eq!(
+    ///     Path::at(point!(0 m, 0 m)).line_to(point!(0 m, 2 m)).end_direction(),
+    ///     dir!(0, 1)
+    /// );
+    /// assert_eq!(
+    ///     Path::at(point!(0 m, 0 m)).end_direction(),
+    ///     dir!(1, 0)
+    /// )
+    /// ```
+    pub fn end_direction(&self) -> Dir2D {
+        match self.edges.last() {
+            Some(last_edge) => last_edge
+                .end_direction()
+                .expect("edge has already been checked for zero length"),
+            None => Dir2D::from(Angle::zero()),
         }
     }
 
