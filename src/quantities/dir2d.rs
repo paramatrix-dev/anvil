@@ -1,8 +1,8 @@
-use std::ops::Mul;
+use std::ops::{Add, Mul};
 
 use crate::Error;
 
-use super::{Length, Point2D};
+use super::{Angle, Length, Point2D};
 
 /// A direction in 2D space with a length of 1.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -43,24 +43,72 @@ impl Dir2D {
         self.y
     }
 
+    /// Return the `Angle` this `Dir2D` points to in relation to the unit circle.
+    pub fn angle(&self) -> Angle {
+        Angle::from_rad(self.y.atan2(self.x))
+    }
+
     /// Return the dot-product of this `Dir2D` with another.
     pub fn dot(&self, other: Dir2D) -> f64 {
         self.x * other.x + self.y * other.y
     }
 
-    /// Return a `Dir2D` that is at a right angle to this `Dir2D`.
+    /// Return a `Dir2D` rotated by a specified amount counter clockwise.
+    pub fn rotate(&self, angle: Angle) -> Self {
+        if (angle - Angle::zero()).abs().rad() < 1e-9 {
+            self.clone()
+        } else if (angle - Angle::from_deg(90.)).abs().rad() < 1e-9 {
+            Self {
+                x: -self.y,
+                y: self.x,
+            }
+        } else if (angle - Angle::from_deg(180.)).abs().rad() < 1e-9 {
+            Self {
+                x: -self.x,
+                y: -self.y,
+            }
+        } else if (angle - Angle::from_deg(270.)).abs().rad() < 1e-9 {
+            Self {
+                x: self.y,
+                y: -self.x,
+            }
+        } else {
+            Self::from(self.angle() + angle)
+        }
+    }
+}
+
+impl From<Angle> for Dir2D {
+    /// Construct a `Dir2D` from an `Angle`.
+    ///
+    /// An angle of 0 points in the positive x-direction and positive angles rotate counter
+    /// clockwise.
+    fn from(value: Angle) -> Self {
+        Self {
+            x: f64::cos(value.rad()),
+            y: f64::sin(value.rad()),
+        }
+    }
+}
+
+impl Add<Dir2D> for Dir2D {
+    type Output = Result<Self, Error>;
+    /// Add another `Dir2D` to this one.
     ///
     /// ```rust
-    /// use anvil::dir;
+    /// use anvil::{dir, Error};
     ///
-    /// assert_eq!(dir!(0, 1).orthogonal(), dir!(1, 0));
-    /// assert_eq!(dir!(4, 6).orthogonal(), dir!(6, -4));
+    /// assert_eq!(
+    ///     dir!(0, 1) + dir!(1, 0),
+    ///     Ok(dir!(1, 1))
+    /// );
+    /// assert_eq!(
+    ///     dir!(1, 1) + dir!(-1, -1),
+    ///     Err(Error::ZeroVector)
+    /// )
     /// ```
-    pub fn orthogonal(&self) -> Self {
-        Self {
-            x: self.y,
-            y: -self.x,
-        }
+    fn add(self, other: Self) -> Result<Self, Error> {
+        Self::try_from(self.x + other.x, self.y + other.y)
     }
 }
 
