@@ -47,6 +47,21 @@ impl Dir2D {
     pub fn dot(&self, other: Dir2D) -> f64 {
         self.x * other.x + self.y * other.y
     }
+
+    /// Return a `Dir2D` that is at a right angle to this `Dir2D`.
+    ///
+    /// ```rust
+    /// use anvil::dir;
+    ///
+    /// assert_eq!(dir!(0, 1).orthogonal(), dir!(1, 0));
+    /// assert_eq!(dir!(4, 6).orthogonal(), dir!(6, -4));
+    /// ```
+    pub fn orthogonal(&self) -> Self {
+        Self {
+            x: self.y,
+            y: -self.x,
+        }
+    }
 }
 
 impl Mul<Length> for Dir2D {
