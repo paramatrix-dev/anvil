@@ -1,3 +1,5 @@
+use std::alloc::dealloc;
+
 use crate::Error;
 
 use super::{Dir2D, Length, Point2D};
@@ -67,5 +69,32 @@ impl Axis2D {
     /// ```
     pub fn point_at(&self, distance: Length) -> Point2D {
         self.origin + self.direction * distance
+    }
+
+    /// Return the intersection point of this `Axis2D` with another.
+    ///
+    /// If the two axes are parallel, None is returned.
+    ///
+    /// ```rust
+    /// use anvil::{Axis2D, dir, point};
+    ///
+    /// let axis1 = Axis2D::new(point!(0 m, 0 m), dir!(1, 1));
+    /// let axis2 = Axis2D::new(point!(1 m, 5 m), dir!(0, 1));
+    /// assert_eq!(axis1.intersect(axis2), Some(point!(1 m, 1 m)));
+    /// assert_eq!(axis1.intersect(axis1), None);
+    /// ```
+    pub fn intersect(&self, other: Axis2D) -> Option<Point2D> {
+        let determinant =
+            self.direction.x() * other.direction.y() - self.direction.y() * other.direction.x();
+
+        let lines_are_parallel = determinant.abs() < 1e-9;
+        if lines_are_parallel {
+            return None;
+        }
+
+        let diff = other.origin - self.origin;
+        let offset = (diff.x * other.direction.y() - diff.y * other.direction.x()) / determinant;
+
+        Some(self.origin + offset * self.direction)
     }
 }
