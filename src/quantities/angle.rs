@@ -1,5 +1,5 @@
 use core::f64;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 /// A physical angle (i.e. a distance).
 ///
@@ -180,6 +180,13 @@ impl Div<Angle> for Angle {
     /// ```
     fn div(self, other: Angle) -> f64 {
         self.rad / other.rad
+    }
+}
+
+impl Neg for Angle {
+    type Output = Angle;
+    fn neg(self) -> Self::Output {
+        self * -1.
     }
 }
 

@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use super::{Dir2D, Dir3D, Point2D, Point3D};
 
@@ -287,6 +287,13 @@ impl Mul<Dir3D> for Length {
     /// ```
     fn mul(self, other: Dir3D) -> Point3D {
         other * self
+    }
+}
+
+impl Neg for Length {
+    type Output = Length;
+    fn neg(self) -> Self::Output {
+        self * -1.
     }
 }
 
