@@ -117,14 +117,23 @@ impl Edge {
     /// assert_eq!(line.end_direction(), Dir2D::try_from(1., 2.));
     /// ```
     pub fn end_direction(&self) -> Result<Dir2D, Error> {
-        // Works for now but needs to be refactored
         match self {
             Self::Arc(start, interior, end) => {
                 let (center, _) = arc_center_radius(*start, *interior, *end)?;
-                let center_end_axis =
-                    Axis2D::between(center, *end).expect("zero vector was already checked");
 
-                Ok(center_end_axis.direction.rotate(Angle::from_deg(-90.)))
+                let start_angle = arc_point_angle_on_unit_circle(center, *start);
+                let interior_angle = arc_point_angle_on_unit_circle(center, *interior);
+                let end_angle = arc_point_angle_on_unit_circle(center, *end);
+
+                let arc_is_clockwise = (start_angle > interior_angle && interior_angle > end_angle)
+                    || (interior_angle > end_angle && end_angle > start_angle)
+                    || (end_angle > start_angle && start_angle > interior_angle);
+
+                if arc_is_clockwise {
+                    Ok(Dir2D::from(end_angle - Angle::from_deg(90.)))
+                } else {
+                    Ok(Dir2D::from(end_angle + Angle::from_deg(90.)))
+                }
             }
             Self::Line(start, end) => Dir2D::try_from((*end - *start).x.m(), (*end - *start).y.m()),
         }
@@ -198,4 +207,11 @@ fn arc_center_radius(
     let radius = (center - start).distance_to_origin();
 
     Ok((center, radius))
+}
+
+fn arc_point_angle_on_unit_circle(center: Point2D, point: Point2D) -> Angle {
+    point
+        .direction_from(center)
+        .expect("center and point can not be the same")
+        .angle()
 }

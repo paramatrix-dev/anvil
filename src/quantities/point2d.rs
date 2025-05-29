@@ -184,29 +184,29 @@ impl Div<f64> for Point2D {
 #[macro_export]
 macro_rules! point {
     ($x:literal $x_unit:ident, $y:literal $y_unit:ident) => {
-        anvil::Point2D::new(anvil::length!($x $x_unit), anvil::length!($y $y_unit))
+        $crate::Point2D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit))
     };
     ($x:expr, $y:literal $y_unit:ident) => {
-        anvil::Point2D::new($x, anvil::length!($y $y_unit))
+        $crate::Point2D::new($x, $crate::length!($y $y_unit))
     };
     ($x:literal $x_unit:ident, $y:expr) => {
-        anvil::Point2D::new(anvil::length!($x $x_unit), $y)
+        $crate::Point2D::new($crate::length!($x $x_unit), $y)
     };
     ($x:expr, $y:expr) => {
-        anvil::Point2D::new($x, $y)
+        $crate::Point2D::new($x, $y)
     };
 
     ($x:literal $x_unit:ident, $y:literal $y_unit:ident, $z:literal $z_unit:ident) => {
-        anvil::Point3D::new(anvil::length!($x $x_unit), anvil::length!($y $y_unit), anvil::length!($z $z_unit))
+        $crate::Point3D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit), $crate::length!($z $z_unit))
     };
     ($x:expr, $y:literal $y_unit:ident, $z:literal $z_unit:ident) => {
-        anvil::Point3D::new($x, anvil::length!($y $y_unit), anvil::length!($z $z_unit))
+        $crate::Point3D::new($x, $crate::length!($y $y_unit), $crate::length!($z $z_unit))
     };
     ($x:literal $x_unit:ident, $y:expr, $z:literal $z_unit:ident) => {
-        anvil::Point3D::new(anvil::length!($x $x_unit), $y, anvil::length!($z $z_unit))
+        $crate::Point3D::new($crate::length!($x $x_unit), $y, $crate::length!($z $z_unit))
     };
     ($x:literal $x_unit:ident, $y:literal $y_unit:ident, $z:expr) => {
-        anvil::Point3D::new(anvil::length!($x $x_unit), anvil::length!($y $y_unit), $z)
+        $crate::Point3D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit), $z)
     };
 }
 

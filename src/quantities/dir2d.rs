@@ -44,8 +44,26 @@ impl Dir2D {
     }
 
     /// Return the `Angle` this `Dir2D` points to in relation to the unit circle.
+    ///
+    /// ```rust
+    /// use anvil::{dir, angle};
+    ///
+    /// assert!((dir!(1, 0).angle() - angle!(0 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(1, 1).angle() - angle!(45 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(0, 1).angle() - angle!(90 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, 1).angle() - angle!(135 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, 0).angle() - angle!(180 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, -1).angle() - angle!(225 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(0, -1).angle() - angle!(270 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(1, -1).angle() - angle!(315 deg)).rad().abs() < 1e-9);
+    /// ```
     pub fn angle(&self) -> Angle {
-        Angle::from_rad(self.y.atan2(self.x))
+        let angle = Angle::from_rad(self.y.atan2(self.x));
+        if angle.rad() < 0. {
+            Angle::from_rad(angle.rad() + std::f64::consts::TAU)
+        } else {
+            angle
+        }
     }
 
     /// Return the dot-product of this `Dir2D` with another.
@@ -55,26 +73,7 @@ impl Dir2D {
 
     /// Return a `Dir2D` rotated by a specified amount counter clockwise.
     pub fn rotate(&self, angle: Angle) -> Self {
-        if (angle - Angle::zero()).abs().rad() < 1e-9 {
-            self.clone()
-        } else if (angle - Angle::from_deg(90.)).abs().rad() < 1e-9 {
-            Self {
-                x: -self.y,
-                y: self.x,
-            }
-        } else if (angle - Angle::from_deg(180.)).abs().rad() < 1e-9 {
-            Self {
-                x: -self.x,
-                y: -self.y,
-            }
-        } else if (angle - Angle::from_deg(270.)).abs().rad() < 1e-9 {
-            Self {
-                x: self.y,
-                y: -self.x,
-            }
-        } else {
-            Self::from(self.angle() + angle)
-        }
+        Self::from(self.angle() + angle)
     }
 }
 

@@ -51,13 +51,8 @@ impl Angle {
     /// assert_eq!(angle.deg(), 180.);
     /// ```
     pub fn from_rad(value: f64) -> Self {
-        let value = value % f64::consts::TAU;
-        if value < 0. {
-            Angle {
-                rad: f64::consts::TAU + value,
-            }
-        } else {
-            Angle { rad: value }
+        Self {
+            rad: value % f64::consts::TAU,
         }
     }
     /// Return the value of this angle in radians.
