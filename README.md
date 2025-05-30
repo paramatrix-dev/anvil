@@ -5,6 +5,18 @@ Anvil is an intuitive, easy-to-use Rust crate for building 3D CAD models. It is 
 - **mandatory unit support**: Anvil forces you to specify units for all lengths and angles, giving you certainty about the true dimensions of your models
 - **reliability by design**: unit and integration tests exist for almost all public APIs communicating functionality and ensuring reliability
 
+# Installation
+
+Anvil is not yet on crates.io, so to install it you need to run
+```bash
+cargo add --git "https://github.com/paramatrix-dev/anvil.git"
+```
+or add
+```toml
+anvil = { git = "https://github.com/paramatrix-dev/anvil.git", branch = "main" }
+```
+to your Cargo.toml `[dependencies]` section.
+
 # Usage
 
 The two main structs in Anvil are `anvil::Part` for 3D and `anvil::Sketch` for 2D models. Both have primitive constructor-structs like `anvil::Cuboid` for `Part` or `anvil::Rectangle` for `Sketch` which can be further designed with operations like `add`, `subtract`, and `interface`. This is how you would create a 2x2 Lego brick in Anvil:
@@ -37,9 +49,11 @@ let part = block.add(&studs).subtract(&inner_block).add(&inner_tube);
 ```
 ![](/examples/00_lego.png)
 
+For more examples, have a look at the `/examples` directory.
+
 # Inspiration
 
-Anvil was originally inspired by the [opencascade](https://crates.io/crates/opencascade) crate. We used `opencascade-rs` for a personal project but quickly realized a few drawbacks of the crate:
+Anvil was originally inspired by the [opencascade](https://crates.io/crates/opencascade) crate. `opencascade-rs` was first used as the basis for another project, but we quickly realized a few drawbacks of the crate:
 - basic functionality like `Clone` and `PartialEq` is missing
 - hardly any function, struct, or enum are documented or tested
 - the APIs are inconsistent and feel unintuitive
