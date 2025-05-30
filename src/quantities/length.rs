@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use super::{Dir2D, Dir3D, Point2D, Point3D};
 
@@ -163,6 +163,19 @@ impl Length {
         self.m() * 1000.
     }
 
+    /// Return the absolute value of this `Length`.
+    ///
+    /// ```rust
+    /// use anvil::length;
+    ///
+    /// assert_eq!(length!(-5 m).abs(), length!(5 m));
+    /// assert_eq!(length!(5 m).abs(), length!(5 m));
+    /// ```
+    pub fn abs(&self) -> Self {
+        Self {
+            meters: self.meters.abs(),
+        }
+    }
     /// Return the smaller of two lengths.
     ///
     /// # Example
@@ -274,6 +287,13 @@ impl Mul<Dir3D> for Length {
     /// ```
     fn mul(self, other: Dir3D) -> Point3D {
         other * self
+    }
+}
+
+impl Neg for Length {
+    type Output = Length;
+    fn neg(self) -> Self::Output {
+        self * -1.
     }
 }
 

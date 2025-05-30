@@ -80,10 +80,7 @@ impl Axis3D {
         self.origin + self.direction * distance
     }
 
-    pub(crate) fn to_occt_ax1(&self) -> UniquePtr<ffi::gp_Ax1> {
+    pub(crate) fn to_occt_ax1(self) -> UniquePtr<ffi::gp_Ax1> {
         ffi::gp_Ax1_ctor(&self.origin.to_occt_point(), &self.direction.to_occt_dir())
-    }
-    pub(crate) fn to_occt_ax2(&self) -> UniquePtr<ffi::gp_Ax2> {
-        ffi::gp_Ax2_ctor(&self.origin.to_occt_point(), &self.direction.to_occt_dir())
     }
 }

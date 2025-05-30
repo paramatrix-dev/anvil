@@ -1,5 +1,5 @@
 use core::f64;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 /// A physical angle (i.e. a distance).
 ///
@@ -51,7 +51,9 @@ impl Angle {
     /// assert_eq!(angle.deg(), 180.);
     /// ```
     pub fn from_rad(value: f64) -> Self {
-        Angle { rad: value }
+        Self {
+            rad: value % f64::consts::TAU,
+        }
     }
     /// Return the value of this angle in radians.
     pub fn rad(&self) -> f64 {
@@ -75,6 +77,20 @@ impl Angle {
     /// Return the value of this angle in degrees.
     pub fn deg(&self) -> f64 {
         self.rad / f64::consts::TAU * 360.
+    }
+
+    /// Return the absolute value of this `Angle`.
+    ///
+    /// ```rust
+    /// use anvil::angle;
+    ///
+    /// assert_eq!(angle!(-45 deg).abs(), angle!(45 deg));
+    /// assert_eq!(angle!(10 deg).abs(), angle!(10 deg));
+    /// ```
+    pub fn abs(&self) -> Self {
+        Self {
+            rad: self.rad.abs(),
+        }
     }
 
     /// Return the smaller of two angles.
@@ -167,6 +183,13 @@ impl Div<Angle> for Angle {
     }
 }
 
+impl Neg for Angle {
+    type Output = Angle;
+    fn neg(self) -> Self::Output {
+        self * -1.
+    }
+}
+
 /// Macro for simplifying `Angle` construction for static values.
 ///
 /// Create an angle with the correct unit by invoking `angle!([value] [unit])`.
@@ -212,8 +235,8 @@ mod tests {
 
     #[test]
     fn multiply_with_f64() {
-        assert_eq!(angle!(5 rad) * 4., angle!(20 rad));
-        assert_eq!(4. * angle!(5 rad), angle!(20 rad));
+        assert_eq!(angle!(0.2 rad) * 4., angle!(0.8 rad));
+        assert_eq!(4. * angle!(0.2 rad), angle!(0.8 rad));
     }
 
     #[test]

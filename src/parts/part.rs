@@ -77,7 +77,7 @@ impl Part {
         let mut new_shape = self.clone();
         let mut angle = angle!(0);
         for _ in 0..instances {
-            new_shape = new_shape.add(&self.rotate_around(around.clone(), angle));
+            new_shape = new_shape.add(&self.rotate_around(around, angle));
             angle = angle + angle_step;
         }
         new_shape
@@ -137,6 +137,27 @@ impl Part {
             new_part = new_part.add(&self.move_to(axis.point_at(pos)));
         }
         new_part
+    }
+    /// Return a clone of this `Part` moved by a specified amount in each axis.
+    ///
+    /// ```rust
+    /// use anvil::{Cuboid, length, point};
+    ///
+    /// let cuboid = Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m));
+    /// let moved_cuboid = cuboid
+    ///     .move_by(length!(1 m), length!(0), length!(3 m))
+    ///     .move_by(length!(0), length!(1 m), length!(0));
+    /// assert_eq!(
+    ///     moved_cuboid.center(),
+    ///     Ok(point!(1 m, 1 m, 3 m))
+    /// )
+    /// ```
+    pub fn move_by(&self, dx: Length, dy: Length, dz: Length) -> Self {
+        let center = match self.center() {
+            Ok(c) => c,
+            Err(_) => return self.clone(),
+        };
+        self.move_to(center + Point3D::new(dx, dy, dz))
     }
     /// Return a clone of this `Part` with the center moved to a specified point.
     ///
@@ -320,10 +341,21 @@ impl Part {
 
     /// Write the `Part` to a file in the STL format.
     pub fn write_stl(&self, path: impl AsRef<Path>) -> Result<(), Error> {
+        self.write_stl_with_tolerance(path, 0.0001)
+    }
+
+    /// Write the `Part` to a file in the STL format with a specified tolerance.
+    ///
+    /// Smaller tolerances lead to higher precision in rounded shapes, but also larger file size.
+    pub fn write_stl_with_tolerance(
+        &self,
+        path: impl AsRef<Path>,
+        tolerance: f64,
+    ) -> Result<(), Error> {
         match &self.inner {
             Some(inner) => {
                 let mut writer = ffi::StlAPI_Writer_ctor();
-                let mesh = ffi::BRepMesh_IncrementalMesh_ctor(inner, 0.0001);
+                let mesh = ffi::BRepMesh_IncrementalMesh_ctor(inner, tolerance);
                 let success = ffi::write_stl(
                     writer.pin_mut(),
                     mesh.Shape(),
@@ -469,12 +501,12 @@ mod tests {
     }
 
     #[test]
-    fn part_moved_twice() {
+    fn part_move_to_twice() {
         let part = Cuboid::from_m(1., 1., 1.);
         assert_eq!(
             part.move_to(Point3D::from_m(1., 1., 1.))
-                .move_to(Point3D::from_m(2., 2., 2.)),
-            Cuboid::from_m(1., 1., 1.).move_to(Point3D::from_m(2., 2., 2.)),
+                .move_to(Point3D::from_m(-1., -1., -1.)),
+            Cuboid::from_m(1., 1., 1.).move_to(Point3D::from_m(-1., -1., -1.)),
         )
     }
 

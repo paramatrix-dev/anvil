@@ -1,4 +1,4 @@
-use crate::{Edge, Length, Point2D, Sketch};
+use crate::{Length, Path, Point2D, Sketch};
 
 /// Builder for a circular `Sketch`.
 ///
@@ -18,7 +18,16 @@ impl Circle {
     /// assert_eq!(circle.center(), Ok(Point2D::origin()));
     /// ```
     pub fn from_radius(radius: Length) -> Sketch {
-        Sketch::from_edges(vec![Edge::Circle(Point2D::origin(), radius)])
+        Path::at(Point2D::new(radius * -1., Length::zero()))
+            .arc_points(
+                Point2D::new(Length::zero(), radius),
+                Point2D::new(radius, Length::zero()),
+            )
+            .arc_points(
+                Point2D::new(Length::zero(), radius * -1.),
+                Point2D::new(radius * -1., Length::zero()),
+            )
+            .close()
     }
 
     /// Construct a centered circular `Sketch` from a given diameter.

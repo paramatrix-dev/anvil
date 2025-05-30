@@ -34,6 +34,4 @@ fn main() {
     let part = construct();
     part.write_stl("examples/00_lego.stl")
         .expect("could not write part to .STL");
-    part.write_step("examples/00_lego.step")
-        .expect("could not write part to .STEP");
 }

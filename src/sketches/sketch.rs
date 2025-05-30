@@ -166,6 +166,28 @@ impl Sketch {
         }
         new_part
     }
+    /// Return a clone of this `Sketch` moved by a specified amount in each axis.
+    ///
+    /// ```rust
+    /// use anvil::{Circle, length, point};
+    ///
+    /// let circle = Circle::from_radius(length!(1 m));
+    /// let moved_circle = circle
+    ///     .move_by(length!(1 m), length!(0))
+    ///     .move_by(length!(0), length!(2 m));
+    /// assert_eq!(
+    ///     moved_circle.center(),
+    ///     Ok(point!(1 m, 2 m))
+    /// )
+    /// ```
+    pub fn move_by(&self, dx: Length, dy: Length) -> Self {
+        let center = match self.center() {
+            Ok(c) => c,
+            Err(_) => return self.clone(),
+        };
+        self.move_to(center + Point2D::new(dx, dy))
+    }
+    /// Return a clone of this `Sketch` moved to a specified point.
     ///
     /// # Example
     /// ```rust

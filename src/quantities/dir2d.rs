@@ -1,8 +1,8 @@
-use std::ops::Mul;
+use std::ops::{Add, Mul};
 
 use crate::Error;
 
-use super::{Length, Point2D};
+use super::{Angle, Length, Point2D};
 
 /// A direction in 2D space with a length of 1.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -43,9 +43,71 @@ impl Dir2D {
         self.y
     }
 
+    /// Return the `Angle` this `Dir2D` points to in relation to the unit circle.
+    ///
+    /// ```rust
+    /// use anvil::{dir, angle};
+    ///
+    /// assert!((dir!(1, 0).angle() - angle!(0 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(1, 1).angle() - angle!(45 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(0, 1).angle() - angle!(90 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, 1).angle() - angle!(135 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, 0).angle() - angle!(180 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, -1).angle() - angle!(225 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(0, -1).angle() - angle!(270 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(1, -1).angle() - angle!(315 deg)).rad().abs() < 1e-9);
+    /// ```
+    pub fn angle(&self) -> Angle {
+        let angle = Angle::from_rad(self.y.atan2(self.x));
+        if angle.rad() < 0. {
+            Angle::from_rad(angle.rad() + std::f64::consts::TAU)
+        } else {
+            angle
+        }
+    }
+
     /// Return the dot-product of this `Dir2D` with another.
     pub fn dot(&self, other: Dir2D) -> f64 {
         self.x * other.x + self.y * other.y
+    }
+
+    /// Return a `Dir2D` rotated by a specified amount counter clockwise.
+    pub fn rotate(&self, angle: Angle) -> Self {
+        Self::from(self.angle() + angle)
+    }
+}
+
+impl From<Angle> for Dir2D {
+    /// Construct a `Dir2D` from an `Angle`.
+    ///
+    /// An angle of 0 points in the positive x-direction and positive angles rotate counter
+    /// clockwise.
+    fn from(value: Angle) -> Self {
+        Self {
+            x: f64::cos(value.rad()),
+            y: f64::sin(value.rad()),
+        }
+    }
+}
+
+impl Add<Dir2D> for Dir2D {
+    type Output = Result<Self, Error>;
+    /// Add another `Dir2D` to this one.
+    ///
+    /// ```rust
+    /// use anvil::{dir, Error};
+    ///
+    /// assert_eq!(
+    ///     dir!(0, 1) + dir!(1, 0),
+    ///     Ok(dir!(1, 1))
+    /// );
+    /// assert_eq!(
+    ///     dir!(1, 1) + dir!(-1, -1),
+    ///     Err(Error::ZeroVector)
+    /// )
+    /// ```
+    fn add(self, other: Self) -> Result<Self, Error> {
+        Self::try_from(self.x + other.x, self.y + other.y)
     }
 }
 
@@ -68,4 +130,68 @@ impl Mul<Length> for Dir2D {
             y: self.y * other,
         }
     }
+}
+
+/// Macro for simplifying `Dir2D` and `Dir3D` construction for static values.
+///
+/// ```rust
+/// use anvil::{dir, Dir2D, Dir3D};
+///
+/// // For Dir2D
+/// assert_eq!(dir!(3, 4), Dir2D::try_from(3., 4.).unwrap());
+/// assert_eq!(dir!(3., 4.), Dir2D::try_from(3., 4.).unwrap());
+/// // dir!(0, 0); <- this raises a compile error
+///
+/// // For Dir3D
+/// assert_eq!(dir!(3, 4, 5), Dir3D::try_from(3., 4., 5.).unwrap());
+/// assert_eq!(dir!(3., 4., 5.), Dir3D::try_from(3., 4., 5.).unwrap());
+/// // dir!(0, 0, 0); // <- this raises a compile error
+/// ```
+#[macro_export]
+macro_rules! dir {
+    ( 0., 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( $x:literal, $y:literal ) => {
+        $crate::Dir2D::try_from($x as f64, $y as f64)
+            .expect("macro already checked for zero values")
+    };
+
+    ( 0., 0., 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0., 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0, 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0., 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0, 0. ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0, 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0., 0., 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( 0, 0, 0 ) => {
+        compile_error!("At least one value of the Dir needs to be non-zero.")
+    };
+    ( $x:literal, $y:literal, $z:literal ) => {
+        $crate::Dir3D::try_from($x as f64, $y as f64, $z as f64)
+            .expect("macro already checked for zero values")
+    };
 }
