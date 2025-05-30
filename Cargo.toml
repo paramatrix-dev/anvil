@@ -2,6 +2,31 @@
 name = "anvil"
 version = "0.1.0"
 edition = "2024"
+description = "An intuitive 3D modeling kernel"
+repository = "https://github.com/paramatrix-dev/anvil"
+readme = "README.md"
+license = "LGPL-2.1-only"
+keywords = [
+  "3d",
+  "3d-design",
+  "3d-modeling",
+  "cad",
+  "cae",
+  "computer aided design",
+  "computer aided engineering",
+  "design",
+  "modeling",
+  "occt",
+  "opencascade",
+]
+
+include = [
+  "/src",
+  "Cargo.toml",
+  "LICENSE",
+  "README.md",
+  "/examples/00_lego.png",
+]
 
 [dependencies]
 cxx = "1"
