@@ -138,6 +138,27 @@ impl Part {
         }
         new_part
     }
+    /// Return a clone of this `Part` moved by a specified amount in each axis.
+    ///
+    /// ```rust
+    /// use anvil::{Cuboid, length, point};
+    ///
+    /// let cuboid = Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m));
+    /// let moved_cuboid = cuboid
+    ///     .move_by(length!(1 m), length!(0), length!(3 m))
+    ///     .move_by(length!(0), length!(1 m), length!(0));
+    /// assert_eq!(
+    ///     moved_cuboid.center(),
+    ///     Ok(point!(1 m, 1 m, 3 m))
+    /// )
+    /// ```
+    pub fn move_by(&self, dx: Length, dy: Length, dz: Length) -> Self {
+        let center = match self.center() {
+            Ok(c) => c,
+            Err(_) => return self.clone(),
+        };
+        self.move_to(center + Point3D::new(dx, dy, dz))
+    }
     /// Return a clone of this `Part` with the center moved to a specified point.
     ///
     /// # Example
@@ -469,12 +490,12 @@ mod tests {
     }
 
     #[test]
-    fn part_moved_twice() {
+    fn part_move_to_twice() {
         let part = Cuboid::from_m(1., 1., 1.);
         assert_eq!(
             part.move_to(Point3D::from_m(1., 1., 1.))
-                .move_to(Point3D::from_m(2., 2., 2.)),
-            Cuboid::from_m(1., 1., 1.).move_to(Point3D::from_m(2., 2., 2.)),
+                .move_to(Point3D::from_m(-1., -1., -1.)),
+            Cuboid::from_m(1., 1., 1.).move_to(Point3D::from_m(-1., -1., -1.)),
         )
     }
 
