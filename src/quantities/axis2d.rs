@@ -1,5 +1,3 @@
-use std::alloc::dealloc;
-
 use crate::Error;
 
 use super::{Dir2D, Length, Point2D};

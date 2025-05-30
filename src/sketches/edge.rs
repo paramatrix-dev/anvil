@@ -125,9 +125,8 @@ impl Edge {
                 let interior_angle = arc_point_angle_on_unit_circle(center, *interior);
                 let end_angle = arc_point_angle_on_unit_circle(center, *end);
 
-                let arc_is_clockwise = (start_angle > interior_angle && interior_angle > end_angle)
-                    || (interior_angle > end_angle && end_angle > start_angle)
-                    || (end_angle > start_angle && start_angle > interior_angle);
+                let arc_is_clockwise = (end_angle > start_angle || start_angle > interior_angle)
+                    && interior_angle > end_angle;
 
                 if arc_is_clockwise {
                     Ok(Dir2D::from(end_angle - Angle::from_deg(90.)))

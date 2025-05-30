@@ -341,10 +341,21 @@ impl Part {
 
     /// Write the `Part` to a file in the STL format.
     pub fn write_stl(&self, path: impl AsRef<Path>) -> Result<(), Error> {
+        self.write_stl_with_tolerance(path, 0.0001)
+    }
+
+    /// Write the `Part` to a file in the STL format with a specified tolerance.
+    ///
+    /// Smaller tolerances lead to higher precision in rounded shapes, but also larger file size.
+    pub fn write_stl_with_tolerance(
+        &self,
+        path: impl AsRef<Path>,
+        tolerance: f64,
+    ) -> Result<(), Error> {
         match &self.inner {
             Some(inner) => {
                 let mut writer = ffi::StlAPI_Writer_ctor();
-                let mesh = ffi::BRepMesh_IncrementalMesh_ctor(inner, 0.0001);
+                let mesh = ffi::BRepMesh_IncrementalMesh_ctor(inner, tolerance);
                 let success = ffi::write_stl(
                     writer.pin_mut(),
                     mesh.Shape(),
