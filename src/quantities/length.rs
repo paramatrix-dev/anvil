@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-use super::{Dir2D, Dir3D, Point2D, Point3D};
+use super::{Dir2D, Dir3D, IntoF64, Point2D, Point3D};
 
 /// A physical length (i.e. a distance).
 ///
@@ -355,6 +355,102 @@ macro_rules! length {
         compile_error!(concat!("Unsupported length unit: ", stringify!($unit)))
     };
 }
+
+/// Import this trait to easily convert numbers into `Length`s.
+///
+/// ```rust
+/// use anvil::{IntoLength, Length};
+///
+/// assert_eq!(5.m(), Length::from_m(5.));
+/// assert_eq!(5.123.ft(), Length::from_ft(5.123));
+/// ```
+pub trait IntoLength: IntoF64 {
+    /// Convert this number into a `Length` in yard.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Length};
+    ///
+    /// assert_eq!(5.yd(), Length::from_yd(5.));
+    /// ```
+    fn yd(&self) -> Length {
+        Length::from_yd(self.to_f64())
+    }
+    /// Convert this number into a `Length` in meters.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Length};
+    ///
+    /// assert_eq!(5.m(), Length::from_m(5.));
+    /// ```
+    fn m(&self) -> Length {
+        Length::from_m(self.to_f64())
+    }
+    /// Convert this number into a `Length` in feet.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Length};
+    ///
+    /// assert_eq!(5.ft(), Length::from_ft(5.));
+    /// ```
+    fn ft(&self) -> Length {
+        Length::from_ft(self.to_f64())
+    }
+    /// Convert this number into a `Length` in decimeters.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Length};
+    ///
+    /// assert_eq!(5.dm(), Length::from_dm(5.));
+    /// ```
+    fn dm(&self) -> Length {
+        Length::from_dm(self.to_f64())
+    }
+    /// Convert this number into a `Length` in inches.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Length};
+    ///
+    /// assert_eq!(5.in_(), Length::from_in(5.));
+    /// ```
+    fn in_(&self) -> Length {
+        Length::from_in(self.to_f64())
+    }
+    /// Convert this number into a `Length` in centimeters.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Length};
+    ///
+    /// assert_eq!(5.cm(), Length::from_cm(5.));
+    /// ```
+    fn cm(&self) -> Length {
+        Length::from_cm(self.to_f64())
+    }
+    /// Convert this number into a `Length` in millimeters.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Length};
+    ///
+    /// assert_eq!(5.mm(), Length::from_mm(5.));
+    /// ```
+    fn mm(&self) -> Length {
+        Length::from_mm(self.to_f64())
+    }
+}
+
+impl IntoLength for usize {}
+impl IntoLength for isize {}
+impl IntoLength for u8 {}
+impl IntoLength for u16 {}
+impl IntoLength for u32 {}
+impl IntoLength for u64 {}
+impl IntoLength for u128 {}
+impl IntoLength for i8 {}
+impl IntoLength for i16 {}
+impl IntoLength for i32 {}
+impl IntoLength for i64 {}
+impl IntoLength for i128 {}
+impl IntoLength for f32 {}
+impl IntoLength for f64 {}
 
 #[cfg(test)]
 mod tests {
