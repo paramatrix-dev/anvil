@@ -214,9 +214,9 @@ checksum = "cd945864f07fe9f5371a27ad7b52a172b4b499999f1d97574c9fa68373937e12"
 
 [[package]]
 name = "occt-sys"
-version = "0.2.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7acaa7d857f483c1d7c5c9391e470b990f6e52fa5f2d4353eeee6be208390899"
+checksum = "a1b3fb218c80b037a612cc4ec325a426a1705d0b2e25b207f7e3db22556ded5f"
 dependencies = [
  "cmake",
 ]
@@ -230,8 +230,7 @@ checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 [[package]]
 name = "opencascade-sys"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5363b69779640dfb178c061f0ec6f26a7799a5e79982b95f1e4e5c4be96fd9c"
+source = "git+https://github.com/bschwind/opencascade-rs?rev=d1db1bf1fb58dd094144532aa0e5c22106d61083#d1db1bf1fb58dd094144532aa0e5c22106d61083"
 dependencies = [
  "cmake",
  "cxx",
