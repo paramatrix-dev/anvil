@@ -21,16 +21,16 @@ impl Axis2D {
     /// This constructor can return an error if the two points are at the same location.
     ///
     /// ```rust
-    /// use anvil::{Axis2D, point, Dir2D};
+    /// use anvil::{Axis2D, dir, IntoLength, point};
     ///
     /// assert_eq!(
-    ///     Axis2D::between(point!(1 m, 1 m), point!(2 m, 1 m)),
+    ///     Axis2D::between(point!(1.m(), 1.m()), point!(2.m(), 1.m())),
     ///     Ok(Axis2D {
-    ///         origin: point!(1 m, 1 m),
-    ///         direction: Dir2D::try_from(1., 0.).expect("")
+    ///         origin: point!(1.m(), 1.m()),
+    ///         direction: dir!(1, 0)
     ///     })
     /// );
-    /// assert!(Axis2D::between(point!(1 m, 1 m), point!(1 m, 1 m)).is_err())
+    /// assert!(Axis2D::between(point!(1.m(), 1.m()), point!(1.m(), 1.m())).is_err())
     /// ```
     pub fn between(origin: Point2D, other: Point2D) -> Result<Self, Error> {
         let direction = other.direction_from(origin)?;
@@ -57,12 +57,12 @@ impl Axis2D {
     /// Return a point on the `Axis2D` at a specified distance from the `Axis2D` origin.
     ///
     /// ```rust
-    /// use anvil::{Axis2D, length, point};
+    /// use anvil::{Axis2D, IntoLength, point};
     ///
     /// let axis = Axis2D::x();
     /// assert_eq!(
-    ///     axis.point_at(length!(5 m)),
-    ///     point!(5 m, 0 m),
+    ///     axis.point_at(5.m()),
+    ///     point!(5.m(), 0.m()),
     /// )
     /// ```
     pub fn point_at(&self, distance: Length) -> Point2D {
@@ -74,11 +74,11 @@ impl Axis2D {
     /// If the two axes are parallel, None is returned.
     ///
     /// ```rust
-    /// use anvil::{Axis2D, dir, point};
+    /// use anvil::{Axis2D, IntoLength, dir, point};
     ///
-    /// let axis1 = Axis2D::new(point!(0 m, 0 m), dir!(1, 1));
-    /// let axis2 = Axis2D::new(point!(1 m, 5 m), dir!(0, 1));
-    /// assert_eq!(axis1.intersect(axis2), Some(point!(1 m, 1 m)));
+    /// let axis1 = Axis2D::new(point!(0, 0), dir!(1, 1));
+    /// let axis2 = Axis2D::new(point!(1.m(), 5.m()), dir!(0, 1));
+    /// assert_eq!(axis1.intersect(axis2), Some(point!(1.m(), 1.m())));
     /// assert_eq!(axis1.intersect(axis1), None);
     /// ```
     pub fn intersect(&self, other: Axis2D) -> Option<Point2D> {

@@ -18,7 +18,7 @@ impl Dir2D {
     /// ```rust
     /// use anvil::Dir2D;
     ///
-    /// let dir2 = Dir2D::try_from(3., 4.).expect("");
+    /// let dir2 = Dir2D::try_from(3., 4.).unwrap();
     /// assert_eq!(dir2.x(), 3. / 5.);
     /// assert_eq!(dir2.y(), 4. / 5.);
     /// ```
@@ -46,16 +46,16 @@ impl Dir2D {
     /// Return the `Angle` this `Dir2D` points to in relation to the unit circle.
     ///
     /// ```rust
-    /// use anvil::{dir, angle};
+    /// use anvil::{dir, IntoAngle};
     ///
-    /// assert!((dir!(1, 0).angle() - angle!(0 deg)).rad().abs() < 1e-9);
-    /// assert!((dir!(1, 1).angle() - angle!(45 deg)).rad().abs() < 1e-9);
-    /// assert!((dir!(0, 1).angle() - angle!(90 deg)).rad().abs() < 1e-9);
-    /// assert!((dir!(-1, 1).angle() - angle!(135 deg)).rad().abs() < 1e-9);
-    /// assert!((dir!(-1, 0).angle() - angle!(180 deg)).rad().abs() < 1e-9);
-    /// assert!((dir!(-1, -1).angle() - angle!(225 deg)).rad().abs() < 1e-9);
-    /// assert!((dir!(0, -1).angle() - angle!(270 deg)).rad().abs() < 1e-9);
-    /// assert!((dir!(1, -1).angle() - angle!(315 deg)).rad().abs() < 1e-9);
+    /// assert!((dir!(1, 0).angle() - 0.deg()).rad().abs() < 1e-9);
+    /// assert!((dir!(1, 1).angle() - 45.deg()).rad().abs() < 1e-9);
+    /// assert!((dir!(0, 1).angle() - 90.deg()).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, 1).angle() - 135.deg()).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, 0).angle() - 180.deg()).rad().abs() < 1e-9);
+    /// assert!((dir!(-1, -1).angle() - 225.deg()).rad().abs() < 1e-9);
+    /// assert!((dir!(0, -1).angle() - 270.deg()).rad().abs() < 1e-9);
+    /// assert!((dir!(1, -1).angle() - 315.deg()).rad().abs() < 1e-9);
     /// ```
     pub fn angle(&self) -> Angle {
         let angle = Angle::from_rad(self.y.atan2(self.x));
@@ -116,12 +116,12 @@ impl Mul<Length> for Dir2D {
     /// Multiply this `Dir2D` with a `Length` to get a `Point2D`.
     ///
     /// ```rust
-    /// use anvil::{Dir2D, length, point};
+    /// use anvil::{Dir2D, IntoLength, point};
     ///
     /// let dir2 = Dir2D::try_from(1., 0.).unwrap();
     /// assert_eq!(
-    ///     dir2 * length!(2 m),
-    ///     point!(2 m, 0 m)
+    ///     dir2 * 2.m(),
+    ///     point!(2.m(), 0.m())
     /// )
     /// ```
     fn mul(self, other: Length) -> Point2D {

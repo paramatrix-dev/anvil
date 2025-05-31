@@ -13,7 +13,6 @@ pub struct Sketch(Vec<SketchAction>);
 impl Sketch {
     /// Construct an empty `Sketch` which can be used for merging with other sketches.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::Sketch;
     ///
@@ -33,7 +32,6 @@ impl Sketch {
     ///
     /// Warning: the area is susceptibility to floating point errors.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::{Rectangle, length};
     ///
@@ -50,14 +48,13 @@ impl Sketch {
     ///
     /// If the `Sketch` is empty, an `Err(Error::EmptySketch)` is returned.
     ///
-    /// # Examples
     /// ```rust
-    /// use anvil::{Error, length, Point2D, Rectangle, Sketch};
+    /// use anvil::{Error, IntoLength, Rectangle, Sketch, point};
     ///
-    /// let centered_rect = Rectangle::from_dim(length!(1 m), length!(2 m));
-    /// let moved_rect = centered_rect.move_to(Point2D::from_m(3., 3.));
-    /// assert_eq!(centered_rect.center(), Ok(Point2D::origin()));
-    /// assert_eq!(moved_rect.center(), Ok(Point2D::from_m(3., 3.)));
+    /// let centered_rect = Rectangle::from_dim(1.m(), 2.m());
+    /// let moved_rect = centered_rect.move_to(point!(3.m(), 3.m()));
+    /// assert_eq!(centered_rect.center(), Ok(point!(0, 0)));
+    /// assert_eq!(moved_rect.center(), Ok(point!(3.m(), 3.m())));
     /// assert_eq!(Sketch::empty().center(), Err(Error::EmptySketch));
     /// ```
     pub fn center(&self) -> Result<Point2D, Error> {
@@ -71,15 +68,14 @@ impl Sketch {
 
     /// Merge this `Sketch` with another.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Rectangle, Point2D};
+    /// use anvil::{IntoLength, Rectangle, point};
     ///
-    /// let sketch1 = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 2.));
-    /// let sketch2 = Rectangle::from_corners(Point2D::from_m(1., 0.), Point2D::from_m(2., 2.));
+    /// let sketch1 = Rectangle::from_corners(point!(0, 0), point!(1.m(), 2.m()));
+    /// let sketch2 = Rectangle::from_corners(point!(1.m(), 0.m()), point!(2.m(), 2.m()));
     /// assert_eq!(
     ///     sketch1.add(&sketch2),
-    ///     Rectangle::from_corners(Point2D::origin(), Point2D::from_m(2., 2.))
+    ///     Rectangle::from_corners(point!(0, 0), point!(2.m(), 2.m()))
     /// )
     /// ```
     pub fn add(&self, other: &Self) -> Self {
@@ -90,17 +86,16 @@ impl Sketch {
 
     /// Create multiple instances of the `Sketch` spaced evenly around a point.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{angle, point, Point2D, Rectangle};
+    /// use anvil::{IntoAngle, IntoLength, Rectangle, point};
     ///
-    /// let rect = Rectangle::from_corners(point!(1 m, 1 m), point!(2 m, 2 m));
+    /// let rect = Rectangle::from_corners(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
     /// assert_eq!(
-    ///     rect.circular_pattern(Point2D::origin(), 4),
+    ///     rect.circular_pattern(point!(0, 0), 4),
     ///     rect
-    ///         .add(&rect.rotate_around(Point2D::origin(), angle!(90 deg)))
-    ///         .add(&rect.rotate_around(Point2D::origin(), angle!(180 deg)))
-    ///         .add(&rect.rotate_around(Point2D::origin(), angle!(270 deg)))
+    ///         .add(&rect.rotate_around(point!(0, 0), 90.deg()))
+    ///         .add(&rect.rotate_around(point!(0, 0), 180.deg()))
+    ///         .add(&rect.rotate_around(point!(0, 0), 270.deg()))
     /// )
     /// ```
     pub fn circular_pattern(&self, around: Point2D, instances: u8) -> Self {
@@ -115,15 +110,14 @@ impl Sketch {
     }
     /// Return the `Sketch` that is created from the overlapping area between this one and another.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Rectangle, Point2D};
+    /// use anvil::{Rectangle, IntoLength, point};
     ///
-    /// let sketch1 = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(2., 2.));
-    /// let sketch2 = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 2.));
+    /// let sketch1 = Rectangle::from_corners(point!(0, 0), point!(2.m(), 2.m()));
+    /// let sketch2 = Rectangle::from_corners(point!(0, 0), point!(1.m(), 2.m()));
     /// assert_eq!(
     ///     sketch1.intersect(&sketch2),
-    ///     Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 2.))
+    ///     Rectangle::from_corners(point!(0, 0), point!(1.m(), 2.m()))
     /// )
     /// ```
     pub fn intersect(&self, other: &Self) -> Self {
@@ -135,16 +129,16 @@ impl Sketch {
     /// Create multiple instances of the `Sketch` spaced evenly until a point.
     ///
     /// ```rust
-    /// use anvil::{Rectangle, length, point};
+    /// use anvil::{Rectangle, IntoLength, point};
     ///
-    /// let rect = Rectangle::from_m(1., 1.);
+    /// let rect = Rectangle::from_dim(1.m(), 1.m());
     /// assert_eq!(
-    ///     rect.linear_pattern(point!(4 m, 0 m), 5),
+    ///     rect.linear_pattern(point!(4.m(), 0.m()), 5),
     ///     rect
-    ///         .add(&rect.move_to(point!(1 m, 0 m)))
-    ///         .add(&rect.move_to(point!(2 m, 0 m)))
-    ///         .add(&rect.move_to(point!(3 m, 0 m)))
-    ///         .add(&rect.move_to(point!(4 m, 0 m)))
+    ///         .add(&rect.move_to(point!(1.m(), 0.m())))
+    ///         .add(&rect.move_to(point!(2.m(), 0.m())))
+    ///         .add(&rect.move_to(point!(3.m(), 0.m())))
+    ///         .add(&rect.move_to(point!(4.m(), 0.m())))
     /// )
     /// ```
     pub fn linear_pattern(&self, until: Point2D, instances: u8) -> Self {
@@ -169,15 +163,15 @@ impl Sketch {
     /// Return a clone of this `Sketch` moved by a specified amount in each axis.
     ///
     /// ```rust
-    /// use anvil::{Circle, length, point};
+    /// use anvil::{Circle, IntoLength, point};
     ///
-    /// let circle = Circle::from_radius(length!(1 m));
+    /// let circle = Circle::from_radius(1.m());
     /// let moved_circle = circle
-    ///     .move_by(length!(1 m), length!(0))
-    ///     .move_by(length!(0), length!(2 m));
+    ///     .move_by(1.m(), 0.m())
+    ///     .move_by(0.m(), 2.m());
     /// assert_eq!(
     ///     moved_circle.center(),
-    ///     Ok(point!(1 m, 2 m))
+    ///     Ok(point!(1.m(), 2.m()))
     /// )
     /// ```
     pub fn move_by(&self, dx: Length, dy: Length) -> Self {
@@ -189,14 +183,13 @@ impl Sketch {
     }
     /// Return a clone of this `Sketch` moved to a specified point.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{length, Point2D, Rectangle};
+    /// use anvil::{IntoLength, Rectangle, point};
     ///
-    /// let rect = Rectangle::from_dim(length!(1 m), length!(1 m));
-    /// let moved_rect = rect.move_to(Point2D::from_m(2., 2.));
-    /// assert_eq!(rect.center(), Ok(Point2D::origin()));
-    /// assert_eq!(moved_rect.center(), Ok(Point2D::from_m(2., 2.)));
+    /// let rect = Rectangle::from_dim(1.m(), 1.m());
+    /// let moved_rect = rect.move_to(point!(2.m(), 2.m()));
+    /// assert_eq!(rect.center(), Ok(point!(0, 0)));
+    /// assert_eq!(moved_rect.center(), Ok(point!(2.m(), 2.m())));
     /// ```
     pub fn move_to(&self, loc: Point2D) -> Self {
         let mut new_actions = self.0.clone();
@@ -207,7 +200,6 @@ impl Sketch {
     ///
     /// Positive angle values result in a counter-clockwise rotation.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::{angle, length, Point2D, Rectangle};
     ///
@@ -227,7 +219,6 @@ impl Sketch {
     ///
     /// Positive angle values result in a counter-clockwise rotation.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::{angle, Point2D, Rectangle};
     ///

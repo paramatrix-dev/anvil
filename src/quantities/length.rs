@@ -259,12 +259,12 @@ impl Mul<Dir2D> for Length {
     /// Multiply this `Length` with a `Dir2D` to get a `Point2D`.
     ///
     /// ```rust
-    /// use anvil::{Dir2D, length, point};
+    /// use anvil::{dir, IntoLength, point};
     ///
-    /// let dir2 = Dir2D::try_from(1., 0.).unwrap();
+    /// let dir2 = dir!(1, 0);
     /// assert_eq!(
-    ///     length!(2 m) * dir2,
-    ///     point!(2 m, 0 m)
+    ///     2.m() * dir2,
+    ///     point!(2.m(), 0.m())
     /// )
     /// ```
     fn mul(self, other: Dir2D) -> Point2D {
@@ -274,15 +274,15 @@ impl Mul<Dir2D> for Length {
 
 impl Mul<Dir3D> for Length {
     type Output = Point3D;
-    /// Multiply this `Length` with a `Dir3D` to get a `Poin3D`.
+    /// Multiply this `Length` with a `Dir3D` to get a `Point3D`.
     ///
     /// ```rust
-    /// use anvil::{Dir3D, length, point};
+    /// use anvil::{dir, IntoLength, point};
     ///
-    /// let dir3 = Dir3D::try_from(1., 0., 0.).unwrap();
+    /// let dir3 = dir!(1, 0, 0);
     /// assert_eq!(
-    ///     length!(2 m) * dir3,
-    ///     point!(2 m, 0 m, 0 m)
+    ///     2.m() * dir3,
+    ///     point!(2.m(), 0.m(), 0.m())
     /// )
     /// ```
     fn mul(self, other: Dir3D) -> Point3D {

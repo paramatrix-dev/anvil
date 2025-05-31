@@ -85,10 +85,10 @@ impl Point3D {
     /// Return the direction this point lies in with respect to another point.
     ///
     /// ```rust
-    /// use anvil::{Dir3D, Error, point, Point3D};
+    /// use anvil::{Dir3D, Error, IntoLength, point};
     ///
-    /// let p = point!(1 m, 1 m, 1 m);
-    /// assert_eq!(p.direction_from(Point3D::origin()), Dir3D::try_from(1., 1., 1.));
+    /// let p = point!(1.m(), 1.m(), 1.m());
+    /// assert_eq!(p.direction_from(point!(0, 0, 0)), Dir3D::try_from(1., 1., 1.));
     /// assert_eq!(p.direction_from(p), Err(Error::ZeroVector));
     /// ```
     pub fn direction_from(&self, other: Point3D) -> Result<Dir3D, Error> {

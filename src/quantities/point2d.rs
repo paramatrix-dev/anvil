@@ -75,10 +75,10 @@ impl Point2D {
     /// Return the direction this point lies in with respect to another point.
     ///
     /// ```rust
-    /// use anvil::{Dir2D, Error, point, Point2D};
+    /// use anvil::{Dir2D, Error, IntoLength, point};
     ///
-    /// let p = point!(1 m, 1 m);
-    /// assert_eq!(p.direction_from(Point2D::origin()), Dir2D::try_from(1., 1.));
+    /// let p = point!(1.m(), 1.m());
+    /// assert_eq!(p.direction_from(point!(0, 0)), Dir2D::try_from(1., 1.));
     /// assert_eq!(p.direction_from(p), Err(Error::ZeroVector));
     /// ```
     pub fn direction_from(&self, other: Self) -> Result<Dir2D, Error> {
@@ -135,78 +135,36 @@ impl Div<f64> for Point2D {
 ///
 /// # Examples
 /// ```rust
-/// use anvil::{length, Length, point, Point2D, Point3D};
+/// use anvil::{IntoLength, Length, point, Point2D, Point3D};
 ///
-/// // Construct a Point2D from two length values
+/// // construct a Point2D from two length values
 /// assert_eq!(
-///     point!(1 m, 2 m),
-///     Point2D::new(Length::from_m(1.), Length::from_m(2.))
+///     point!(3.m(), 4.cm()),
+///     Point2D::new(Length::from_m(3.), Length::from_cm(4.))
 /// );
-/// assert_eq!(
-///     point!(1 cm, 2.1 mm),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
+/// assert_eq!(point!(0, 0), Point2D::origin());
 ///
-/// // Construct a Point2D from three length values
+/// // construct a Point3D from three length values
 /// assert_eq!(
-///     point!(1 m, 2 m, 3 m),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
+///     point!(3.m(), 4.cm(), 5.yd()),
+///     Point3D::new(Length::from_m(3.), Length::from_cm(4.), Length::from_yd(5.))
 /// );
-///
-/// // Use explicit expressions to construct a Point2D
-/// assert_eq!(
-///     point!(length!(1 cm), 2.1 mm),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
-/// assert_eq!(
-///     point!(1 cm, length!(2.1 mm)),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
-/// assert_eq!(
-///     point!(length!(1 cm), length!(2.1 mm)),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
-///
-/// // Use explicit expressions to construct a Point2D
-/// assert_eq!(
-///     point!(length!(1 m), 2 m, 3 m),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
-/// );
-/// assert_eq!(
-///     point!(1 m, length!(2 m), 3 m),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
-/// );
-/// assert_eq!(
-///     point!(1 m, 2 m, length!(3 m)),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
-/// );
+/// assert_eq!(point!(0, 0, 0), Point3D::origin());
 /// ```
 #[macro_export]
 macro_rules! point {
-    ($x:literal $x_unit:ident, $y:literal $y_unit:ident) => {
-        $crate::Point2D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit))
-    };
-    ($x:expr, $y:literal $y_unit:ident) => {
-        $crate::Point2D::new($x, $crate::length!($y $y_unit))
-    };
-    ($x:literal $x_unit:ident, $y:expr) => {
-        $crate::Point2D::new($crate::length!($x $x_unit), $y)
+    (0, 0) => {
+        $crate::Point2D::origin()
     };
     ($x:expr, $y:expr) => {
         $crate::Point2D::new($x, $y)
     };
 
-    ($x:literal $x_unit:ident, $y:literal $y_unit:ident, $z:literal $z_unit:ident) => {
-        $crate::Point3D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit), $crate::length!($z $z_unit))
+    (0, 0, 0) => {
+        $crate::Point3D::origin()
     };
-    ($x:expr, $y:literal $y_unit:ident, $z:literal $z_unit:ident) => {
-        $crate::Point3D::new($x, $crate::length!($y $y_unit), $crate::length!($z $z_unit))
-    };
-    ($x:literal $x_unit:ident, $y:expr, $z:literal $z_unit:ident) => {
-        $crate::Point3D::new($crate::length!($x $x_unit), $y, $crate::length!($z $z_unit))
-    };
-    ($x:literal $x_unit:ident, $y:literal $y_unit:ident, $z:expr) => {
-        $crate::Point3D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit), $z)
+    ($x:expr, $y:expr, $z:expr) => {
+        $crate::Point3D::new($x, $y, $z)
     };
 }
 

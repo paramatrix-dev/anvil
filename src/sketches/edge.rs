@@ -17,7 +17,6 @@ pub enum Edge {
 impl Edge {
     /// Return the starting point of the edge.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::{Edge, Point2D};
     ///
@@ -32,7 +31,6 @@ impl Edge {
     }
     /// Return the ending point of the edge.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::{Edge, Point2D};
     ///
@@ -50,13 +48,13 @@ impl Edge {
     ///
     /// ```rust
     /// use core::f64;
-    /// use anvil::{Edge, length, Length, point};
+    /// use anvil::{Edge, IntoLength, point};
     ///
-    /// let line = Edge::Line(point!(1 m, 0 m), point!(1 m, 2 m));
-    /// assert_eq!(line.len(), length!(2 m));
+    /// let line = Edge::Line(point!(1.m(), 0.m()), point!(1.m(), 2.m()));
+    /// assert_eq!(line.len(), 2.m());
     ///
-    /// let arc = Edge::Arc(point!(-1 m, 0 m), point!(0 m, 1 m), point!(1 m, 0 m));
-    /// assert_eq!(arc.len(), Length::from_m(f64::consts::PI));
+    /// let arc = Edge::Arc(point!(-1.m(), 0.m()), point!(0.m(), 1.m()), point!(1.m(), 0.m()));
+    /// assert_eq!(arc.len(), f64::consts::PI.m());
     /// ```
     pub fn len(&self) -> Length {
         match self {
@@ -109,11 +107,10 @@ impl Edge {
 
     /// Return the direction this `Edge` is pointing to at its end point.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Dir2D, Edge, point};
+    /// use anvil::{Dir2D, Edge, IntoLength, point};
     ///
-    /// let line = Edge::Line(point!(0 m, 0 m), point!(1 m, 2 m));
+    /// let line = Edge::Line(point!(0, 0), point!(1.m(), 2.m()));
     /// assert_eq!(line.end_direction(), Dir2D::try_from(1., 2.));
     /// ```
     pub fn end_direction(&self) -> Result<Dir2D, Error> {

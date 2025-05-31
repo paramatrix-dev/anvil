@@ -18,7 +18,6 @@ pub struct Part {
 impl Part {
     /// Construct an empty `Part` which can be used for merging with other parts.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::Part;
     ///
@@ -31,19 +30,16 @@ impl Part {
 
     /// Merge this `Part` with another.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, Point3D};
+    /// use anvil::{Cuboid, point, IntoLength};
     ///
-    /// let cuboid1 = Cuboid::from_corners(
-    ///     Point3D::origin(),
-    ///     Point3D::from_m(1., 1., 1.)
-    /// );
-    /// let cuboid2 = Cuboid::from_corners(
-    ///     Point3D::from_m(0., 0., 1.),
-    ///     Point3D::from_m(1., 1., 2.)
-    /// );
-    /// assert!(cuboid1.add(&cuboid2) == Cuboid::from_corners(Point3D::origin(), Point3D::from_m(1., 1., 2.)));
+    /// let cuboid1 = Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), 1.m(), 1.m()));
+    /// let cuboid2 = Cuboid::from_corners(point!(0.m(), 0.m(), 1.m()), point!(1.m(), 1.m(), 2.m()));
+    ///
+    /// assert_eq!(
+    ///     cuboid1.add(&cuboid2),
+    ///     Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), 1.m(), 2.m()))
+    /// )
     /// ```
     pub fn add(&self, other: &Self) -> Self {
         match (&self.inner, &other.inner) {
@@ -59,17 +55,16 @@ impl Part {
 
     /// Create multiple instances of the `Part` spaced evenly around a point.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{angle, Axis3D, Cuboid, point};
+    /// use anvil::{angle, Axis3D, Cuboid, IntoAngle, IntoLength, point};
     ///
-    /// let cuboid = Cuboid::from_corners(point!(1 m, 1 m, 0 m), point!(2 m, 2 m, 1 m));
+    /// let cuboid = Cuboid::from_corners(point!(1.m(), 1.m(), 0.m()), point!(2.m(), 2.m(), 1.m()));
     /// assert_eq!(
     ///     cuboid.circular_pattern(Axis3D::z(), 4),
     ///     cuboid
-    ///         .add(&cuboid.rotate_around(Axis3D::z(), angle!(90 deg)))
-    ///         .add(&cuboid.rotate_around(Axis3D::z(), angle!(180 deg)))
-    ///         .add(&cuboid.rotate_around(Axis3D::z(), angle!(270 deg)))
+    ///         .add(&cuboid.rotate_around(Axis3D::z(), 90.deg()))
+    ///         .add(&cuboid.rotate_around(Axis3D::z(), 180.deg()))
+    ///         .add(&cuboid.rotate_around(Axis3D::z(), 270.deg()))
     /// )
     /// ```
     pub fn circular_pattern(&self, around: Axis3D, instances: u8) -> Self {
@@ -84,14 +79,14 @@ impl Part {
     }
     /// Return the `Part` that is created from the overlapping volume between this one and another.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length};
+    /// use anvil::{Cuboid, IntoLength};
     ///
-    /// let cuboid1 = Cuboid::from_dim(length!(5 m), length!(5 m), length!(1 m));
-    /// let cuboid2 = Cuboid::from_dim(length!(1 m), length!(1 m), length!(5 m));
-    /// assert!(
-    ///     cuboid1.intersect(&cuboid2) == Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m))
+    /// let cuboid1 = Cuboid::from_dim(5.m(), 5.m(), 1.m());
+    /// let cuboid2 = Cuboid::from_dim(1.m(), 1.m(), 5.m());
+    /// assert_eq!(
+    ///     cuboid1.intersect(&cuboid2),
+    ///     Cuboid::from_dim(1.m(), 1.m(), 1.m())
     /// )
     /// ```
     pub fn intersect(&self, other: &Self) -> Self {
@@ -107,16 +102,16 @@ impl Part {
     /// Create multiple instances of the `Part` spaced evenly until a point.
     ///
     /// ```rust
-    /// use anvil::{Cuboid, length, point};
+    /// use anvil::{Cuboid, IntoLength, point};
     ///
-    /// let cuboid = Cuboid::from_m(1., 1., 1.);
+    /// let cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
     /// assert_eq!(
-    ///     cuboid.linear_pattern(point!(4 m, 0 m, 0 m), 5),
+    ///     cuboid.linear_pattern(point!(4.m(), 0.m(), 0.m()), 5),
     ///     cuboid
-    ///         .add(&cuboid.move_to(point!(1 m, 0 m, 0 m)))
-    ///         .add(&cuboid.move_to(point!(2 m, 0 m, 0 m)))
-    ///         .add(&cuboid.move_to(point!(3 m, 0 m, 0 m)))
-    ///         .add(&cuboid.move_to(point!(4 m, 0 m, 0 m)))
+    ///         .add(&cuboid.move_to(point!(1.m(), 0.m(), 0.m())))
+    ///         .add(&cuboid.move_to(point!(2.m(), 0.m(), 0.m())))
+    ///         .add(&cuboid.move_to(point!(3.m(), 0.m(), 0.m())))
+    ///         .add(&cuboid.move_to(point!(4.m(), 0.m(), 0.m())))
     /// )
     /// ```
     pub fn linear_pattern(&self, until: Point3D, instances: u8) -> Self {
@@ -141,15 +136,15 @@ impl Part {
     /// Return a clone of this `Part` moved by a specified amount in each axis.
     ///
     /// ```rust
-    /// use anvil::{Cuboid, length, point};
+    /// use anvil::{Cuboid, IntoLength, point};
     ///
-    /// let cuboid = Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m));
+    /// let cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
     /// let moved_cuboid = cuboid
-    ///     .move_by(length!(1 m), length!(0), length!(3 m))
-    ///     .move_by(length!(0), length!(1 m), length!(0));
+    ///     .move_by(1.m(), 0.m(), 3.m())
+    ///     .move_by(0.m(), 1.m(), 0.m());
     /// assert_eq!(
     ///     moved_cuboid.center(),
-    ///     Ok(point!(1 m, 1 m, 3 m))
+    ///     Ok(point!(1.m(), 1.m(), 3.m()))
     /// )
     /// ```
     pub fn move_by(&self, dx: Length, dy: Length, dz: Length) -> Self {
@@ -161,14 +156,13 @@ impl Part {
     }
     /// Return a clone of this `Part` with the center moved to a specified point.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length, Point3D};
+    /// use anvil::{Cuboid, IntoLength, point};
     ///
-    /// let cuboid = Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m));
-    /// let moved_cuboid = cuboid.move_to(Point3D::from_m(2., 2., 2.));
-    /// assert_eq!(cuboid.center(), Ok(Point3D::origin()));
-    /// assert_eq!(moved_cuboid.center(), Ok(Point3D::from_m(2., 2., 2.)));
+    /// let cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
+    /// let moved_cuboid = cuboid.move_to(point!(2.m(), 2.m(), 2.m()));
+    /// assert_eq!(cuboid.center(), Ok(point!(0, 0, 0)));
+    /// assert_eq!(moved_cuboid.center(), Ok(point!(2.m(), 2.m(), 2.m())));
     /// ```
     pub fn move_to(&self, loc: Point3D) -> Self {
         match &self.inner {
@@ -186,14 +180,13 @@ impl Part {
     ///
     /// For positive angles, the right-hand-rule applies for the direction of rotation.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{angle, Axis3D, Cuboid, point, Point3D};
+    /// use anvil::{Axis3D, Cuboid, IntoAngle, IntoLength, point};
     ///
-    /// let cuboid = Cuboid::from_corners(Point3D::origin(), point!(1 m, 1 m , 1 m));
+    /// let cuboid = Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), 1.m(), 1.m()));
     /// assert_eq!(
-    ///     cuboid.rotate_around(Axis3D::x(), angle!(90 deg)),
-    ///     Cuboid::from_corners(Point3D::origin(), point!(1 m, -1 m , 1 m))
+    ///     cuboid.rotate_around(Axis3D::x(), 90.deg()),
+    ///     Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), -1.m(), 1.m()))
     /// )
     /// ```
     pub fn rotate_around(&self, axis: Axis3D, angle: Angle) -> Self {
@@ -211,14 +204,13 @@ impl Part {
     }
     /// Return a clone of this `Part` with the size scaled by a factor.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length};
+    /// use anvil::{Cuboid, IntoLength};
     ///
-    /// let cuboid = Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m));
+    /// let cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
     /// assert_eq!(
     ///     cuboid.scale(2.),
-    ///     Cuboid::from_dim(length!(2 m), length!(2 m), length!(2 m))
+    ///     Cuboid::from_dim(2.m(), 2.m(), 2.m())
     /// )
     /// ```
     pub fn scale(&self, factor: f64) -> Self {
@@ -237,19 +229,15 @@ impl Part {
     }
     /// Return a copy of this `Part` with the intersection of another removed.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, Point3D};
+    /// use anvil::{Cuboid, IntoLength, point};
     ///
-    /// let cuboid1 = Cuboid::from_corners(
-    ///     Point3D::origin(),
-    ///     Point3D::from_m(1., 1., 2.)
+    /// let cuboid1 = Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), 1.m(), 2.m()));
+    /// let cuboid2 = Cuboid::from_corners(point!(0.m(), 0.m(), 1.m()), point!(1.m(), 1.m(), 2.m()));
+    /// assert_eq!(
+    ///     cuboid1.subtract(&cuboid2),
+    ///     Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), 1.m(), 1.m()))
     /// );
-    /// let cuboid2 = Cuboid::from_corners(
-    ///     Point3D::from_m(0., 0., 1.),
-    ///     Point3D::from_m(1., 1., 2.)
-    /// );
-    /// assert!(cuboid1.subtract(&cuboid2) == Cuboid::from_corners(Point3D::origin(), Point3D::from_m(1., 1., 1.)));
     /// ```
     pub fn subtract(&self, other: &Self) -> Self {
         match (&self.inner, &other.inner) {
@@ -264,13 +252,10 @@ impl Part {
 
     /// Return the volume occupied by this `Part` in cubic meters.
     ///
-    /// Warning: the volume is susceptibility to floating point errors.
-    ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length};
+    /// use anvil::{Cuboid, IntoLength};
     ///
-    /// let cuboid = Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m));
+    /// let cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
     /// assert!((cuboid.volume() - 1.).abs() < 1e-9)
     /// ```
     pub fn volume(&self) -> f64 {
@@ -287,18 +272,17 @@ impl Part {
     ///
     /// If the `Part` is empty, an `Err(Error::EmptyPart)` is returned.
     ///
-    /// # Examples
     /// ```rust
-    /// use anvil::{Cuboid, length, Point3D};
+    /// use anvil::{Cuboid, IntoLength, point};
     ///
-    /// let centered_cuboid = Cuboid::from_dim(length!(1 m), length!(1 m), length!(1 m));
-    /// assert_eq!(centered_cuboid.center(), Ok(Point3D::origin()));
+    /// let centered_cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
+    /// assert_eq!(centered_cuboid.center(), Ok(point!(0, 0, 0)));
     ///
     /// let non_centered_cuboid = Cuboid::from_corners(
-    ///     Point3D::from_m(0., 0., 0.),
-    ///     Point3D::from_m(2., 2., 2.)
+    ///     point!(0, 0, 0),
+    ///     point!(2.m(), 2.m(), 2.m())
     /// );
-    /// assert_eq!(non_centered_cuboid.center(), Ok(Point3D::from_m(1., 1., 1.)));
+    /// assert_eq!(non_centered_cuboid.center(), Ok(point!(1.m(), 1.m(), 1.m())));
     /// ```
     pub fn center(&self) -> Result<Point3D, Error> {
         match &self.inner {
