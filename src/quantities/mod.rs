@@ -9,7 +9,7 @@ mod plane;
 mod point2d;
 mod point3d;
 
-pub use angle::Angle;
+pub use angle::{Angle, IntoAngle};
 pub use axis2d::Axis2D;
 pub use axis3d::Axis3D;
 pub use dir2d::Dir2D;

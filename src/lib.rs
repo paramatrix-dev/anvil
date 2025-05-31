@@ -13,7 +13,8 @@ pub use parts::{
     primitives::{Cuboid, Cylinder, Sphere},
 };
 pub use quantities::{
-    Angle, Axis2D, Axis3D, Dir2D, Dir3D, IntoF64, IntoLength, Length, Plane, Point2D, Point3D,
+    Angle, Axis2D, Axis3D, Dir2D, Dir3D, IntoAngle, IntoF64, IntoLength, Length, Plane, Point2D,
+    Point3D,
 };
 pub use sketches::{
     Edge, Path, Sketch,

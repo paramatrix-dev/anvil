@@ -1,6 +1,8 @@
 use core::f64;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+use super::IntoF64;
+
 /// A physical angle (i.e. a distance).
 ///
 /// Angle exists to remove ambiguity about angle units, which are not supported by default by
@@ -218,6 +220,52 @@ macro_rules! angle {
         compile_error!(concat!("Unsupported angle unit: ", stringify!($unit)))
     };
 }
+
+/// Import this trait to easily convert numbers into `Angle`s.
+///
+/// ```rust
+/// use anvil::{Angle, IntoAngle};
+///
+/// assert_eq!(5.deg(), Angle::from_deg(5.));
+/// assert_eq!(5.123.rad(), Angle::from_rad(5.123));
+/// ```
+pub trait IntoAngle: IntoF64 {
+    /// Convert this number into a `Angle` in degrees.
+    ///
+    /// ```rust
+    /// use anvil::{IntoAngle, Angle};
+    ///
+    /// assert_eq!(5.deg(), Angle::from_deg(5.));
+    /// ```
+    fn deg(&self) -> Angle {
+        Angle::from_deg(self.to_f64())
+    }
+    /// Convert this number into a `Angle` in radians.
+    ///
+    /// ```rust
+    /// use anvil::{IntoAngle, Angle};
+    ///
+    /// assert_eq!(5.rad(), Angle::from_rad(5.));
+    /// ```
+    fn rad(&self) -> Angle {
+        Angle::from_rad(self.to_f64())
+    }
+}
+
+impl IntoAngle for usize {}
+impl IntoAngle for isize {}
+impl IntoAngle for u8 {}
+impl IntoAngle for u16 {}
+impl IntoAngle for u32 {}
+impl IntoAngle for u64 {}
+impl IntoAngle for u128 {}
+impl IntoAngle for i8 {}
+impl IntoAngle for i16 {}
+impl IntoAngle for i32 {}
+impl IntoAngle for i64 {}
+impl IntoAngle for i128 {}
+impl IntoAngle for f32 {}
+impl IntoAngle for f64 {}
 
 #[cfg(test)]
 mod tests {
