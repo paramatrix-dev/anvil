@@ -16,44 +16,15 @@ pub struct Point2D {
 impl Point2D {
     /// The origin point at the position x=0 and y=0.
     pub fn origin() -> Self {
-        Self::from_mm(0., 0.)
+        Self {
+            x: Length::from_m(0.),
+            y: Length::from_m(0.),
+        }
     }
 
     /// Construct a `Point2D` from its component lengths.
     pub fn new(x: Length, y: Length) -> Self {
         Point2D { x, y }
-    }
-    /// Construct a `Point2D` from the millimeter length values directly.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{length, Point2D};
-    ///
-    /// let point = Point2D::from_mm(1., 2.);
-    /// assert_eq!(point.x, length!(1 mm));
-    /// assert_eq!(point.y, length!(2 mm));
-    /// ```
-    pub fn from_mm(x: f64, y: f64) -> Self {
-        Point2D {
-            x: Length::from_mm(x),
-            y: Length::from_mm(y),
-        }
-    }
-    /// Construct a `Point2D` from the meter length values directly.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{length, Point2D};
-    ///
-    /// let point = Point2D::from_m(1., 2.);
-    /// assert_eq!(point.x, length!(1 m));
-    /// assert_eq!(point.y, length!(2 m));
-    /// ```
-    pub fn from_m(x: f64, y: f64) -> Self {
-        Point2D {
-            x: Length::from_m(x),
-            y: Length::from_m(y),
-        }
     }
 
     /// Return the absolute distance between this `Point2D` and the origin point.
@@ -61,10 +32,10 @@ impl Point2D {
     /// # Example
     /// ```rust
     /// use core::f64;
-    /// use anvil::{Length, Point2D};
+    /// use anvil::{IntoLength, point};
     ///
-    /// let point = Point2D::from_m(1., 1.);
-    /// assert_eq!(point.distance_to_origin(), Length::from_m(f64::sqrt(2.)))
+    /// let point = point!(1.m(), 1.m());
+    /// assert_eq!(point.distance_to_origin(), f64::sqrt(2.).m())
     /// ```
     pub fn distance_to_origin(&self) -> Length {
         Length::from_m(f64::sqrt(
@@ -75,10 +46,10 @@ impl Point2D {
     /// Return the direction this point lies in with respect to another point.
     ///
     /// ```rust
-    /// use anvil::{Dir2D, Error, point, Point2D};
+    /// use anvil::{Dir2D, Error, IntoLength, point};
     ///
-    /// let p = point!(1 m, 1 m);
-    /// assert_eq!(p.direction_from(Point2D::origin()), Dir2D::try_from(1., 1.));
+    /// let p = point!(1.m(), 1.m());
+    /// assert_eq!(p.direction_from(point!(0, 0)), Dir2D::try_from(1., 1.));
     /// assert_eq!(p.direction_from(p), Err(Error::ZeroVector));
     /// ```
     pub fn direction_from(&self, other: Self) -> Result<Dir2D, Error> {
@@ -135,118 +106,76 @@ impl Div<f64> for Point2D {
 ///
 /// # Examples
 /// ```rust
-/// use anvil::{length, Length, point, Point2D, Point3D};
+/// use anvil::{IntoLength, Length, point, Point2D, Point3D};
 ///
-/// // Construct a Point2D from two length values
+/// // construct a Point2D from two `Length` values
 /// assert_eq!(
-///     point!(1 m, 2 m),
-///     Point2D::new(Length::from_m(1.), Length::from_m(2.))
+///     point!(3.m(), 4.cm()),
+///     Point2D::new(Length::from_m(3.), Length::from_cm(4.))
 /// );
-/// assert_eq!(
-///     point!(1 cm, 2.1 mm),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
+/// assert_eq!(point!(0, 0), Point2D::origin());
 ///
-/// // Construct a Point2D from three length values
+/// // construct a Point3D from three `Length` values
 /// assert_eq!(
-///     point!(1 m, 2 m, 3 m),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
+///     point!(3.m(), 4.cm(), 5.yd()),
+///     Point3D::new(Length::from_m(3.), Length::from_cm(4.), Length::from_yd(5.))
 /// );
-///
-/// // Use explicit expressions to construct a Point2D
-/// assert_eq!(
-///     point!(length!(1 cm), 2.1 mm),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
-/// assert_eq!(
-///     point!(1 cm, length!(2.1 mm)),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
-/// assert_eq!(
-///     point!(length!(1 cm), length!(2.1 mm)),
-///     Point2D::new(Length::from_cm(1.), Length::from_mm(2.1))
-/// );
-///
-/// // Use explicit expressions to construct a Point2D
-/// assert_eq!(
-///     point!(length!(1 m), 2 m, 3 m),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
-/// );
-/// assert_eq!(
-///     point!(1 m, length!(2 m), 3 m),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
-/// );
-/// assert_eq!(
-///     point!(1 m, 2 m, length!(3 m)),
-///     Point3D::new(Length::from_m(1.), Length::from_m(2.), Length::from_m(3.))
-/// );
+/// assert_eq!(point!(0, 0, 0), Point3D::origin());
 /// ```
 #[macro_export]
 macro_rules! point {
-    ($x:literal $x_unit:ident, $y:literal $y_unit:ident) => {
-        $crate::Point2D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit))
-    };
-    ($x:expr, $y:literal $y_unit:ident) => {
-        $crate::Point2D::new($x, $crate::length!($y $y_unit))
-    };
-    ($x:literal $x_unit:ident, $y:expr) => {
-        $crate::Point2D::new($crate::length!($x $x_unit), $y)
+    (0, 0) => {
+        $crate::Point2D::origin()
     };
     ($x:expr, $y:expr) => {
         $crate::Point2D::new($x, $y)
     };
 
-    ($x:literal $x_unit:ident, $y:literal $y_unit:ident, $z:literal $z_unit:ident) => {
-        $crate::Point3D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit), $crate::length!($z $z_unit))
+    (0, 0, 0) => {
+        $crate::Point3D::origin()
     };
-    ($x:expr, $y:literal $y_unit:ident, $z:literal $z_unit:ident) => {
-        $crate::Point3D::new($x, $crate::length!($y $y_unit), $crate::length!($z $z_unit))
-    };
-    ($x:literal $x_unit:ident, $y:expr, $z:literal $z_unit:ident) => {
-        $crate::Point3D::new($crate::length!($x $x_unit), $y, $crate::length!($z $z_unit))
-    };
-    ($x:literal $x_unit:ident, $y:literal $y_unit:ident, $z:expr) => {
-        $crate::Point3D::new($crate::length!($x $x_unit), $crate::length!($y $y_unit), $z)
+    ($x:expr, $y:expr, $z:expr) => {
+        $crate::Point3D::new($x, $y, $z)
     };
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::Dir3D;
+    use crate::{Dir3D, IntoLength, point};
 
     use super::*;
 
     #[test]
     fn add() {
-        let point1 = Point2D::from_m(1., 2.);
-        let point2 = Point2D::from_m(4., 5.);
+        let point1 = point!(1.m(), 2.m());
+        let point2 = point!(4.m(), 5.m());
 
-        assert_eq!(point1 + point2, Point2D::from_m(5., 7.));
+        assert_eq!(point1 + point2, point!(5.m(), 7.m()));
     }
 
     #[test]
     fn substract() {
-        let point1 = Point2D::from_m(1., 2.);
-        let point2 = Point2D::from_m(4., 5.);
+        let point1 = point!(1.m(), 2.m());
+        let point2 = point!(4.m(), 5.m());
 
-        assert_eq!(point2 - point1, Point2D::from_m(3., 3.));
+        assert_eq!(point2 - point1, point!(3.m(), 3.m()));
     }
 
     #[test]
     fn multiply() {
-        assert_eq!(Point2D::from_m(1., 2.) * 4., Point2D::from_m(4., 8.));
-        assert_eq!(4. * Point2D::from_m(1., 2.), Point2D::from_m(4., 8.));
+        assert_eq!(point!(1.m(), 2.m()) * 4., point!(4.m(), 8.m()));
+        assert_eq!(4. * point!(1.m(), 2.m()), point!(4.m(), 8.m()));
     }
 
     #[test]
     fn divide() {
-        assert_eq!(Point2D::from_m(4., 8.) / 4., Point2D::from_m(1., 2.));
+        assert_eq!(point!(4.m(), 8.m()) / 4., point!(1.m(), 2.m()));
     }
 
     #[test]
     fn to_3d_origin() {
         let plane = Plane::new(
-            Point3D::from_m(1., 2., 3.),
+            point!(1.m(), 2.m(), 3.m()),
             Dir3D::try_from(1., 1., 0.).unwrap(),
             Dir3D::try_from(0., 0., 1.).unwrap(),
         )
@@ -259,9 +188,9 @@ mod tests {
     #[test]
     fn to_3d_straight_plane() {
         let plane = Plane::xy();
-        let point = Point2D::from_m(1., 2.);
+        let point = point!(1.m(), 2.m());
 
-        assert_eq!(point.to_3d(plane), Point3D::from_m(1., 2., 0.));
+        assert_eq!(point.to_3d(plane), point!(1.m(), 2.m(), 0.m()));
     }
 
     #[test]
@@ -272,9 +201,9 @@ mod tests {
             Dir3D::try_from(0., 1., 0.).unwrap(),
         )
         .unwrap();
-        let point = Point2D::from_mm(f64::sqrt(2.), 5.);
+        let point = point!(f64::sqrt(2.).mm(), 5.mm());
 
-        let right = Point3D::from_mm(1., 5., -1.);
+        let right = point!(1.mm(), 5.mm(), -1.mm());
         assert!((point.to_3d(plane).x.m() - right.x.m()).abs() < 1e-9);
         assert!((point.to_3d(plane).y.m() - right.y.m()).abs() < 1e-9);
         assert!((point.to_3d(plane).z.m() - right.z.m()).abs() < 1e-9);

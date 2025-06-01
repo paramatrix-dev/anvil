@@ -74,15 +74,15 @@ impl Dir3D {
 
 impl Mul<Length> for Dir3D {
     type Output = Point3D;
-    /// Multiply this `Dir3D` with a `Length` to get a `Poin3D`.
+    /// Multiply this `Dir3D` with a `Length` to get a `Point3D`.
     ///
     /// ```rust
-    /// use anvil::{Dir3D, length, point};
+    /// use anvil::{dir, IntoLength, point};
     ///
-    /// let dir3 = Dir3D::try_from(1., 0., 0.).unwrap();
+    /// let dir3 = dir!(1, 0, 0);
     /// assert_eq!(
-    ///     dir3 * length!(2 m),
-    ///     point!(2 m, 0 m, 0 m)
+    ///     dir3 * 2.m(),
+    ///     point!(2.m(), 0.m(), 0.m())
     /// )
     /// ```
     fn mul(self, other: Length) -> Point3D {

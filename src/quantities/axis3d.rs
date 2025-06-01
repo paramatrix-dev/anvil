@@ -24,16 +24,16 @@ impl Axis3D {
     /// This constructor can return an error if the two points are at the same location.
     ///
     /// ```rust
-    /// use anvil::{Axis3D, point, Dir3D};
+    /// use anvil::{Axis3D, IntoLength, dir, point};
     ///
     /// assert_eq!(
-    ///     Axis3D::between(point!(1 m, 1 m, 1 m), point!(2 m, 1 m, 1 m)),
+    ///     Axis3D::between(point!(1.m(), 1.m(), 1.m()), point!(2.m(), 1.m(), 1.m())),
     ///     Ok(Axis3D {
-    ///         origin: point!(1 m, 1 m, 1 m),
-    ///         direction: Dir3D::try_from(1., 0., 0.).expect("")
+    ///         origin: point!(1.m(), 1.m(), 1.m()),
+    ///         direction: dir!(1, 0, 0)
     ///     })
     /// );
-    /// assert!(Axis3D::between(point!(1 m, 1 m, 1 m), point!(1 m, 1 m, 1 m)).is_err())
+    /// assert!(Axis3D::between(point!(1.m(), 1.m(), 1.m()), point!(1.m(), 1.m(), 1.m())).is_err())
     /// ```
     pub fn between(origin: Point3D, other: Point3D) -> Result<Self, Error> {
         let direction = other.direction_from(origin)?;
@@ -68,12 +68,12 @@ impl Axis3D {
     /// Return a point on the `Axis3D` at a specified distance from the `Axis3D` origin.
     ///
     /// ```rust
-    /// use anvil::{Axis3D, length, point};
+    /// use anvil::{Axis3D, IntoLength, point};
     ///
     /// let axis = Axis3D::x();
     /// assert_eq!(
-    ///     axis.point_at(length!(5 m)),
-    ///     point!(5 m, 0 m, 0 m),
+    ///     axis.point_at(5.m()),
+    ///     point!(5.m(), 0.m(), 0.m()),
     /// )
     /// ```
     pub fn point_at(&self, distance: Length) -> Point3D {

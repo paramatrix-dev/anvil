@@ -11,12 +11,11 @@ pub struct Path {
 impl Path {
     /// Construct an empty `Path` at a given starting point.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Path, Point2D};
+    /// use anvil::{IntoLength, Path, point};
     ///
-    /// let path = Path::at(Point2D::from_m(1., 2.));
-    /// assert_eq!(path.start(), Point2D::from_m(1., 2.))
+    /// let path = Path::at(point!(1.m(), 2.m()));
+    /// assert_eq!(path.start(), point!(1.m(), 2.m()))
     /// ```
     pub fn at(start: Point2D) -> Self {
         Self {
@@ -27,12 +26,11 @@ impl Path {
 
     /// Add a line to the end of this `Path` that ends at a specified point.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Path, Point2D};
+    /// use anvil::{IntoLength, Path, point};
     ///
-    /// let path = Path::at(Point2D::from_m(1., 2.)).line_to(Point2D::from_m(3., 4.));
-    /// assert_eq!(path.end(), Point2D::from_m(3., 4.))
+    /// let path = Path::at(point!(1.m(), 2.m())).line_to(point!(3.m(), 4.m()));
+    /// assert_eq!(path.end(), point!(3.m(), 4.m()))
     /// ```
     pub fn line_to(&self, point: Point2D) -> Self {
         self.add_edge(Edge::Line(self.cursor, point))
@@ -40,12 +38,11 @@ impl Path {
 
     /// Add a line to the end of this `Path` that extends by a specified amount in x and y direction.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{length, Path, point};
+    /// use anvil::{IntoLength, Path, point};
     ///
-    /// let path = Path::at(point!(1 m, 2 m)).line_by(length!(3 m), length!(4 m));
-    /// assert_eq!(path.end(), point!(4 m, 6 m))
+    /// let path = Path::at(point!(1.m(), 2.m())).line_by(3.m(), 4.m());
+    /// assert_eq!(path.end(), point!(4.m(), 6.m()))
     /// ```
     pub fn line_by(&self, dx: Length, dy: Length) -> Self {
         self.add_edge(Edge::Line(self.cursor, self.cursor + Point2D::new(dx, dy)))
@@ -59,22 +56,21 @@ impl Path {
     ///
     /// If the path was empty before, the arc starts in positive x-direction.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{angle, Circle, Edge, length, Path, point, Rectangle, Plane};
+    /// use anvil::{Circle, IntoAngle, IntoLength, Edge, Path, point, Rectangle, Plane};
     ///
-    /// let sketch = Path::at(point!(1 m, 1 m))
-    ///     .arc_by(length!(-1 m), angle!(180 deg))
-    ///     .line_by(length!(-2 m), length!(0))
-    ///     .arc_by(length!(-1 m), angle!(30 deg))
-    ///     .arc_by(length!(-1 m), angle!(150 deg)) // arcs can be split into sections
+    /// let sketch = Path::at(point!(1.m(), 1.m()))
+    ///     .arc_by(-1.m(), 180.deg())
+    ///     .line_by(-2.m(), 0.m())
+    ///     .arc_by(-1.m(), 30.deg())
+    ///     .arc_by(-1.m(), 150.deg()) // arcs can be split into sections
     ///     .close();
     ///
     /// assert_eq!(
     ///     sketch,
-    ///     Rectangle::from_dim(length!(2 m), length!(2 m))
-    ///         .add(&Circle::from_radius(length!(1 m)).move_to(point!(1 m, 0 m)))
-    ///         .add(&Circle::from_radius(length!(1 m)).move_to(point!(-1 m, 0 m)))
+    ///     Rectangle::from_dim(2.m(), 2.m())
+    ///         .add(&Circle::from_radius(1.m()).move_to(point!(1.m(), 0.m())))
+    ///         .add(&Circle::from_radius(1.m()).move_to(point!(-1.m(), 0.m())))
     /// )
     /// ```
     pub fn arc_by(&self, radius: Length, angle: Angle) -> Self {
@@ -102,13 +98,12 @@ impl Path {
 
     /// Add a circle section to the end of this `Path` two points.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Edge, Path, point};
+    /// use anvil::{Edge, IntoLength, Path, point};
     ///
-    /// let path = Path::at(point!(0 m, 0 m)).arc_points(point!(1 m, 1 m), point!(0 m, 2 m));
-    /// assert_eq!(path.cursor(), point!(0 m, 2 m));
-    /// assert_eq!(path.edges(), vec![Edge::Arc(point!(0 m, 0 m), point!(1 m, 1 m), point!(0 m, 2 m))]);
+    /// let path = Path::at(point!(0, 0)).arc_points(point!(1.m(), 1.m()), point!(0.m(), 2.m()));
+    /// assert_eq!(path.cursor(), point!(0.m(), 2.m()));
+    /// assert_eq!(path.edges(), vec![Edge::Arc(point!(0, 0), point!(1.m(), 1.m()), point!(0.m(), 2.m()))]);
     /// ```
     pub fn arc_points(&self, mid: Point2D, end: Point2D) -> Self {
         self.add_edge(Edge::Arc(self.cursor, mid, end))
@@ -127,15 +122,14 @@ impl Path {
     ///
     /// If the path does not have any edges, the cursor is returned.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Path, Point2D};
+    /// use anvil::{IntoLength, Path, point};
     ///
-    /// let path = Path::at(Point2D::from_m(1., 2.)).line_to(Point2D::origin()).line_to(Point2D::from_m(3., 4.));
-    /// assert_eq!(path.start(), Point2D::from_m(1., 2.));
+    /// let path = Path::at(point!(1.m(), 2.m())).line_to(point!(3.m(), 4.m()));
+    /// assert_eq!(path.start(), point!(1.m(), 2.m()));
     ///
-    /// let empty_path = Path::at(Point2D::from_m(5., 6.));
-    /// assert_eq!(empty_path.start(), Point2D::from_m(5., 6.));
+    /// let empty_path = Path::at(point!(5.m(), 6.m()));
+    /// assert_eq!(empty_path.start(), point!(5.m(), 6.m()));
     /// ```
     pub fn start(&self) -> Point2D {
         match self.edges.first() {
@@ -148,15 +142,14 @@ impl Path {
     ///
     /// If the path does not have any edges, the cursor is returned.
     ///
-    /// # Example
     /// ```rust
-    /// use anvil::{Path, Point2D};
+    /// use anvil::{IntoLength, Path, point};
     ///
-    /// let path = Path::at(Point2D::from_m(1., 2.)).line_to(Point2D::origin()).line_to(Point2D::from_m(3., 4.));
-    /// assert_eq!(path.end(), Point2D::from_m(3., 4.));
+    /// let path = Path::at(point!(1.m(), 2.m())).line_to(point!(3.m(), 4.m()));
+    /// assert_eq!(path.end(), point!(3.m(), 4.m()));
     ///
-    /// let empty_path = Path::at(Point2D::from_m(5., 6.));
-    /// assert_eq!(empty_path.end(), Point2D::from_m(5., 6.));
+    /// let empty_path = Path::at(point!(5.m(), 6.m()));
+    /// assert_eq!(empty_path.end(), point!(5.m(), 6.m()));
     /// ```
     pub fn end(&self) -> Point2D {
         match self.edges.iter().last() {
@@ -170,14 +163,14 @@ impl Path {
     /// If the path is empty, a `Dir2D` parallel to the positive x-direction is returned.
     ///
     /// ```rust
-    /// use anvil::{Path, dir, point};
+    /// use anvil::{IntoLength, Path, dir, point};
     ///
     /// assert_eq!(
-    ///     Path::at(point!(0 m, 0 m)).line_to(point!(0 m, 2 m)).end_direction(),
+    ///     Path::at(point!(0, 0)).line_to(point!(0.m(), 2.m())).end_direction(),
     ///     dir!(0, 1)
     /// );
     /// assert_eq!(
-    ///     Path::at(point!(0 m, 0 m)).end_direction(),
+    ///     Path::at(point!(0, 0)).end_direction(),
     ///     dir!(1, 0)
     /// )
     /// ```
@@ -221,7 +214,7 @@ mod tests {
     use assert_float_eq::assert_float_relative_eq;
 
     use super::*;
-    use crate::{angle, dir, length, point};
+    use crate::{IntoAngle, IntoLength, dir, point};
 
     fn assert_dir_eq(dir1: Dir2D, dir2: Dir2D) {
         assert_float_relative_eq!(dir1.x(), dir2.x());
@@ -235,70 +228,70 @@ mod tests {
 
     #[test]
     fn end_arc_positive_radius_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(1 m), angle!(90 deg));
-        assert_point_eq(path.end(), point!(1 m, 1 m))
+        let path = Path::at(point!(0, 0)).arc_by(1.m(), 90.deg());
+        assert_point_eq(path.end(), point!(1.m(), 1.m()))
     }
 
     #[test]
     fn end_arc_positive_radius_negative_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(1 m), angle!(-90 deg));
-        assert_point_eq(path.end(), point!(-1 m, 1 m))
+        let path = Path::at(point!(0, 0)).arc_by(1.m(), -90.deg());
+        assert_point_eq(path.end(), point!(-1.m(), 1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_positive_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(-1 m), angle!(90 deg));
-        assert_point_eq(path.end(), point!(1 m, -1 m))
+        let path = Path::at(point!(0, 0)).arc_by(-1.m(), 90.deg());
+        assert_point_eq(path.end(), point!(1.m(), -1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(-1 m), angle!(-90 deg));
-        assert_point_eq(path.end(), point!(-1 m, -1 m))
+        let path = Path::at(point!(0, 0)).arc_by(-1.m(), -90.deg());
+        assert_point_eq(path.end(), point!(-1.m(), -1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_positive_angle_45deg() {
-        let path = Path::at(point!(0 m, 1 m)).arc_by(length!(-1 m), angle!(45 deg));
+        let path = Path::at(point!(0.m(), 1.m())).arc_by(-1.m(), 45.deg());
         assert_point_eq(
             path.end(),
-            Point2D::from_m(1. / f64::sqrt(2.), 1. / f64::sqrt(2.)),
+            point!(1.m() / f64::sqrt(2.), 1.m() / f64::sqrt(2.)),
         )
     }
 
     #[test]
     fn end_direction_empty_path() {
-        let path = Path::at(Point2D::origin());
+        let path = Path::at(point!(0, 0));
         assert_dir_eq(path.end_direction(), dir!(1, 0))
     }
 
     #[test]
     fn end_direction_line() {
-        let path = Path::at(Point2D::origin()).line_to(point!(1 m, 1 m));
+        let path = Path::at(point!(0, 0)).line_to(point!(1.m(), 1.m()));
         assert_dir_eq(path.end_direction(), dir!(1, 1))
     }
 
     #[test]
     fn end_direction_arc_positive_radius_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(1 m), angle!(45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(1.m(), 45.deg());
         assert_dir_eq(path.end_direction(), dir!(1, 1))
     }
 
     #[test]
     fn end_direction_arc_positive_radius_negative_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(1 m), angle!(-45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(1.m(), -45.deg());
         assert_dir_eq(path.end_direction(), dir!(-1, 1))
     }
 
     #[test]
     fn end_direction_arc_negative_radius_positive_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(-1 m), angle!(45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(-1.m(), 45.deg());
         assert_dir_eq(path.end_direction(), dir!(1, -1))
     }
 
     #[test]
     fn end_direction_arc_negative_radius_angle() {
-        let path = Path::at(Point2D::origin()).arc_by(length!(-1 m), angle!(-45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(-1.m(), -45.deg());
         assert_dir_eq(path.end_direction(), dir!(-1, -1))
     }
 }

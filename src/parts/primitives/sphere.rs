@@ -12,9 +12,9 @@ impl Sphere {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Sphere, length, Point3D, Part};
+    /// use anvil::{Sphere, IntoLength, Point3D, Part};
     ///
-    /// let part = Sphere::from_radius(length!(1 m));
+    /// let part = Sphere::from_radius(1.m());
     /// assert_eq!(part.center(), Ok(Point3D::origin()));
     /// assert!((part.volume() - 4.18879).abs() < 1e-5);
     /// ```
@@ -29,9 +29,9 @@ impl Sphere {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Sphere, length, Point3D, Part};
+    /// use anvil::{Sphere, IntoLength, Point3D, Part};
     ///
-    /// let part = Sphere::from_diameter(length!(1 m));
+    /// let part = Sphere::from_diameter(1.m());
     /// assert_eq!(part.center(), Ok(Point3D::origin()));
     /// assert!((part.volume() - 0.523599).abs() < 1e-5);
     /// ```
@@ -43,15 +43,15 @@ impl Sphere {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::length;
+    use crate::IntoLength;
 
     #[test]
     fn from_radius_empty() {
-        assert!(Sphere::from_radius(length!(0)) == Part::empty())
+        assert!(Sphere::from_radius(0.m()) == Part::empty())
     }
 
     #[test]
     fn from_diameter_empty() {
-        assert!(Sphere::from_diameter(length!(0)) == Part::empty())
+        assert!(Sphere::from_diameter(0.m()) == Part::empty())
     }
 }

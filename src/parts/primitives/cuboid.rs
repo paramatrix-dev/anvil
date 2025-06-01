@@ -13,10 +13,10 @@ impl Cuboid {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length, Point3D, Part};
+    /// use anvil::{Cuboid, IntoLength, Part, point};
     ///
-    /// let part = Cuboid::from_dim(length!(1 m), length!(2 m), length!(3 m));
-    /// assert_eq!(part.center(), Ok(Point3D::origin()));
+    /// let part = Cuboid::from_dim(1.m(), 2.m(), 3.m());
+    /// assert_eq!(part.center(), Ok(point!(0, 0, 0)));
     /// assert!((part.volume() - 6.).abs() < 1e-5);
     /// ```
     pub fn from_dim(x: Length, y: Length, z: Length) -> Part {
@@ -37,10 +37,10 @@ impl Cuboid {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length, Point3D, Part};
+    /// use anvil::{Cuboid, IntoLength, Part, point};
     ///
-    /// let part = Cuboid::from_corners(Point3D::origin(), Point3D::from_m(2., 2., 2.));
-    /// assert_eq!(part.center(), Ok(Point3D::from_m(1., 1., 1.)));
+    /// let part = Cuboid::from_corners(point!(0, 0, 0), point!(2.m(), 2.m(), 2.m()));
+    /// assert_eq!(part.center(), Ok(point!(1.m(), 1.m(), 1.m())));
     /// assert!((part.volume() - 8.).abs() < 1e-5);
     /// ```
     pub fn from_corners(corner1: Point3D, corner2: Point3D) -> Part {
@@ -73,11 +73,11 @@ impl Cuboid {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length, Point3D, Part};
+    /// use anvil::{Cuboid, IntoLength, Part};
     ///
     /// assert_eq!(
     ///     Cuboid::from_m(1., 2., 3.),
-    ///     Cuboid::from_dim(length!(1 m), length!(2 m), length!(3 m))
+    ///     Cuboid::from_dim(1.m(), 2.m(), 3.m())
     /// )
     /// ```
     pub fn from_m(x: f64, y: f64, z: f64) -> Part {
@@ -90,11 +90,11 @@ impl Cuboid {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length, Point3D, Part};
+    /// use anvil::{Cuboid, IntoLength, Part};
     ///
     /// assert_eq!(
     ///     Cuboid::from_mm(1., 2., 3.),
-    ///     Cuboid::from_dim(length!(1 mm), length!(2 mm), length!(3 mm))
+    ///     Cuboid::from_dim(1.mm(), 2.mm(), 3.mm())
     /// )
     /// ```
     pub fn from_mm(x: f64, y: f64, z: f64) -> Part {
@@ -105,12 +105,12 @@ impl Cuboid {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::length;
+    use crate::IntoLength;
 
     #[test]
     fn from_dim_empty() {
-        assert!(Cuboid::from_dim(length!(0), length!(1 m), length!(1 m)) == Part::empty());
-        assert!(Cuboid::from_dim(length!(1 m), length!(0), length!(1 m)) == Part::empty());
-        assert!(Cuboid::from_dim(length!(1 m), length!(1 m), length!(0)) == Part::empty())
+        assert!(Cuboid::from_dim(0.m(), 1.m(), 1.m()) == Part::empty());
+        assert!(Cuboid::from_dim(1.m(), 0.m(), 1.m()) == Part::empty());
+        assert!(Cuboid::from_dim(1.m(), 1.m(), 0.m()) == Part::empty())
     }
 }

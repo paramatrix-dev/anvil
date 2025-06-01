@@ -3,7 +3,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Error, Length};
+use crate::{Error, IntoLength, Length};
 
 use super::Dir3D;
 
@@ -22,48 +22,12 @@ pub struct Point3D {
 impl Point3D {
     /// The origin point at the position x=0, y=0, z=0.
     pub fn origin() -> Self {
-        Self::from_mm(0., 0., 0.)
+        Self::new(0.m(), 0.m(), 0.m())
     }
 
     /// Construct a `Point3D` from its component lengths.
     pub fn new(x: Length, y: Length, z: Length) -> Self {
         Point3D { x, y, z }
-    }
-    /// Construct a `Point3D` from the millimeter length values directly.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{length, Point3D};
-    ///
-    /// let point = Point3D::from_mm(1., 2., 3.);
-    /// assert_eq!(point.x, length!(1 mm));
-    /// assert_eq!(point.y, length!(2 mm));
-    /// assert_eq!(point.z, length!(3 mm));
-    /// ```
-    pub fn from_mm(x: f64, y: f64, z: f64) -> Self {
-        Point3D {
-            x: Length::from_mm(x),
-            y: Length::from_mm(y),
-            z: Length::from_mm(z),
-        }
-    }
-    /// Construct a `Point3D` from the meter length values directly.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{length, Point3D};
-    ///
-    /// let point = Point3D::from_m(1., 2., 3.);
-    /// assert_eq!(point.x, length!(1 m));
-    /// assert_eq!(point.y, length!(2 m));
-    /// assert_eq!(point.z, length!(3 m));
-    /// ```
-    pub fn from_m(x: f64, y: f64, z: f64) -> Self {
-        Point3D {
-            x: Length::from_m(x),
-            y: Length::from_m(y),
-            z: Length::from_m(z),
-        }
     }
 
     /// Return the absolute distance between this `Point3D` and the origin point.
@@ -71,10 +35,10 @@ impl Point3D {
     /// # Example
     /// ```rust
     /// use core::f64;
-    /// use anvil::{Length, Point3D};
+    /// use anvil::{IntoLength, point};
     ///
-    /// let point = Point3D::from_m(0., 1., 1.);
-    /// assert_eq!(point.distance_to_origin(), Length::from_m(f64::sqrt(2.)))
+    /// let point = point!(0.m(), 1.m(), 1.m());
+    /// assert_eq!(point.distance_to_origin(), f64::sqrt(2.).m())
     /// ```
     pub fn distance_to_origin(&self) -> Length {
         Length::from_m(f64::sqrt(
@@ -85,10 +49,10 @@ impl Point3D {
     /// Return the direction this point lies in with respect to another point.
     ///
     /// ```rust
-    /// use anvil::{Dir3D, Error, point, Point3D};
+    /// use anvil::{Dir3D, Error, IntoLength, point};
     ///
-    /// let p = point!(1 m, 1 m, 1 m);
-    /// assert_eq!(p.direction_from(Point3D::origin()), Dir3D::try_from(1., 1., 1.));
+    /// let p = point!(1.m(), 1.m(), 1.m());
+    /// assert_eq!(p.direction_from(point!(0, 0, 0)), Dir3D::try_from(1., 1., 1.));
     /// assert_eq!(p.direction_from(p), Err(Error::ZeroVector));
     /// ```
     pub fn direction_from(&self, other: Point3D) -> Result<Dir3D, Error> {
@@ -143,41 +107,41 @@ impl Div<f64> for Point3D {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::{IntoLength, point};
 
     #[test]
     fn add() {
-        let point1 = Point3D::from_m(1., 2., 3.);
-        let point2 = Point3D::from_m(4., 5., 6.);
+        let point1 = point!(1.m(), 2.m(), 3.m());
+        let point2 = point!(4.m(), 5.m(), 6.m());
 
-        assert_eq!(point1 + point2, Point3D::from_m(5., 7., 9.));
+        assert_eq!(point1 + point2, point!(5.m(), 7.m(), 9.m()));
     }
 
     #[test]
     fn substract() {
-        let point1 = Point3D::from_m(1., 2., 3.);
-        let point2 = Point3D::from_m(4., 5., 6.);
+        let point1 = point!(1.m(), 2.m(), 3.m());
+        let point2 = point!(4.m(), 5.m(), 6.m());
 
-        assert_eq!(point2 - point1, Point3D::from_m(3., 3., 3.));
+        assert_eq!(point2 - point1, point!(3.m(), 3.m(), 3.m()));
     }
 
     #[test]
     fn multiply() {
         assert_eq!(
-            Point3D::from_m(1., 2., 3.) * 4.,
-            Point3D::from_m(4., 8., 12.)
+            point!(1.m(), 2.m(), 3.m()) * 4.,
+            point!(4.m(), 8.m(), 12.m())
         );
         assert_eq!(
-            4. * Point3D::from_m(1., 2., 3.),
-            Point3D::from_m(4., 8., 12.)
+            4. * point!(1.m(), 2.m(), 3.m()),
+            point!(4.m(), 8.m(), 12.m())
         );
     }
 
     #[test]
     fn divide() {
         assert_eq!(
-            Point3D::from_m(4., 8., 12.) / 4.,
-            Point3D::from_m(1., 2., 3.)
+            point!(4.m(), 8.m(), 12.m()) / 4.,
+            point!(1.m(), 2.m(), 3.m())
         );
     }
 }
