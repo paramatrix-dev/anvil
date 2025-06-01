@@ -11,11 +11,11 @@ impl Rectangle {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{length, Point2D, Rectangle};
+    /// use anvil::{length, Rectangle, point};
     ///
     /// let rect = Rectangle::from_dim(length!(1 m), length!(1 m));
     /// assert_eq!(rect.area(), 1.);
-    /// assert_eq!(rect.center(), Ok(Point2D::origin()));
+    /// assert_eq!(rect.center(), Ok(point!(0, 0)));
     /// ```
     pub fn from_dim(x: Length, y: Length) -> Sketch {
         let corner1 = Point2D {
@@ -33,9 +33,9 @@ impl Rectangle {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Point2D, Rectangle};
+    /// use anvil::{IntoLength, Rectangle, point};
     ///
-    /// let rect = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(2., 2.));
+    /// let rect = Rectangle::from_corners(point!(0, 0), point!(2.m(), 2.m()));
     /// assert_eq!(rect.area(), 4.);
     /// ```
     pub fn from_corners(corner1: Point2D, corner2: Point2D) -> Sketch {
@@ -89,28 +89,22 @@ impl Rectangle {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::length;
+    use crate::{IntoLength, point};
 
     #[test]
     fn from_dim_empty() {
-        assert_eq!(
-            Rectangle::from_dim(length!(0), length!(1 m)),
-            Sketch::empty()
-        );
-        assert_eq!(
-            Rectangle::from_dim(length!(1 m), length!(0)),
-            Sketch::empty()
-        );
+        assert_eq!(Rectangle::from_dim(0.m(), 1.m()), Sketch::empty());
+        assert_eq!(Rectangle::from_dim(1.m(), 0.m()), Sketch::empty());
     }
 
     #[test]
     fn from_corners_empty() {
         assert_eq!(
-            Rectangle::from_corners(Point2D::from_m(1., 2.), Point2D::from_m(1., 4.)),
+            Rectangle::from_corners(point!(1.m(), 2.m()), point!(1.m(), 4.m())),
             Sketch::empty()
         );
         assert_eq!(
-            Rectangle::from_corners(Point2D::from_m(1., 2.), Point2D::from_m(3., 2.)),
+            Rectangle::from_corners(point!(1.m(), 2.m()), point!(3.m(), 2.m())),
             Sketch::empty()
         );
     }

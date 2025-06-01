@@ -18,10 +18,10 @@ impl Edge {
     /// Return the starting point of the edge.
     ///
     /// ```rust
-    /// use anvil::{Edge, Point2D};
+    /// use anvil::{Edge, IntoLength, point};
     ///
-    /// let edge = Edge::Line(Point2D::from_m(1., 1.), Point2D::from_m(2., 2.));
-    /// assert_eq!(edge.start(), Point2D::from_m(1., 1.))
+    /// let edge = Edge::Line(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
+    /// assert_eq!(edge.start(), point!(1.m(), 1.m()))
     /// ```
     pub fn start(&self) -> Point2D {
         match self {
@@ -32,10 +32,10 @@ impl Edge {
     /// Return the ending point of the edge.
     ///
     /// ```rust
-    /// use anvil::{Edge, Point2D};
+    /// use anvil::{Edge, IntoLength, point};
     ///
-    /// let edge = Edge::Line(Point2D::from_m(1., 1.), Point2D::from_m(2., 2.));
-    /// assert_eq!(edge.end(), Point2D::from_m(2., 2.))
+    /// let edge = Edge::Line(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
+    /// assert_eq!(edge.end(), point!(2.m(), 2.m()))
     /// ```
     pub fn end(&self) -> Point2D {
         match self {

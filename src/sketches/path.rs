@@ -255,7 +255,7 @@ mod tests {
         let path = Path::at(point!(0.m(), 1.m())).arc_by(length!(-1 m), angle!(45 deg));
         assert_point_eq(
             path.end(),
-            Point2D::from_m(1. / f64::sqrt(2.), 1. / f64::sqrt(2.)),
+            point!(1.m() / f64::sqrt(2.), 1.m() / f64::sqrt(2.)),
         )
     }
 

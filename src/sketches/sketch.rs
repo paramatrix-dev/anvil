@@ -201,12 +201,12 @@ impl Sketch {
     /// Positive angle values result in a counter-clockwise rotation.
     ///
     /// ```rust
-    /// use anvil::{angle, length, Point2D, Rectangle};
+    /// use anvil::{IntoAngle, IntoLength, Rectangle, point};
     ///
-    /// let sketch = Rectangle::from_dim(length!(1 m), length!(2 m)).move_to(Point2D::from_m(1., 1.));
+    /// let sketch = Rectangle::from_dim(1.m(), 2.m()).move_to(point!(1.m(), 1.m()));
     /// assert_eq!(
-    ///     sketch.rotate(angle!(90 deg)),
-    ///     Rectangle::from_dim(length!(2 m), length!(1 m)).move_to(Point2D::from_m(1., 1.))
+    ///     sketch.rotate(90.deg()),
+    ///     Rectangle::from_dim(2.m(), 1.m()).move_to(point!(1.m(), 1.m()))
     /// )
     /// ```
     pub fn rotate(&self, angle: Angle) -> Self {
@@ -220,12 +220,12 @@ impl Sketch {
     /// Positive angle values result in a counter-clockwise rotation.
     ///
     /// ```rust
-    /// use anvil::{angle, Point2D, Rectangle};
+    /// use anvil::{IntoAngle, IntoLength, Rectangle, point};
     ///
-    /// let sketch = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 1.));
+    /// let sketch = Rectangle::from_corners(point!(0, 0), point!(1.m(), 1.m()));
     /// assert_eq!(
-    ///     sketch.rotate_around(Point2D::origin(), angle!(90 deg)),
-    ///     Rectangle::from_corners(Point2D::origin(), Point2D::from_m(-1., 1.))
+    ///     sketch.rotate_around(point!(0, 0), 90.deg()),
+    ///     Rectangle::from_corners(point!(0, 0), point!(-1.m(), 1.m()))
     /// )
     /// ```
     pub fn rotate_around(&self, point: Point2D, angle: Angle) -> Self {
@@ -254,13 +254,13 @@ impl Sketch {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Rectangle, Point2D};
+    /// use anvil::{IntoLength, Rectangle, point};
     ///
-    /// let sketch1 = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(2., 2.));
-    /// let sketch2 = Rectangle::from_corners(Point2D::from_m(1., 0.), Point2D::from_m(2., 2.));
+    /// let sketch1 = Rectangle::from_corners(point!(0, 0), point!(2.m(), 2.m()));
+    /// let sketch2 = Rectangle::from_corners(point!(1.m(), 0.m()), point!(2.m(), 2.m()));
     /// assert_eq!(
     ///     sketch1.subtract(&sketch2),
-    ///     Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 2.))
+    ///     Rectangle::from_corners(point!(0, 0), point!(1.m(), 2.m()))
     /// )
     /// ```
     pub fn subtract(&self, other: &Self) -> Self {
@@ -273,12 +273,12 @@ impl Sketch {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cuboid, length, Rectangle, Plane, Point2D, Point3D};
+    /// use anvil::{Cuboid, IntoLength, Rectangle, Plane, point};
     ///
-    /// let sketch = Rectangle::from_corners(Point2D::origin(), Point2D::from_m(1., 2.));
+    /// let sketch = Rectangle::from_corners(point!(0, 0), point!(1.m(), 2.m()));
     /// assert_eq!(
-    ///     sketch.extrude(Plane::xy(), length!(3 m)),
-    ///     Ok(Cuboid::from_corners(Point3D::origin(), Point3D::from_m(1., 2., 3.)))
+    ///     sketch.extrude(Plane::xy(), 3.m()),
+    ///     Ok(Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), 2.m(), 3.m())))
     /// );
     /// ```
     pub fn extrude(&self, plane: Plane, thickness: Length) -> Result<Part, Error> {
@@ -469,7 +469,7 @@ impl SketchAction {
 #[cfg(test)]
 mod tests {
     use crate::{
-        Cuboid, Cylinder, Path, Point2D, Point3D, Rectangle, angle, length,
+        Cuboid, Cylinder, IntoLength, Path, Point2D, Point3D, Rectangle, angle, length, point,
         sketches::primitives::Circle,
     };
 
@@ -494,16 +494,16 @@ mod tests {
     #[test]
     fn eq_both_rectangles_not_at_origin() {
         assert_eq!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(Point2D::from_m(2., 2.)),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(Point2D::from_m(2., 2.)),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
         )
     }
 
     #[test]
     fn ne_both_rectangles_not_at_origin() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(Point2D::from_m(2., 2.)),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(Point2D::from_m(3., 3.)),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(3.m(), 3.m())),
         )
     }
 
@@ -526,15 +526,15 @@ mod tests {
     #[test]
     fn ne_different_sketches() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(Point2D::from_m(2., 2.)),
-            Circle::from_radius(length!(1 m)).move_to(Point2D::from_m(2., 2.)),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
+            Circle::from_radius(length!(1 m)).move_to(point!(2.m(), 2.m())),
         )
     }
 
     #[test]
     fn intersect_non_overlapping() {
-        let sketch1 = Rectangle::from_corners(Point2D::from_m(1., 1.), Point2D::from_m(2., 2.));
-        let sketch2 = Rectangle::from_corners(Point2D::from_m(-1., -1.), Point2D::from_m(-2., -2.));
+        let sketch1 = Rectangle::from_corners(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
+        let sketch2 = Rectangle::from_corners(point!(-1.m(), -1.m()), point!(-2.m(), -2.m()));
         assert!(sketch1.intersect(&sketch2).to_occt(Plane::xy()).is_err())
     }
 
@@ -558,10 +558,10 @@ mod tests {
 
     #[test]
     fn extrude_cube_different_plane() {
-        let sketch = Path::at(Point2D::origin())
-            .line_to(Point2D::from_m(1., 0.))
-            .line_to(Point2D::from_m(1., 2.))
-            .line_to(Point2D::from_m(0., 2.))
+        let sketch = Path::at(point!(0, 0))
+            .line_to(point!(1.m(), 0.m()))
+            .line_to(point!(1.m(), 2.m()))
+            .line_to(point!(0.m(), 2.m()))
             .close();
         assert_eq!(
             sketch.extrude(Plane::xz(), Length::from_m(-3.)),
