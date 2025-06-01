@@ -57,13 +57,13 @@ impl Path {
     /// If the path was empty before, the arc starts in positive x-direction.
     ///
     /// ```rust
-    /// use anvil::{angle, Circle, IntoLength, Edge, length, Path, point, Rectangle, Plane};
+    /// use anvil::{Circle, IntoAngle, IntoLength, Edge, length, Path, point, Rectangle, Plane};
     ///
     /// let sketch = Path::at(point!(1.m(), 1.m()))
-    ///     .arc_by(length!(-1 m), angle!(180 deg))
+    ///     .arc_by(length!(-1 m), 180.deg())
     ///     .line_by(length!(-2 m), length!(0))
-    ///     .arc_by(length!(-1 m), angle!(30 deg))
-    ///     .arc_by(length!(-1 m), angle!(150 deg)) // arcs can be split into sections
+    ///     .arc_by(length!(-1 m), 30.deg())
+    ///     .arc_by(length!(-1 m), 150.deg()) // arcs can be split into sections
     ///     .close();
     ///
     /// assert_eq!(
@@ -214,7 +214,7 @@ mod tests {
     use assert_float_eq::assert_float_relative_eq;
 
     use super::*;
-    use crate::{IntoLength, angle, dir, length, point};
+    use crate::{IntoAngle, IntoLength, dir, length, point};
 
     fn assert_dir_eq(dir1: Dir2D, dir2: Dir2D) {
         assert_float_relative_eq!(dir1.x(), dir2.x());
@@ -228,31 +228,31 @@ mod tests {
 
     #[test]
     fn end_arc_positive_radius_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), angle!(90 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), 90.deg());
         assert_point_eq(path.end(), point!(1.m(), 1.m()))
     }
 
     #[test]
     fn end_arc_positive_radius_negative_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), angle!(-90 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), -90.deg());
         assert_point_eq(path.end(), point!(-1.m(), 1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_positive_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), angle!(90 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), 90.deg());
         assert_point_eq(path.end(), point!(1.m(), -1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), angle!(-90 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), -90.deg());
         assert_point_eq(path.end(), point!(-1.m(), -1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_positive_angle_45deg() {
-        let path = Path::at(point!(0.m(), 1.m())).arc_by(length!(-1 m), angle!(45 deg));
+        let path = Path::at(point!(0.m(), 1.m())).arc_by(length!(-1 m), 45.deg());
         assert_point_eq(
             path.end(),
             point!(1.m() / f64::sqrt(2.), 1.m() / f64::sqrt(2.)),
@@ -273,25 +273,25 @@ mod tests {
 
     #[test]
     fn end_direction_arc_positive_radius_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), angle!(45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), 45.deg());
         assert_dir_eq(path.end_direction(), dir!(1, 1))
     }
 
     #[test]
     fn end_direction_arc_positive_radius_negative_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), angle!(-45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(1 m), -45.deg());
         assert_dir_eq(path.end_direction(), dir!(-1, 1))
     }
 
     #[test]
     fn end_direction_arc_negative_radius_positive_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), angle!(45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), 45.deg());
         assert_dir_eq(path.end_direction(), dir!(1, -1))
     }
 
     #[test]
     fn end_direction_arc_negative_radius_angle() {
-        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), angle!(-45 deg));
+        let path = Path::at(point!(0, 0)).arc_by(length!(-1 m), -45.deg());
         assert_dir_eq(path.end_direction(), dir!(-1, -1))
     }
 }

@@ -4,7 +4,7 @@ use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
 use crate::{
-    Angle, Axis2D, Axis3D, Error, IntoLength, Length, Part, Plane, Point2D, Point3D, angle,
+    Angle, Axis2D, Axis3D, Error, IntoAngle, IntoLength, Length, Part, Plane, Point2D, Point3D,
 };
 
 use super::Edge;
@@ -101,9 +101,9 @@ impl Sketch {
     /// )
     /// ```
     pub fn circular_pattern(&self, around: Point2D, instances: u8) -> Self {
-        let angle_step = angle!(360 deg) / instances as f64;
+        let angle_step = 360.deg() / instances as f64;
         let mut new_shape = self.clone();
-        let mut angle = angle!(0 deg);
+        let mut angle = 0.rad();
         for _ in 0..instances {
             new_shape = new_shape.add(&self.rotate_around(around, angle));
             angle = angle + angle_step;
@@ -475,7 +475,7 @@ impl SketchAction {
 #[cfg(test)]
 mod tests {
     use crate::{
-        Cuboid, Cylinder, IntoLength, Path, Point3D, Rectangle, angle, length, point,
+        Cuboid, Cylinder, IntoLength, Path, Point3D, Rectangle, length, point,
         sketches::primitives::Circle,
     };
 
@@ -516,16 +516,16 @@ mod tests {
     #[test]
     fn eq_both_rectangles_rotated() {
         assert_eq!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(angle!(45 deg)),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(angle!(45 deg)),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(45.deg()),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(45.deg()),
         )
     }
 
     #[test]
     fn ne_both_rectangles_rotated() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(angle!(45 deg)),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(angle!(90 deg)),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(45.deg()),
+            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(90.deg()),
         )
     }
 

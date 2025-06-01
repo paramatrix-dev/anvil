@@ -19,11 +19,11 @@ use super::IntoF64;
 /// assert_eq!(degrees_angle.deg(), 1.2);
 /// assert_eq!(radians_angle.rad(), 3.4);
 ///
-/// // Angle construction can also be simplified using the angle! macro
-/// use anvil::angle;
+/// // Angle construction can be simplified using the `IntoAngle` trait
+/// use anvil::IntoAngle;
 ///
-/// assert_eq!(angle!(1.2 deg), Angle::from_deg(1.2));
-/// assert_eq!(angle!(4.5 rad), Angle::from_rad(4.5));
+/// assert_eq!(1.2.deg(), Angle::from_deg(1.2));
+/// assert_eq!(4.5.rad(), Angle::from_rad(4.5));
 /// ```
 #[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
 pub struct Angle {
@@ -84,10 +84,10 @@ impl Angle {
     /// Return the absolute value of this `Angle`.
     ///
     /// ```rust
-    /// use anvil::angle;
+    /// use anvil::IntoAngle;
     ///
-    /// assert_eq!(angle!(-45 deg).abs(), angle!(45 deg));
-    /// assert_eq!(angle!(10 deg).abs(), angle!(10 deg));
+    /// assert_eq!((-45).deg().abs(), 45.deg());
+    /// assert_eq!(10.deg().abs(), 10.deg());
     /// ```
     pub fn abs(&self) -> Self {
         Self {
@@ -99,10 +99,10 @@ impl Angle {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::angle;
+    /// use anvil::IntoAngle;
     ///
-    /// let angle1 = angle!(1 deg);
-    /// let angle2 = angle!(2 deg);
+    /// let angle1 = 1.deg();
+    /// let angle2 = 2.deg();
     /// assert_eq!(angle1.min(&angle2), angle1);
     /// assert_eq!(angle2.min(&angle1), angle1);
     /// ```
@@ -115,10 +115,10 @@ impl Angle {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::angle;
+    /// use anvil::IntoAngle;
     ///
-    /// let angle1 = angle!(1 deg);
-    /// let angle2 = angle!(2 deg);
+    /// let angle1 = 1.deg();
+    /// let angle2 = 2.deg();
     /// assert_eq!(angle1.max(&angle2), angle2);
     /// assert_eq!(angle2.max(&angle1), angle2);
     /// ```
@@ -176,9 +176,9 @@ impl Div<Angle> for Angle {
     type Output = f64;
     /// Divide a `Angle` by another `Angle`.
     /// ```rust
-    /// use anvil::angle;
+    /// use anvil::IntoAngle;
     ///
-    /// assert_eq!(angle!(6 deg) / angle!(2 deg), 3.)
+    /// assert_eq!(6.deg() / 2.deg(), 3.)
     /// ```
     fn div(self, other: Angle) -> f64 {
         self.rad / other.rad
@@ -190,35 +190,6 @@ impl Neg for Angle {
     fn neg(self) -> Self::Output {
         self * -1.
     }
-}
-
-/// Macro for simplifying `Angle` construction for static values.
-///
-/// Create an angle with the correct unit by invoking `angle!([value] [unit])`.
-///
-/// # Examples
-/// ```rust
-/// use anvil::{angle, Angle};
-///
-/// assert_eq!(angle!(5 deg), Angle::from_deg(5.));
-/// assert_eq!(angle!(5.1 deg), Angle::from_deg(5.1));
-/// assert_eq!(angle!(2 rad), Angle::from_rad(2.));
-/// assert_eq!(angle!(0), Angle::zero());
-/// ```
-#[macro_export]
-macro_rules! angle {
-    ( 0 ) => {
-        $crate::Angle::zero()
-    };
-    ( $val:literal deg ) => {
-        $crate::Angle::from_deg($val as f64)
-    };
-    ( $val:literal rad ) => {
-        $crate::Angle::from_rad($val as f64)
-    };
-    ($val:literal $unit:ident) => {
-        compile_error!(concat!("Unsupported angle unit: ", stringify!($unit)))
-    };
 }
 
 /// Import this trait to easily convert numbers into `Angle`s.
@@ -269,26 +240,26 @@ impl IntoAngle for f64 {}
 
 #[cfg(test)]
 mod tests {
-    use crate::angle;
+    use super::*;
 
     #[test]
     fn add() {
-        assert_eq!(angle!(2 rad) + angle!(3 rad), angle!(5 rad));
+        assert_eq!(2.rad() + 3.rad(), 5.rad());
     }
 
     #[test]
     fn subtract() {
-        assert_eq!(angle!(3 rad) - angle!(2 rad), angle!(1 rad));
+        assert_eq!(3.rad() - 2.rad(), 1.rad());
     }
 
     #[test]
     fn multiply_with_f64() {
-        assert_eq!(angle!(0.2 rad) * 4., angle!(0.8 rad));
-        assert_eq!(4. * angle!(0.2 rad), angle!(0.8 rad));
+        assert_eq!(0.2.rad() * 4., 0.8.rad());
+        assert_eq!(4. * 0.2.rad(), 0.8.rad());
     }
 
     #[test]
     fn divide_with_f64() {
-        assert_eq!(angle!(6 rad) / 2., angle!(3 rad));
+        assert_eq!(6.rad() / 2., 3.rad());
     }
 }

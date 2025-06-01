@@ -9,7 +9,7 @@ use cxx::UniquePtr;
 use opencascade_sys::ffi;
 use tempfile::NamedTempFile;
 
-use crate::{Angle, Axis3D, Error, Length, Point3D, angle};
+use crate::{Angle, Axis3D, Error, IntoAngle, Length, Point3D};
 
 /// A 3D object in space.
 pub struct Part {
@@ -56,7 +56,7 @@ impl Part {
     /// Create multiple instances of the `Part` spaced evenly around a point.
     ///
     /// ```rust
-    /// use anvil::{angle, Axis3D, Cuboid, IntoAngle, IntoLength, point};
+    /// use anvil::{Axis3D, Cuboid, IntoAngle, IntoLength, point};
     ///
     /// let cuboid = Cuboid::from_corners(point!(1.m(), 1.m(), 0.m()), point!(2.m(), 2.m(), 1.m()));
     /// assert_eq!(
@@ -68,9 +68,9 @@ impl Part {
     /// )
     /// ```
     pub fn circular_pattern(&self, around: Axis3D, instances: u8) -> Self {
-        let angle_step = angle!(360 deg) / instances as f64;
+        let angle_step = 360.deg() / instances as f64;
         let mut new_shape = self.clone();
-        let mut angle = angle!(0);
+        let mut angle = 0.rad();
         for _ in 0..instances {
             new_shape = new_shape.add(&self.rotate_around(around, angle));
             angle = angle + angle_step;
@@ -498,7 +498,7 @@ mod tests {
     fn move_after_rotate_should_not_reset_rotate() {
         let part = Cuboid::from_m(1., 1., 2.);
         assert_eq!(
-            part.rotate_around(Axis3D::y(), angle!(90 deg))
+            part.rotate_around(Axis3D::y(), 90.deg())
                 .move_to(Point3D::origin()),
             Cuboid::from_m(2., 1., 1.)
         )
