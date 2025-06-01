@@ -11,9 +11,9 @@ impl Rectangle {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{length, Rectangle, point};
+    /// use anvil::{IntoLength, Rectangle, point};
     ///
-    /// let rect = Rectangle::from_dim(length!(1 m), length!(1 m));
+    /// let rect = Rectangle::from_dim(1.m(), 1.m());
     /// assert_eq!(rect.area(), 1.);
     /// assert_eq!(rect.center(), Ok(point!(0, 0)));
     /// ```
@@ -56,11 +56,11 @@ impl Rectangle {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{length, Rectangle};
+    /// use anvil::{IntoLength, Rectangle};
     ///
     /// assert_eq!(
     ///     Rectangle::from_m(1., 2.),
-    ///     Rectangle::from_dim(length!(1 m), length!(2 m))
+    ///     Rectangle::from_dim(1.m(), 2.m())
     /// )
     /// ```
     pub fn from_m(x: f64, y: f64) -> Sketch {
@@ -74,11 +74,11 @@ impl Rectangle {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{length, Rectangle};
+    /// use anvil::{IntoLength, Rectangle};
     ///
     /// assert_eq!(
     ///     Rectangle::from_mm(1., 2.),
-    ///     Rectangle::from_dim(length!(1 mm), length!(2 mm))
+    ///     Rectangle::from_dim(1.mm(), 2.mm())
     /// )
     /// ```
     pub fn from_mm(x: f64, y: f64) -> Sketch {

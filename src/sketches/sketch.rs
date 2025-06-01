@@ -35,9 +35,9 @@ impl Sketch {
     /// Warning: the area is susceptibility to floating point errors.
     ///
     /// ```rust
-    /// use anvil::{Rectangle, length};
+    /// use anvil::{Rectangle, IntoLength};
     ///
-    /// let sketch = Rectangle::from_dim(length!(2 m), length!(3 m));
+    /// let sketch = Rectangle::from_dim(2.m(), 3.m());
     /// assert!((sketch.area() - 6.).abs() < 1e-9)
     /// ```
     pub fn area(&self) -> f64 {
@@ -239,12 +239,12 @@ impl Sketch {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Rectangle, length};
+    /// use anvil::{Rectangle, IntoLength};
     ///
-    /// let rect = Rectangle::from_dim(length!(1 m), length!(1 m));
+    /// let rect = Rectangle::from_dim(1.m(), 1.m());
     /// assert_eq!(
     ///     rect.scale(2.),
-    ///     Rectangle::from_dim(length!(2 m), length!(2 m))
+    ///     Rectangle::from_dim(2.m(), 2.m())
     /// )
     /// ```
     pub fn scale(&self, factor: f64) -> Self {
@@ -475,8 +475,7 @@ impl SketchAction {
 #[cfg(test)]
 mod tests {
     use crate::{
-        Cuboid, Cylinder, IntoLength, Path, Point3D, Rectangle, length, point,
-        sketches::primitives::Circle,
+        Cuboid, Cylinder, IntoLength, Path, Point3D, Rectangle, point, sketches::primitives::Circle,
     };
 
     use super::*;
@@ -484,56 +483,56 @@ mod tests {
     #[test]
     fn eq_both_rectangles() {
         assert_eq!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)),
-            Rectangle::from_dim(length!(1 m), length!(1 m)),
+            Rectangle::from_dim(1.m(), 1.m()),
+            Rectangle::from_dim(1.m(), 1.m()),
         )
     }
 
     #[test]
     fn ne_both_rectangles() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)),
-            Rectangle::from_dim(length!(1 m), length!(1.1 m)),
+            Rectangle::from_dim(1.m(), 1.m()),
+            Rectangle::from_dim(1.m(), 1.1.m()),
         )
     }
 
     #[test]
     fn eq_both_rectangles_not_at_origin() {
         assert_eq!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
+            Rectangle::from_dim(1.m(), 1.m()).move_to(point!(2.m(), 2.m())),
+            Rectangle::from_dim(1.m(), 1.m()).move_to(point!(2.m(), 2.m())),
         )
     }
 
     #[test]
     fn ne_both_rectangles_not_at_origin() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(3.m(), 3.m())),
+            Rectangle::from_dim(1.m(), 1.m()).move_to(point!(2.m(), 2.m())),
+            Rectangle::from_dim(1.m(), 1.m()).move_to(point!(3.m(), 3.m())),
         )
     }
 
     #[test]
     fn eq_both_rectangles_rotated() {
         assert_eq!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(45.deg()),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(45.deg()),
+            Rectangle::from_dim(1.m(), 1.m()).rotate(45.deg()),
+            Rectangle::from_dim(1.m(), 1.m()).rotate(45.deg()),
         )
     }
 
     #[test]
     fn ne_both_rectangles_rotated() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(45.deg()),
-            Rectangle::from_dim(length!(1 m), length!(1 m)).rotate(90.deg()),
+            Rectangle::from_dim(1.m(), 1.m()).rotate(45.deg()),
+            Rectangle::from_dim(1.m(), 1.m()).rotate(90.deg()),
         )
     }
 
     #[test]
     fn ne_different_sketches() {
         assert_ne!(
-            Rectangle::from_dim(length!(1 m), length!(1 m)).move_to(point!(2.m(), 2.m())),
-            Circle::from_radius(length!(1 m)).move_to(point!(2.m(), 2.m())),
+            Rectangle::from_dim(1.m(), 1.m()).move_to(point!(2.m(), 2.m())),
+            Circle::from_radius(1.m()).move_to(point!(2.m(), 2.m())),
         )
     }
 
@@ -547,15 +546,12 @@ mod tests {
     #[test]
     fn extrude_empty_sketch() {
         let sketch = Sketch::empty();
-        assert_eq!(
-            sketch.extrude(Plane::xy(), length!(5 m)),
-            Err(Error::EmptySketch)
-        )
+        assert_eq!(sketch.extrude(Plane::xy(), 5.m()), Err(Error::EmptySketch))
     }
 
     #[test]
     fn extrude_zero_thickness() {
-        let sketch = Rectangle::from_dim(length!(1 m), length!(2 m));
+        let sketch = Rectangle::from_dim(1.m(), 2.m());
         assert_eq!(
             sketch.extrude(Plane::xy(), Length::zero()),
             Err(Error::EmptySketch)
@@ -580,16 +576,10 @@ mod tests {
 
     #[test]
     fn extrude_cylinder() {
-        let sketch = Circle::from_radius(length!(1 m));
+        let sketch = Circle::from_radius(1.m());
         assert_eq!(
-            sketch.extrude(Plane::xy(), length!(2 m)),
-            Ok(
-                Cylinder::from_radius(length!(1 m), length!(2 m)).move_to(point!(
-                    0.m(),
-                    0.m(),
-                    1.m()
-                ))
-            )
+            sketch.extrude(Plane::xy(), 2.m()),
+            Ok(Cylinder::from_radius(1.m(), 2.m()).move_to(point!(0.m(), 0.m(), 1.m())))
         )
     }
 }

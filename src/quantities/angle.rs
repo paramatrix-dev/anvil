@@ -19,7 +19,7 @@ use super::IntoF64;
 /// assert_eq!(degrees_angle.deg(), 1.2);
 /// assert_eq!(radians_angle.rad(), 3.4);
 ///
-/// // Angle construction can be simplified using the `IntoAngle` trait
+/// // Angle construction can be simplified using the `IntoAngle` trait.
 /// use anvil::IntoAngle;
 ///
 /// assert_eq!(1.2.deg(), Angle::from_deg(1.2));

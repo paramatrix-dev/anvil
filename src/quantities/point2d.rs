@@ -108,14 +108,14 @@ impl Div<f64> for Point2D {
 /// ```rust
 /// use anvil::{IntoLength, Length, point, Point2D, Point3D};
 ///
-/// // construct a Point2D from two length values
+/// // construct a Point2D from two `Length` values
 /// assert_eq!(
 ///     point!(3.m(), 4.cm()),
 ///     Point2D::new(Length::from_m(3.), Length::from_cm(4.))
 /// );
 /// assert_eq!(point!(0, 0), Point2D::origin());
 ///
-/// // construct a Point3D from three length values
+/// // construct a Point3D from three `Length` values
 /// assert_eq!(
 ///     point!(3.m(), 4.cm(), 5.yd()),
 ///     Point3D::new(Length::from_m(3.), Length::from_cm(4.), Length::from_yd(5.))

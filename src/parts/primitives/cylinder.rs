@@ -12,9 +12,9 @@ impl Cylinder {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cylinder, length, Point3D, Part};
+    /// use anvil::{Cylinder, IntoLength, Point3D, Part};
     ///
-    /// let part = Cylinder::from_radius(length!(1 m), length!(2 m));
+    /// let part = Cylinder::from_radius(1.m(), 2.m());
     /// assert_eq!(part.center(), Ok(Point3D::origin()));
     /// assert!((part.volume() - 6.28319).abs() < 1e-5);
     /// ```
@@ -34,9 +34,9 @@ impl Cylinder {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cylinder, length, Point3D, Part};
+    /// use anvil::{Cylinder, IntoLength, Point3D, Part};
     ///
-    /// let part = Cylinder::from_diameter(length!(1 m), length!(2 m));
+    /// let part = Cylinder::from_diameter(1.m(), 2.m());
     /// assert_eq!(part.center(), Ok(Point3D::origin()));
     /// assert!((part.volume() - 1.57080).abs() < 1e-5);
     /// ```
@@ -48,17 +48,17 @@ impl Cylinder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::length;
+    use crate::IntoLength;
 
     #[test]
     fn from_radius_empty() {
-        assert!(Cylinder::from_radius(length!(0), length!(1 m)) == Part::empty());
-        assert!(Cylinder::from_radius(length!(1 m), length!(0)) == Part::empty());
+        assert!(Cylinder::from_radius(0.m(), 1.m()) == Part::empty());
+        assert!(Cylinder::from_radius(1.m(), 0.m()) == Part::empty());
     }
 
     #[test]
     fn from_diameter_empty() {
-        assert!(Cylinder::from_diameter(length!(0), length!(1 m)) == Part::empty());
-        assert!(Cylinder::from_diameter(length!(1 m), length!(0)) == Part::empty());
+        assert!(Cylinder::from_diameter(0.m(), 1.m()) == Part::empty());
+        assert!(Cylinder::from_diameter(1.m(), 0.m()) == Part::empty());
     }
 }

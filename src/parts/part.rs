@@ -421,7 +421,7 @@ fn round(x: f64, n_digits: u8) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Cuboid, IntoLength, Sphere, length, point};
+    use crate::{Cuboid, IntoLength, Sphere, point};
 
     #[test]
     fn eq_both_none() {
@@ -444,15 +444,15 @@ mod tests {
 
     #[test]
     fn eq_both_sphere() {
-        let sphere1 = Sphere::from_radius(length!(2 m));
-        let sphere2 = Sphere::from_radius(length!(2 m));
+        let sphere1 = Sphere::from_radius(2.m());
+        let sphere2 = Sphere::from_radius(2.m());
         assert!(sphere1 == sphere2)
     }
 
     #[test]
     fn neq_both_sphere() {
-        let sphere1 = Sphere::from_radius(length!(1 m));
-        let sphere2 = Sphere::from_radius(length!(2 m));
+        let sphere1 = Sphere::from_radius(1.m());
+        let sphere2 = Sphere::from_radius(2.m());
         assert!(sphere1 != sphere2)
     }
 

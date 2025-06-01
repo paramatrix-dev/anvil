@@ -21,29 +21,33 @@ to your Cargo.toml `[dependencies]` section.
 
 The two main structs in Anvil are `anvil::Part` for 3D and `anvil::Sketch` for 2D models. Both have primitive constructor-structs like `anvil::Cuboid` for `Part` or `anvil::Rectangle` for `Sketch` which can be further designed with operations like `add`, `subtract`, and `interface`. This is how you would create a 2x2 Lego brick in Anvil:
 ```rust
-let block_width = length!(16 mm);
-let block_height = length!(9.6 mm);
-let stud_height = length!(11.2 mm) - block_height;
-let stud_distance = length!(8 mm);
-let stud_diameter = length!(4.8 mm);
-let thickness = length!(1.2 mm);
-let tube_diameter = length!(6.5 mm);
+use anvil::{Axis3D, Cuboid, Cylinder, IntoLength, Part, point};
+
+let block_width = 16.mm();
+let block_height = 9.6.mm();
+let stud_height = 11.2.mm() - block_height;
+let stud_distance = 8.mm();
+let stud_diameter = 4.8.mm();
+let thickness = 1.2.mm();
+let tube_diameter = 6.5.mm();
 
 let block = Cuboid::from_dim(block_width, block_width, block_height);
-
 let studs = Cylinder::from_diameter(stud_diameter, stud_height)
-    .move_to(Point3D::new(
+    .move_to(point!(
         stud_distance / 2.,
         stud_distance / 2.,
-        (block_height + stud_height) / 2.,
+        (block_height + stud_height) / 2.
     ))
-    .circular_pattern(Axis::z(), 4);
-
-let inner_block = Cuboid::from_dim(block_width - thickness, block_width - thickness, block_height)
-    .move_to(Point3D::new(length!(0), length!(0), thickness * -0.5));
-
-let inner_tube = Cylinder::from_diameter(tube_diameter, block_height - thickness)
-    .subtract(&Cylinder::from_diameter(tube_diameter - thickness / 2., block_height - thickness));
+    .circular_pattern(Axis3D::z(), 4);
+let inner_block = Cuboid::from_dim(
+    block_width - thickness,
+    block_width - thickness,
+    block_height,
+)
+.move_to(point!(0.m(), 0.m(), thickness * -0.5));
+let inner_tube = Cylinder::from_diameter(tube_diameter, block_height - thickness).subtract(
+    &Cylinder::from_diameter(tube_diameter - thickness / 2., block_height - thickness),
+);
 
 let part = block.add(&studs).subtract(&inner_block).add(&inner_tube);
 ```
