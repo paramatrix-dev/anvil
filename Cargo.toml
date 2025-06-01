@@ -28,9 +28,13 @@ include = [
   "/examples/00_lego.png",
 ]
 
+[features]
+default = ["builtin"]
+builtin = [ "opencascade-sys/builtin" ]
+
 [dependencies]
 cxx = "1"
-opencascade-sys = "0.2.0"
+opencascade-sys = { git = "https://github.com/bschwind/opencascade-rs", rev = "d1db1bf1fb58dd094144532aa0e5c22106d61083" }
 tempfile = "3.19.1"
 
 [dev-dependencies]

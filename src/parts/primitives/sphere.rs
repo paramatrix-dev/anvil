@@ -22,7 +22,10 @@ impl Sphere {
         if is_zero(&[radius]) {
             return Part::empty();
         }
-        let mut make_sphere = ffi::BRepPrimAPI_MakeSphere_ctor(radius.m());
+
+        let axis = ffi::gp_Ax2_ctor(&ffi::new_point(0., 0., 0.), &ffi::gp_Dir_ctor(0., 0., 1.));
+        let mut make_sphere =
+            ffi::BRepPrimAPI_MakeSphere_ctor(&axis, radius.m(), std::f64::consts::TAU);
         Part::from_occt(make_sphere.pin_mut().Shape())
     }
     /// Construct a centered spherical `Part` from a given diameter.
