@@ -421,7 +421,7 @@ fn round(x: f64, n_digits: u8) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Cuboid, Point3D, Sphere, length};
+    use crate::{Cuboid, IntoLength, Sphere, length, point};
 
     #[test]
     fn eq_both_none() {
@@ -459,7 +459,7 @@ mod tests {
     #[test]
     fn move_to_deepcopied() {
         let cuboid1 = Cuboid::from_m(1., 1., 1.);
-        let loc = Point3D::from_m(2., 2., 2.);
+        let loc = point!(2.m(), 2.m(), 2.m());
         let cuboid2 = cuboid1.move_to(loc);
 
         assert_eq!(cuboid1.center(), Ok(Point3D::origin()));
@@ -475,22 +475,22 @@ mod tests {
     #[test]
     fn centre_of_mass_at_origin() {
         let cuboid = Cuboid::from_m(1., 1., 1.);
-        assert_eq!(cuboid.center(), Ok(Point3D::from_m(0., 0., 0.)))
+        assert_eq!(cuboid.center(), Ok(point!(0, 0, 0)))
     }
 
     #[test]
     fn centre_of_mass_not_at_origin() {
-        let cuboid = Cuboid::from_corners(Point3D::from_m(0., 0., 0.), Point3D::from_m(2., 2., 2.));
-        assert_eq!(cuboid.center(), Ok(Point3D::from_m(1., 1., 1.)))
+        let cuboid = Cuboid::from_corners(point!(0, 0, 0), point!(2.m(), 2.m(), 2.m()));
+        assert_eq!(cuboid.center(), Ok(point!(1.m(), 1.m(), 1.m())))
     }
 
     #[test]
     fn part_move_to_twice() {
         let part = Cuboid::from_m(1., 1., 1.);
         assert_eq!(
-            part.move_to(Point3D::from_m(1., 1., 1.))
-                .move_to(Point3D::from_m(-1., -1., -1.)),
-            Cuboid::from_m(1., 1., 1.).move_to(Point3D::from_m(-1., -1., -1.)),
+            part.move_to(point!(1.m(), 1.m(), 1.m()))
+                .move_to(point!(-1.m(), -1.m(), -1.m())),
+            Cuboid::from_m(1., 1., 1.).move_to(point!(-1.m(), -1.m(), -1.m())),
         )
     }
 

@@ -3,7 +3,9 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Angle, Axis2D, Axis3D, Error, Length, Part, Plane, Point2D, Point3D, angle};
+use crate::{
+    Angle, Axis2D, Axis3D, Error, IntoLength, Length, Part, Plane, Point2D, Point3D, angle,
+};
 
 use super::Edge;
 
@@ -362,7 +364,11 @@ fn occt_center(occt: &ffi::TopoDS_Shape) -> Point3D {
     ffi::BRepGProp_VolumeProperties(occt, gprops.pin_mut());
 
     let centre_of_mass = ffi::GProp_GProps_CentreOfMass(&gprops);
-    Point3D::from_m(centre_of_mass.X(), centre_of_mass.Y(), centre_of_mass.X())
+    Point3D::new(
+        centre_of_mass.X().m(),
+        centre_of_mass.Y().m(),
+        centre_of_mass.X().m(),
+    )
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -469,7 +475,7 @@ impl SketchAction {
 #[cfg(test)]
 mod tests {
     use crate::{
-        Cuboid, Cylinder, IntoLength, Path, Point2D, Point3D, Rectangle, angle, length, point,
+        Cuboid, Cylinder, IntoLength, Path, Point3D, Rectangle, angle, length, point,
         sketches::primitives::Circle,
     };
 
@@ -567,7 +573,7 @@ mod tests {
             sketch.extrude(Plane::xz(), Length::from_m(-3.)),
             Ok(Cuboid::from_corners(
                 Point3D::origin(),
-                Point3D::from_m(1., 3., 2.)
+                point!(1.m(), 3.m(), 2.m())
             ))
         )
     }
@@ -577,8 +583,13 @@ mod tests {
         let sketch = Circle::from_radius(length!(1 m));
         assert_eq!(
             sketch.extrude(Plane::xy(), length!(2 m)),
-            Ok(Cylinder::from_radius(length!(1 m), length!(2 m))
-                .move_to(Point3D::from_m(0., 0., 1.)))
+            Ok(
+                Cylinder::from_radius(length!(1 m), length!(2 m)).move_to(point!(
+                    0.m(),
+                    0.m(),
+                    1.m()
+                ))
+            )
         )
     }
 }

@@ -141,7 +141,7 @@ macro_rules! point {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Dir3D, IntoLength};
+    use crate::{Dir3D, IntoLength, point};
 
     use super::*;
 
@@ -175,7 +175,7 @@ mod tests {
     #[test]
     fn to_3d_origin() {
         let plane = Plane::new(
-            Point3D::from_m(1., 2., 3.),
+            point!(1.m(), 2.m(), 3.m()),
             Dir3D::try_from(1., 1., 0.).unwrap(),
             Dir3D::try_from(0., 0., 1.).unwrap(),
         )
@@ -190,7 +190,7 @@ mod tests {
         let plane = Plane::xy();
         let point = point!(1.m(), 2.m());
 
-        assert_eq!(point.to_3d(plane), Point3D::from_m(1., 2., 0.));
+        assert_eq!(point.to_3d(plane), point!(1.m(), 2.m(), 0.m()));
     }
 
     #[test]
