@@ -203,7 +203,7 @@ mod tests {
         .unwrap();
         let point = point!(f64::sqrt(2.).mm(), 5.mm());
 
-        let right = Point3D::from_mm(1., 5., -1.);
+        let right = point!(1.mm(), 5.mm(), -1.mm());
         assert!((point.to_3d(plane).x.m() - right.x.m()).abs() < 1e-9);
         assert!((point.to_3d(plane).y.m() - right.y.m()).abs() < 1e-9);
         assert!((point.to_3d(plane).z.m() - right.z.m()).abs() < 1e-9);

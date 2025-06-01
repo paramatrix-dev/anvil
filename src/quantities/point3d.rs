@@ -3,7 +3,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Error, Length};
+use crate::{Error, IntoLength, Length};
 
 use super::Dir3D;
 
@@ -22,30 +22,12 @@ pub struct Point3D {
 impl Point3D {
     /// The origin point at the position x=0, y=0, z=0.
     pub fn origin() -> Self {
-        Self::from_mm(0., 0., 0.)
+        Self::new(0.m(), 0.m(), 0.m())
     }
 
     /// Construct a `Point3D` from its component lengths.
     pub fn new(x: Length, y: Length, z: Length) -> Self {
         Point3D { x, y, z }
-    }
-    /// Construct a `Point3D` from the millimeter length values directly.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{length, Point3D};
-    ///
-    /// let point = Point3D::from_mm(1., 2., 3.);
-    /// assert_eq!(point.x, length!(1 mm));
-    /// assert_eq!(point.y, length!(2 mm));
-    /// assert_eq!(point.z, length!(3 mm));
-    /// ```
-    pub fn from_mm(x: f64, y: f64, z: f64) -> Self {
-        Point3D {
-            x: Length::from_mm(x),
-            y: Length::from_mm(y),
-            z: Length::from_mm(z),
-        }
     }
 
     /// Return the absolute distance between this `Point3D` and the origin point.
