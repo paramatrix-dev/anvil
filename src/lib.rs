@@ -13,9 +13,9 @@ pub use core::{
 pub use errors::Error;
 pub use parts::{
     Part,
-    primitives::{Cuboid, Cylinder, Sphere},
+    primitives::{Cube, Cuboid, Cylinder, Sphere},
 };
 pub use sketches::{
     Sketch,
-    primitives::{Circle, Rectangle},
+    primitives::{Circle, Rectangle, Square},
 };
