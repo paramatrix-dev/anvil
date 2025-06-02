@@ -1,6 +1,4 @@
-use crate::{Angle, Axis, Dir, Length, Point};
-
-use super::{Edge, Sketch};
+use crate::{Angle, Axis, Dir, Edge, Length, Point, Sketch};
 
 /// A continuous series of edges (i.e. lines, arcs, ...).
 #[derive(Debug, PartialEq, Clone)]

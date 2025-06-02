@@ -3,9 +3,7 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Angle, Axis, Error, IntoAngle, IntoLength, Length, Part, Plane, Point};
-
-use super::Edge;
+use crate::{Angle, Axis, Edge, Error, IntoAngle, IntoLength, Length, Part, Plane, Point};
 
 /// A closed shape in 2D space.
 #[derive(Debug, Clone)]

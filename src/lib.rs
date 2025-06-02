@@ -7,13 +7,15 @@ mod errors;
 mod parts;
 mod sketches;
 
-pub use core::{Angle, Axis, Dir, IntoAngle, IntoF64, IntoLength, Length, Plane, Point};
+pub use core::{
+    Angle, Axis, Dir, Edge, IntoAngle, IntoF64, IntoLength, Length, Path, Plane, Point,
+};
 pub use errors::Error;
 pub use parts::{
     Part,
     primitives::{Cuboid, Cylinder, Sphere},
 };
 pub use sketches::{
-    Edge, Path, Sketch,
+    Sketch,
     primitives::{Circle, Rectangle},
 };
