@@ -142,6 +142,44 @@ impl Dir<3> {
     }
 }
 
+impl<const DIM: usize> Add<Self> for Dir<DIM> {
+    type Output = Result<Self, Error>;
+    /// Add another `Dir` to this one.
+    ///
+    /// ```rust
+    /// use anvil::{dirRENAME, Error};
+    ///
+    /// // for 2d
+    /// assert_eq!(
+    ///     dirRENAME!(0, 1) + dirRENAME!(1, 0),
+    ///     Ok(dirRENAME!(1, 1))
+    /// );
+    /// assert_eq!(
+    ///     dirRENAME!(1, 1) + dirRENAME!(-1, -1),
+    ///     Err(Error::ZeroVector)
+    /// );
+    ///
+    /// // for 3d
+    /// assert_eq!(
+    ///     dirRENAME!(0, 1, 0) + dirRENAME!(1, 0, 0),
+    ///     Ok(dirRENAME!(1, 1, 0))
+    /// );
+    /// assert_eq!(
+    ///     dirRENAME!(1, 1, 1) + dirRENAME!(-1, -1, -1),
+    ///     Err(Error::ZeroVector)
+    /// );
+    /// ```
+    fn add(self, other: Self) -> Result<Self, Error> {
+        Self::try_from(
+            self.0
+                .into_iter_fixed()
+                .zip(other.0)
+                .map(|(a, b)| a + b)
+                .collect(),
+        )
+    }
+}
+
 impl<const DIM: usize> Sub<Self> for Dir<DIM> {
     type Output = Result<Self, Error>;
     /// Subtract another `Dir` from this one.
