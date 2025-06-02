@@ -1,6 +1,8 @@
 use std::ops::{Add, Div, Mul, Sub};
 
+use cxx::UniquePtr;
 use iter_fixed::IntoIteratorFixed;
+use opencascade_sys::ffi;
 
 use crate::{Length, Plane};
 
@@ -10,8 +12,8 @@ use crate::{Length, Plane};
 /// ```rust
 /// use anvil::{IntoLength, Point};
 ///
-/// let two_dimensional_point = Point::<2>::new(1.m(), 2.m());
-/// let three_dimensional_point = Point::<3>::new(1.m(), 2.m(), 3.m());
+/// let two_dimensional_point = Point::<2>::new([1.m(), 2.m()]);
+/// let three_dimensional_point = Point::<3>::new([1.m(), 2.m(), 3.m()]);
 /// ```
 ///
 /// The point! macro can be used to simplify point construction.
@@ -20,16 +22,36 @@ use crate::{Length, Plane};
 ///
 /// assert_eq!(
 ///     pointRENAME!(1.m(), 2.m()),
-///     Point::<2>::new(1.m(), 2.m())
+///     Point::<2>::new([1.m(), 2.m()])
 /// );
 /// assert_eq!(
 ///     pointRENAME!(1.m(), 2.m(), 3.m()),
-///     Point::<3>::new(1.m(), 2.m(), 3.m())
+///     Point::<3>::new([1.m(), 2.m(), 3.m()])
 /// );
 /// ```
 #[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
 pub struct Point<const DIM: usize>([Length; DIM]);
 impl<const DIM: usize> Point<DIM> {
+    /// Construct a `Point` from its coordinate `Length`s.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Point};
+    ///
+    /// // for 2D
+    /// let point2d = Point::<2>::new([1.m(), 2.m()]);
+    /// assert_eq!(point2d.x(), 1.m());
+    /// assert_eq!(point2d.y(), 2.m());
+    ///
+    /// // for 3D
+    /// let point3d = Point::<3>::new([1.m(), 2.m(), 3.m()]);
+    /// assert_eq!(point3d.x(), 1.m());
+    /// assert_eq!(point3d.y(), 2.m());
+    /// assert_eq!(point3d.z(), 3.m());
+    /// ```
+    pub fn new(coordinates: [Length; DIM]) -> Self {
+        Self(coordinates)
+    }
+
     /// The origin point with all coordinates equal to zero.
     ///
     /// ```rust
@@ -44,7 +66,7 @@ impl<const DIM: usize> Point<DIM> {
     /// let point3d = Point::<3>::origin();
     /// assert_eq!(point3d.x(), 0.m());
     /// assert_eq!(point3d.y(), 0.m());
-    /// assert_eq!(point3d.y(), 0.m());
+    /// assert_eq!(point3d.z(), 0.m());
     /// ```
     pub fn origin() -> Self {
         Self([Length::zero(); DIM])
@@ -77,11 +99,6 @@ impl<const DIM: usize> Point<DIM> {
 }
 
 impl Point<2> {
-    /// Construct a `Point<2>` from its component lengths.
-    pub fn new(x: Length, y: Length) -> Self {
-        Point::<2>([x, y])
-    }
-
     /// Return the distance of the `Point<2>` to the origin on the x-axis.
     pub fn x(&self) -> Length {
         self.0[0]
@@ -98,11 +115,6 @@ impl Point<2> {
 }
 
 impl Point<3> {
-    /// Construct a `Point<3>` from its component lengths.
-    pub fn new(x: Length, y: Length, z: Length) -> Self {
-        Point::<3>([x, y, z])
-    }
-
     /// Return the distance of the `Point<3>` to the origin on the x-axis.
     pub fn x(&self) -> Length {
         self.0[0]
@@ -114,6 +126,13 @@ impl Point<3> {
     /// Return the distance of the `Point<3>` to the origin on the z-axis.
     pub fn z(&self) -> Length {
         self.0[2]
+    }
+
+    pub(crate) fn to_occt_point(self) -> UniquePtr<ffi::gp_Pnt> {
+        ffi::new_point(self.x().m(), self.y().m(), self.z().m())
+    }
+    pub(crate) fn to_occt_vec(self) -> UniquePtr<ffi::gp_Vec> {
+        ffi::new_vec(self.x().m(), self.y().m(), self.z().m())
     }
 }
 
@@ -258,14 +277,14 @@ impl<const DIM: usize> Div<f64> for Point<DIM> {
 /// // construct a Point<2> from two `Length` values
 /// assert_eq!(
 ///     pointRENAME!(3.m(), 4.cm()),
-///     Point::<2>::new(3.m(), 4.cm())
+///     Point::<2>::new([3.m(), 4.cm()])
 /// );
 /// assert_eq!(pointRENAME!(0, 0), Point::<2>::origin());
 ///
 /// // construct a Point<3> from three `Length` values
 /// assert_eq!(
 ///     pointRENAME!(3.m(), 4.cm(), 5.yd()),
-///     Point::<3>::new(3.m(), 4.cm(), 5.yd())
+///     Point::<3>::new([3.m(), 4.cm(), 5.yd()])
 /// );
 /// assert_eq!(pointRENAME!(0, 0, 0), Point::<3>::origin());
 /// ```
@@ -275,13 +294,13 @@ macro_rules! pointRENAME {
         $crate::Point::<2>::origin()
     };
     ($x:expr, $y:expr) => {
-        $crate::Point::<2>::new($x, $y)
+        $crate::Point::<2>::new([$x, $y])
     };
 
     (0, 0, 0) => {
         $crate::Point::<3>::origin()
     };
     ($x:expr, $y:expr, $z:expr) => {
-        $crate::Point::<3>::new($x, $y, $z)
+        $crate::Point::<3>::new([$x, $y, $z])
     };
 }
