@@ -4,7 +4,7 @@ use cxx::UniquePtr;
 use iter_fixed::IntoIteratorFixed;
 use opencascade_sys::ffi;
 
-use crate::{Length, Plane};
+use crate::{Dir, Error, Length, Plane};
 
 /// A location in space.
 ///
@@ -16,7 +16,7 @@ use crate::{Length, Plane};
 /// let three_dimensional_point = Point::<3>::new([1.m(), 2.m(), 3.m()]);
 /// ```
 ///
-/// The point! macro can be used to simplify point construction.
+/// The `point!` macro can be used to simplify point construction.
 /// ```rust
 /// use anvil::{IntoLength, Point, pointRENAME};
 ///
@@ -93,8 +93,8 @@ impl<const DIM: usize> Point<DIM> {
     }
 
     /// Return the direction this `Point` lies in with respect to another point.
-    pub fn direction_from(&self, other: Self) {
-        todo!()
+    pub fn direction_from(&self, other: Self) -> Result<Dir<DIM>, Error> {
+        Dir::<DIM>::try_from((*self - other).0.into_iter_fixed().map(|n| n.m()).collect())
     }
 }
 

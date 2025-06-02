@@ -8,7 +8,7 @@ mod parts;
 mod quantities;
 mod sketches;
 
-pub use core::Point;
+pub use core::{Dir, Point};
 pub use errors::Error;
 pub use parts::{
     Part,

@@ -1,5 +1,7 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+use crate::{Dir, Point};
+
 use super::{Dir2D, Dir3D, IntoF64, Point2D, Point3D};
 
 /// A physical length (i.e. a distance).
@@ -248,6 +250,30 @@ impl Div<Length> for Length {
     /// ```
     fn div(self, other: Length) -> f64 {
         self.meters / other.meters
+    }
+}
+
+impl<const DIM: usize> Mul<Dir<DIM>> for Length {
+    type Output = Point<DIM>;
+    /// Multiply this `Length` with a `Dir` to get a `Point`.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, dirRENAME, pointRENAME};
+    ///
+    /// // for 2d
+    /// assert_eq!(
+    ///     2.m() * dirRENAME!(1, 0),
+    ///     pointRENAME!(2.m(), 0.m())
+    /// );
+    ///
+    /// // for 3d
+    /// assert_eq!(
+    ///     2.m() * dirRENAME!(1, 0, 0),
+    ///     pointRENAME!(2.m(), 0.m(), 0.m())
+    /// );
+    /// ```
+    fn mul(self, other: Dir<DIM>) -> Point<DIM> {
+        other * self
     }
 }
 
