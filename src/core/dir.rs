@@ -18,10 +18,10 @@ use crate::{Angle, Error, Length, Point};
 ///
 /// The `dir!` macro can be used to simplify point construction.
 /// ```rust
-/// use anvil::{Dir, dirRENAME};
+/// use anvil::{Dir, dir};
 ///
-/// assert_eq!(dirRENAME!(3, 4), Dir::try_from([3., 4.]).unwrap());
-/// assert_eq!(dirRENAME!(3, 4, 5), Dir::try_from([3., 4., 5.]).unwrap());
+/// assert_eq!(dir!(3, 4), Dir::try_from([3., 4.]).unwrap());
+/// assert_eq!(dir!(3, 4, 5), Dir::try_from([3., 4., 5.]).unwrap());
 /// ```
 #[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
 pub struct Dir<const DIM: usize>([f64; DIM]);
@@ -147,25 +147,25 @@ impl<const DIM: usize> Add<Self> for Dir<DIM> {
     /// Add another `Dir` to this one.
     ///
     /// ```rust
-    /// use anvil::{dirRENAME, Error};
+    /// use anvil::{dir, Error};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     dirRENAME!(0, 1) + dirRENAME!(1, 0),
-    ///     Ok(dirRENAME!(1, 1))
+    ///     dir!(0, 1) + dir!(1, 0),
+    ///     Ok(dir!(1, 1))
     /// );
     /// assert_eq!(
-    ///     dirRENAME!(1, 1) + dirRENAME!(-1, -1),
+    ///     dir!(1, 1) + dir!(-1, -1),
     ///     Err(Error::ZeroVector)
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     dirRENAME!(0, 1, 0) + dirRENAME!(1, 0, 0),
-    ///     Ok(dirRENAME!(1, 1, 0))
+    ///     dir!(0, 1, 0) + dir!(1, 0, 0),
+    ///     Ok(dir!(1, 1, 0))
     /// );
     /// assert_eq!(
-    ///     dirRENAME!(1, 1, 1) + dirRENAME!(-1, -1, -1),
+    ///     dir!(1, 1, 1) + dir!(-1, -1, -1),
     ///     Err(Error::ZeroVector)
     /// );
     /// ```
@@ -185,25 +185,25 @@ impl<const DIM: usize> Sub<Self> for Dir<DIM> {
     /// Subtract another `Dir` from this one.
     ///
     /// ```rust
-    /// use anvil::{dirRENAME, Error};
+    /// use anvil::{dir, Error};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     dirRENAME!(0, 1) - dirRENAME!(1, 0),
-    ///     Ok(dirRENAME!(-1, 1))
+    ///     dir!(0, 1) - dir!(1, 0),
+    ///     Ok(dir!(-1, 1))
     /// );
     /// assert_eq!(
-    ///     dirRENAME!(1, 1) - dirRENAME!(1, 1),
+    ///     dir!(1, 1) - dir!(1, 1),
     ///     Err(Error::ZeroVector)
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     dirRENAME!(0, 1, 0) - dirRENAME!(1, 0, 0),
-    ///     Ok(dirRENAME!(-1, 1, 0))
+    ///     dir!(0, 1, 0) - dir!(1, 0, 0),
+    ///     Ok(dir!(-1, 1, 0))
     /// );
     /// assert_eq!(
-    ///     dirRENAME!(1, 1, 1) - dirRENAME!(1, 1, 1),
+    ///     dir!(1, 1, 1) - dir!(1, 1, 1),
     ///     Err(Error::ZeroVector)
     /// );
     /// ```
@@ -223,18 +223,18 @@ impl<const DIM: usize> Mul<Length> for Dir<DIM> {
     /// Multiply this `Dir` with a `Length` to get a `Point`.
     ///
     /// ```rust
-    /// use anvil::{IntoLength, dirRENAME, pointRENAME};
+    /// use anvil::{IntoLength, dir, point};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     dirRENAME!(1, 0) * 2.m(),
-    ///     pointRENAME!(2.m(), 0.m())
+    ///     dir!(1, 0) * 2.m(),
+    ///     point!(2.m(), 0.m())
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     dirRENAME!(1, 0, 0) * 2.m(),
-    ///     pointRENAME!(2.m(), 0.m(), 0.m())
+    ///     dir!(1, 0, 0) * 2.m(),
+    ///     point!(2.m(), 0.m(), 0.m())
     /// );
     /// ```
     fn mul(self, other: Length) -> Point<DIM> {
@@ -245,20 +245,20 @@ impl<const DIM: usize> Mul<Length> for Dir<DIM> {
 /// Macro for simplifying `Dir` construction for static values.
 ///
 /// ```rust
-/// use anvil::{dirRENAME, Dir};
+/// use anvil::{dir, Dir};
 ///
 /// // for 2d
-/// assert_eq!(dirRENAME!(3, 4), Dir::try_from([3., 4.]).unwrap());
-/// assert_eq!(dirRENAME!(3., 4.), Dir::try_from([3., 4.]).unwrap());
-/// // dirRENAME!(0, 0); <- this raises a compile error
+/// assert_eq!(dir!(3, 4), Dir::try_from([3., 4.]).unwrap());
+/// assert_eq!(dir!(3., 4.), Dir::try_from([3., 4.]).unwrap());
+/// // dir!(0, 0); <- this raises a compile error
 ///
 /// // for 3d
-/// assert_eq!(dirRENAME!(3, 4, 5), Dir::try_from([3., 4., 5.]).unwrap());
-/// assert_eq!(dirRENAME!(3., 4., 5.), Dir::try_from([3., 4., 5.]).unwrap());
-/// // dirRENAME!(0, 0, 0); // <- this raises a compile error
+/// assert_eq!(dir!(3, 4, 5), Dir::try_from([3., 4., 5.]).unwrap());
+/// assert_eq!(dir!(3., 4., 5.), Dir::try_from([3., 4., 5.]).unwrap());
+/// // dir!(0, 0, 0); // <- this raises a compile error
 /// ```
 #[macro_export]
-macro_rules! dirRENAME {
+macro_rules! dir {
     ( 0., 0. ) => {
         compile_error!("At least one value of the Dir needs to be non-zero.")
     };

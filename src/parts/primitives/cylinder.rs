@@ -1,4 +1,4 @@
-use crate::{Length, Part, quantities::is_zero};
+use crate::{Length, Part, core::is_zero};
 use opencascade_sys::ffi;
 
 /// Builder for a cylindrical `Part`.
@@ -12,10 +12,10 @@ impl Cylinder {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cylinder, IntoLength, Point3D, Part};
+    /// use anvil::{Cylinder, IntoLength, Point, Part};
     ///
     /// let part = Cylinder::from_radius(1.m(), 2.m());
-    /// assert_eq!(part.center(), Ok(Point3D::origin()));
+    /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
     /// assert!((part.volume() - 6.28319).abs() < 1e-5);
     /// ```
     pub fn from_radius(radius: Length, height: Length) -> Part {
@@ -34,10 +34,10 @@ impl Cylinder {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Cylinder, IntoLength, Point3D, Part};
+    /// use anvil::{Cylinder, IntoLength, Point, Part};
     ///
     /// let part = Cylinder::from_diameter(1.m(), 2.m());
-    /// assert_eq!(part.center(), Ok(Point3D::origin()));
+    /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
     /// assert!((part.volume() - 1.57080).abs() < 1e-5);
     /// ```
     pub fn from_diameter(diameter: Length, height: Length) -> Part {

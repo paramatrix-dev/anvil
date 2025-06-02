@@ -18,14 +18,14 @@ use crate::{Dir, Error, Length, Plane};
 ///
 /// The `point!` macro can be used to simplify point construction.
 /// ```rust
-/// use anvil::{IntoLength, Point, pointRENAME};
+/// use anvil::{IntoLength, Point, point};
 ///
 /// assert_eq!(
-///     pointRENAME!(1.m(), 2.m()),
+///     point!(1.m(), 2.m()),
 ///     Point::<2>::new([1.m(), 2.m()])
 /// );
 /// assert_eq!(
-///     pointRENAME!(1.m(), 2.m(), 3.m()),
+///     point!(1.m(), 2.m(), 3.m()),
 ///     Point::<3>::new([1.m(), 2.m(), 3.m()])
 /// );
 /// ```
@@ -76,15 +76,15 @@ impl<const DIM: usize> Point<DIM> {
     ///
     /// ```rust
     /// use core::f64;
-    /// use anvil::{IntoLength, pointRENAME};
+    /// use anvil::{IntoLength, point};
     ///
     /// // for 2D
-    /// let point2 = pointRENAME!(3.m(), 4.m());
-    /// assert_eq!(point2.distance_to(pointRENAME!(0, 0)), 5.m());
+    /// let point2 = point!(3.m(), 4.m());
+    /// assert_eq!(point2.distance_to(point!(0, 0)), 5.m());
     ///
     /// // for 3D
-    /// let point3 = pointRENAME!(3.m(), 0.m(), 4.m());
-    /// assert_eq!(point3.distance_to(pointRENAME!(0, 0, 0)), 5.m());
+    /// let point3 = point!(3.m(), 0.m(), 4.m());
+    /// assert_eq!(point3.distance_to(point!(0, 0, 0)), 5.m());
     /// ```
     pub fn distance_to(&self, other: Self) -> Length {
         Length::from_m(f64::sqrt(
@@ -110,7 +110,7 @@ impl Point<2> {
 
     /// Return the global position of this `Point<2>` given the `Plane` it is located on.
     pub fn to_3d(&self, plane: Plane) -> Point<3> {
-        todo!()
+        plane.origin() + plane.x() * self.x() + plane.y() * self.y()
     }
 }
 
@@ -141,18 +141,18 @@ impl<const DIM: usize> Add<Self> for Point<DIM> {
     /// Add another `Point` of the same dimension to this one.
     ///
     /// ```rust
-    /// use anvil::{IntoLength, pointRENAME};
+    /// use anvil::{IntoLength, point};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     pointRENAME!(1.m(), 2.m()) + pointRENAME!(4.m(), 5.m()),
-    ///     pointRENAME!(5.m(), 7.m())
+    ///     point!(1.m(), 2.m()) + point!(4.m(), 5.m()),
+    ///     point!(5.m(), 7.m())
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     pointRENAME!(1.m(), 2.m(), 3.m()) + pointRENAME!(4.m(), 5.m(), 6.m()),
-    ///     pointRENAME!(5.m(), 7.m(), 9.m())
+    ///     point!(1.m(), 2.m(), 3.m()) + point!(4.m(), 5.m(), 6.m()),
+    ///     point!(5.m(), 7.m(), 9.m())
     /// );
     /// ```
     fn add(self, other: Self) -> Self {
@@ -171,18 +171,18 @@ impl<const DIM: usize> Sub<Self> for Point<DIM> {
     /// Subtract another `Point` of the same dimension from this one.
     ///
     /// ```rust
-    /// use anvil::{IntoLength, pointRENAME};
+    /// use anvil::{IntoLength, point};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     pointRENAME!(4.m(), 5.m()) - pointRENAME!(1.m(), 2.m()),
-    ///     pointRENAME!(3.m(), 3.m())
+    ///     point!(4.m(), 5.m()) - point!(1.m(), 2.m()),
+    ///     point!(3.m(), 3.m())
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     pointRENAME!(4.m(), 5.m(), 6.m()) - pointRENAME!(1.m(), 2.m(), 3.m()),
-    ///     pointRENAME!(3.m(), 3.m(), 3.m())
+    ///     point!(4.m(), 5.m(), 6.m()) - point!(1.m(), 2.m(), 3.m()),
+    ///     point!(3.m(), 3.m(), 3.m())
     /// );
     /// ```
     fn sub(self, other: Self) -> Self {
@@ -201,18 +201,18 @@ impl<const DIM: usize> Mul<f64> for Point<DIM> {
     /// Multiply this `Point` with a scalar.
     ///
     /// ```rust
-    /// use anvil::{IntoLength, pointRENAME};
+    /// use anvil::{IntoLength, point};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     pointRENAME!(1.m(), 2.m()) * 3.,
-    ///     pointRENAME!(3.m(), 6.m())
+    ///     point!(1.m(), 2.m()) * 3.,
+    ///     point!(3.m(), 6.m())
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     pointRENAME!(1.m(), 2.m(), 3.m()) * 4.,
-    ///     pointRENAME!(4.m(), 8.m(), 12.m())
+    ///     point!(1.m(), 2.m(), 3.m()) * 4.,
+    ///     point!(4.m(), 8.m(), 12.m())
     /// );
     /// ```
     fn mul(self, other: f64) -> Self {
@@ -225,18 +225,18 @@ impl<const DIM: usize> Mul<Point<DIM>> for f64 {
     /// Multiply this scalar with a `Point`.
     ///
     /// ```rust
-    /// use anvil::{IntoLength, pointRENAME};
+    /// use anvil::{IntoLength, point};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     3. * pointRENAME!(1.m(), 2.m()),
-    ///     pointRENAME!(3.m(), 6.m())
+    ///     3. * point!(1.m(), 2.m()),
+    ///     point!(3.m(), 6.m())
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     4. * pointRENAME!(1.m(), 2.m(), 3.m()),
-    ///     pointRENAME!(4.m(), 8.m(), 12.m())
+    ///     4. * point!(1.m(), 2.m(), 3.m()),
+    ///     point!(4.m(), 8.m(), 12.m())
     /// );
     /// ```
     fn mul(self, other: Point<DIM>) -> Point<DIM> {
@@ -249,18 +249,18 @@ impl<const DIM: usize> Div<f64> for Point<DIM> {
     /// Divide this `Point` by a scalar.
     ///
     /// ```rust
-    /// use anvil::{IntoLength, pointRENAME};
+    /// use anvil::{IntoLength, point};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     pointRENAME!(3.m(), 6.m()) / 3.,
-    ///     pointRENAME!(1.m(), 2.m())
+    ///     point!(3.m(), 6.m()) / 3.,
+    ///     point!(1.m(), 2.m())
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     pointRENAME!(4.m(), 8.m(), 12.m()) / 4.,
-    ///     pointRENAME!(1.m(), 2.m(), 3.m())
+    ///     point!(4.m(), 8.m(), 12.m()) / 4.,
+    ///     point!(1.m(), 2.m(), 3.m())
     /// );
     /// ```
     fn div(self, other: f64) -> Self {
@@ -272,24 +272,24 @@ impl<const DIM: usize> Div<f64> for Point<DIM> {
 ///
 /// # Examples
 /// ```rust
-/// use anvil::{IntoLength, pointRENAME, Point};
+/// use anvil::{IntoLength, point, Point};
 ///
 /// // construct a Point<2> from two `Length` values
 /// assert_eq!(
-///     pointRENAME!(3.m(), 4.cm()),
+///     point!(3.m(), 4.cm()),
 ///     Point::<2>::new([3.m(), 4.cm()])
 /// );
-/// assert_eq!(pointRENAME!(0, 0), Point::<2>::origin());
+/// assert_eq!(point!(0, 0), Point::<2>::origin());
 ///
 /// // construct a Point<3> from three `Length` values
 /// assert_eq!(
-///     pointRENAME!(3.m(), 4.cm(), 5.yd()),
+///     point!(3.m(), 4.cm(), 5.yd()),
 ///     Point::<3>::new([3.m(), 4.cm(), 5.yd()])
 /// );
-/// assert_eq!(pointRENAME!(0, 0, 0), Point::<3>::origin());
+/// assert_eq!(point!(0, 0, 0), Point::<3>::origin());
 /// ```
 #[macro_export]
-macro_rules! pointRENAME {
+macro_rules! point {
     (0, 0) => {
         $crate::Point::<2>::origin()
     };

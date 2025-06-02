@@ -1,4 +1,4 @@
-use anvil::{Axis3D, Cylinder, IntoAngle, IntoLength, Part, Path, Plane, point};
+use anvil::{Axis, Cylinder, IntoAngle, IntoLength, Part, Path, Plane, point};
 
 fn construct() -> Part {
     let thickness = 1.m();
@@ -26,7 +26,7 @@ fn construct() -> Part {
         .move_to(point!(thickness / 4., 0.m(), total_height / 2.));
 
     let hinge_hole = Cylinder::from_radius(hinge_radius, depth + thickness)
-        .rotate_around(Axis3D::y(), 90.deg())
+        .rotate_around(Axis::<3>::y(), 90.deg())
         .move_to(point!(0.m(), 0.m(), hinge_outer_radius));
 
     let mount_hole = Cylinder::from_radius(mount_radius, thickness * 2.);

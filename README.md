@@ -21,7 +21,7 @@ to your Cargo.toml `[dependencies]` section.
 
 The two main structs in Anvil are `anvil::Part` for 3D and `anvil::Sketch` for 2D models. Both have primitive constructor-structs like `anvil::Cuboid` for `Part` or `anvil::Rectangle` for `Sketch` which can be further designed with operations like `add`, `subtract`, and `interface`. This is how you would create a 2x2 Lego brick in Anvil:
 ```rust
-use anvil::{Axis3D, Cuboid, Cylinder, IntoLength, Part, point};
+use anvil::{Axis::<3>, Cuboid, Cylinder, IntoLength, Part, point};
 
 let block_width = 16.mm();
 let block_height = 9.6.mm();
@@ -38,7 +38,7 @@ let studs = Cylinder::from_diameter(stud_diameter, stud_height)
         stud_distance / 2.,
         (block_height + stud_height) / 2.
     ))
-    .circular_pattern(Axis3D::z(), 4);
+    .circular_pattern(Axis::<3>::z(), 4);
 let inner_block = Cuboid::from_dim(
     block_width - thickness,
     block_width - thickness,

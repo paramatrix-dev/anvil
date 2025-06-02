@@ -9,7 +9,7 @@ use cxx::UniquePtr;
 use opencascade_sys::ffi;
 use tempfile::NamedTempFile;
 
-use crate::{Angle, Axis3D, Error, IntoAngle, Length, Point3D};
+use crate::{Angle, Axis, Error, IntoAngle, Length, Point, point};
 
 /// A 3D object in space.
 pub struct Part {
@@ -56,18 +56,18 @@ impl Part {
     /// Create multiple instances of the `Part` spaced evenly around a point.
     ///
     /// ```rust
-    /// use anvil::{Axis3D, Cuboid, IntoAngle, IntoLength, point};
+    /// use anvil::{Axis, Cuboid, IntoAngle, IntoLength, point};
     ///
     /// let cuboid = Cuboid::from_corners(point!(1.m(), 1.m(), 0.m()), point!(2.m(), 2.m(), 1.m()));
     /// assert_eq!(
-    ///     cuboid.circular_pattern(Axis3D::z(), 4),
+    ///     cuboid.circular_pattern(Axis::<3>::z(), 4),
     ///     cuboid
-    ///         .add(&cuboid.rotate_around(Axis3D::z(), 90.deg()))
-    ///         .add(&cuboid.rotate_around(Axis3D::z(), 180.deg()))
-    ///         .add(&cuboid.rotate_around(Axis3D::z(), 270.deg()))
+    ///         .add(&cuboid.rotate_around(Axis::<3>::z(), 90.deg()))
+    ///         .add(&cuboid.rotate_around(Axis::<3>::z(), 180.deg()))
+    ///         .add(&cuboid.rotate_around(Axis::<3>::z(), 270.deg()))
     /// )
     /// ```
-    pub fn circular_pattern(&self, around: Axis3D, instances: u8) -> Self {
+    pub fn circular_pattern(&self, around: Axis<3>, instances: u8) -> Self {
         let angle_step = 360.deg() / instances as f64;
         let mut new_shape = self.clone();
         let mut angle = 0.rad();
@@ -114,17 +114,17 @@ impl Part {
     ///         .add(&cuboid.move_to(point!(4.m(), 0.m(), 0.m())))
     /// )
     /// ```
-    pub fn linear_pattern(&self, until: Point3D, instances: u8) -> Self {
+    pub fn linear_pattern(&self, until: Point<3>, instances: u8) -> Self {
         let start = match self.center() {
             Ok(p) => p,
             Err(_) => return self.clone(),
         };
-        let axis = match Axis3D::between(start, until) {
+        let axis = match Axis::<3>::between(start, until) {
             Ok(axis) => axis,
             Err(_) => return self.clone(),
         };
 
-        let len_step = (start - until).distance_to_origin() / instances as f64;
+        let len_step = (start - until).distance_to(Point::<3>::origin()) / instances as f64;
         let mut new_part = self.clone();
         let mut pos = Length::zero();
         for _ in 0..instances {
@@ -152,7 +152,7 @@ impl Part {
             Ok(c) => c,
             Err(_) => return self.clone(),
         };
-        self.move_to(center + Point3D::new(dx, dy, dz))
+        self.move_to(center + point!(dx, dy, dz))
     }
     /// Return a clone of this `Part` with the center moved to a specified point.
     ///
@@ -164,7 +164,7 @@ impl Part {
     /// assert_eq!(cuboid.center(), Ok(point!(0, 0, 0)));
     /// assert_eq!(moved_cuboid.center(), Ok(point!(2.m(), 2.m(), 2.m())));
     /// ```
-    pub fn move_to(&self, loc: Point3D) -> Self {
+    pub fn move_to(&self, loc: Point<3>) -> Self {
         match &self.inner {
             Some(inner) => {
                 let move_vec = (loc - self.center().unwrap()).to_occt_vec();
@@ -176,20 +176,20 @@ impl Part {
             None => Self { inner: None },
         }
     }
-    /// Return a clone of this `Part` rotated around an `Axis3D`.
+    /// Return a clone of this `Part` rotated around an `Axis::<3>`.
     ///
     /// For positive angles, the right-hand-rule applies for the direction of rotation.
     ///
     /// ```rust
-    /// use anvil::{Axis3D, Cuboid, IntoAngle, IntoLength, point};
+    /// use anvil::{Axis, Cuboid, IntoAngle, IntoLength, point};
     ///
     /// let cuboid = Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), 1.m(), 1.m()));
     /// assert_eq!(
-    ///     cuboid.rotate_around(Axis3D::x(), 90.deg()),
+    ///     cuboid.rotate_around(Axis::<3>::x(), 90.deg()),
     ///     Cuboid::from_corners(point!(0, 0, 0), point!(1.m(), -1.m(), 1.m()))
     /// )
     /// ```
-    pub fn rotate_around(&self, axis: Axis3D, angle: Angle) -> Self {
+    pub fn rotate_around(&self, axis: Axis<3>, angle: Angle) -> Self {
         match &self.inner {
             Some(inner) => {
                 let mut transform = ffi::new_transform();
@@ -284,18 +284,18 @@ impl Part {
     /// );
     /// assert_eq!(non_centered_cuboid.center(), Ok(point!(1.m(), 1.m(), 1.m())));
     /// ```
-    pub fn center(&self) -> Result<Point3D, Error> {
+    pub fn center(&self) -> Result<Point<3>, Error> {
         match &self.inner {
             Some(inner) => {
                 let mut gprops = ffi::GProp_GProps_ctor();
                 ffi::BRepGProp_VolumeProperties(inner, gprops.pin_mut());
                 let centre_of_mass = ffi::GProp_GProps_CentreOfMass(&gprops);
 
-                Ok(Point3D {
-                    x: Length::from_m(round(centre_of_mass.X(), 9)),
-                    y: Length::from_m(round(centre_of_mass.Y(), 9)),
-                    z: Length::from_m(round(centre_of_mass.Z(), 9)),
-                })
+                Ok(point!(
+                    Length::from_m(round(centre_of_mass.X(), 9)),
+                    Length::from_m(round(centre_of_mass.Y(), 9)),
+                    Length::from_m(round(centre_of_mass.Z(), 9))
+                ))
             }
             None => Err(Error::EmptyPart),
         }
@@ -462,7 +462,7 @@ mod tests {
         let loc = point!(2.m(), 2.m(), 2.m());
         let cuboid2 = cuboid1.move_to(loc);
 
-        assert_eq!(cuboid1.center(), Ok(Point3D::origin()));
+        assert_eq!(cuboid1.center(), Ok(Point::<3>::origin()));
         assert_eq!(cuboid2.center(), Ok(loc));
     }
 
@@ -498,8 +498,8 @@ mod tests {
     fn move_after_rotate_should_not_reset_rotate() {
         let part = Cuboid::from_m(1., 1., 2.);
         assert_eq!(
-            part.rotate_around(Axis3D::y(), 90.deg())
-                .move_to(Point3D::origin()),
+            part.rotate_around(Axis::<3>::y(), 90.deg())
+                .move_to(Point::<3>::origin()),
             Cuboid::from_m(2., 1., 1.)
         )
     }

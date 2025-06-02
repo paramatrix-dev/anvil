@@ -1,8 +1,6 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-use crate::{Dir, Point};
-
-use super::{Dir2D, Dir3D, IntoF64, Point2D, Point3D};
+use crate::{Dir, IntoF64, Point};
 
 /// A physical length (i.e. a distance).
 ///
@@ -258,57 +256,21 @@ impl<const DIM: usize> Mul<Dir<DIM>> for Length {
     /// Multiply this `Length` with a `Dir` to get a `Point`.
     ///
     /// ```rust
-    /// use anvil::{IntoLength, dirRENAME, pointRENAME};
+    /// use anvil::{IntoLength, dir, point};
     ///
     /// // for 2d
     /// assert_eq!(
-    ///     2.m() * dirRENAME!(1, 0),
-    ///     pointRENAME!(2.m(), 0.m())
+    ///     2.m() * dir!(1, 0),
+    ///     point!(2.m(), 0.m())
     /// );
     ///
     /// // for 3d
     /// assert_eq!(
-    ///     2.m() * dirRENAME!(1, 0, 0),
-    ///     pointRENAME!(2.m(), 0.m(), 0.m())
+    ///     2.m() * dir!(1, 0, 0),
+    ///     point!(2.m(), 0.m(), 0.m())
     /// );
     /// ```
     fn mul(self, other: Dir<DIM>) -> Point<DIM> {
-        other * self
-    }
-}
-
-impl Mul<Dir2D> for Length {
-    type Output = Point2D;
-    /// Multiply this `Length` with a `Dir2D` to get a `Point2D`.
-    ///
-    /// ```rust
-    /// use anvil::{dir, IntoLength, point};
-    ///
-    /// let dir2 = dir!(1, 0);
-    /// assert_eq!(
-    ///     2.m() * dir2,
-    ///     point!(2.m(), 0.m())
-    /// )
-    /// ```
-    fn mul(self, other: Dir2D) -> Point2D {
-        other * self
-    }
-}
-
-impl Mul<Dir3D> for Length {
-    type Output = Point3D;
-    /// Multiply this `Length` with a `Dir3D` to get a `Point3D`.
-    ///
-    /// ```rust
-    /// use anvil::{dir, IntoLength, point};
-    ///
-    /// let dir3 = dir!(1, 0, 0);
-    /// assert_eq!(
-    ///     2.m() * dir3,
-    ///     point!(2.m(), 0.m(), 0.m())
-    /// )
-    /// ```
-    fn mul(self, other: Dir3D) -> Point3D {
         other * self
     }
 }

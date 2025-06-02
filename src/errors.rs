@@ -1,6 +1,6 @@
 use std::{error::Error as StdError, fmt, path::PathBuf};
 
-use crate::quantities::Dir3D;
+use crate::Dir;
 
 /// The errors that can occurr.
 #[derive(Clone, Debug, PartialEq)]
@@ -21,7 +21,7 @@ pub enum Error {
     ZeroVector,
 
     /// Occurs when two vectors that are required to be orthogonal, are not.
-    VectorsNotOrthogonal(Dir3D, Dir3D),
+    VectorsNotOrthogonal(Dir<3>, Dir<3>),
 }
 impl StdError for Error {}
 impl fmt::Display for Error {

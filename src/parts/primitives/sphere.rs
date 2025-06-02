@@ -1,4 +1,4 @@
-use crate::{Length, Part, quantities::is_zero};
+use crate::{Length, Part, core::is_zero};
 use opencascade_sys::ffi;
 
 /// Builder for a spherical `Part`.
@@ -12,10 +12,10 @@ impl Sphere {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Sphere, IntoLength, Point3D, Part};
+    /// use anvil::{Sphere, IntoLength, Point, Part};
     ///
     /// let part = Sphere::from_radius(1.m());
-    /// assert_eq!(part.center(), Ok(Point3D::origin()));
+    /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
     /// assert!((part.volume() - 4.18879).abs() < 1e-5);
     /// ```
     pub fn from_radius(radius: Length) -> Part {
@@ -32,10 +32,10 @@ impl Sphere {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Sphere, IntoLength, Point3D, Part};
+    /// use anvil::{Sphere, IntoLength, Point, Part};
     ///
     /// let part = Sphere::from_diameter(1.m());
-    /// assert_eq!(part.center(), Ok(Point3D::origin()));
+    /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
     /// assert!((part.volume() - 0.523599).abs() < 1e-5);
     /// ```
     pub fn from_diameter(diameter: Length) -> Part {

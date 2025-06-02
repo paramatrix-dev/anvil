@@ -1,11 +1,11 @@
-use crate::{Angle, Axis2D, Dir2D, Length, Point2D};
+use crate::{Angle, Axis, Dir, Length, Point};
 
 use super::{Edge, Sketch};
 
 /// A continuous series of edges (i.e. lines, arcs, ...).
 #[derive(Debug, PartialEq, Clone)]
 pub struct Path {
-    cursor: Point2D,
+    cursor: Point<2>,
     edges: Vec<Edge>,
 }
 impl Path {
@@ -17,7 +17,7 @@ impl Path {
     /// let path = Path::at(point!(1.m(), 2.m()));
     /// assert_eq!(path.start(), point!(1.m(), 2.m()))
     /// ```
-    pub fn at(start: Point2D) -> Self {
+    pub fn at(start: Point<2>) -> Self {
         Self {
             cursor: start,
             edges: vec![],
@@ -32,7 +32,7 @@ impl Path {
     /// let path = Path::at(point!(1.m(), 2.m())).line_to(point!(3.m(), 4.m()));
     /// assert_eq!(path.end(), point!(3.m(), 4.m()))
     /// ```
-    pub fn line_to(&self, point: Point2D) -> Self {
+    pub fn line_to(&self, point: Point<2>) -> Self {
         self.add_edge(Edge::Line(self.cursor, point))
     }
 
@@ -45,7 +45,10 @@ impl Path {
     /// assert_eq!(path.end(), point!(4.m(), 6.m()))
     /// ```
     pub fn line_by(&self, dx: Length, dy: Length) -> Self {
-        self.add_edge(Edge::Line(self.cursor, self.cursor + Point2D::new(dx, dy)))
+        self.add_edge(Edge::Line(
+            self.cursor,
+            self.cursor + Point::<2>::new([dx, dy]),
+        ))
     }
 
     /// Append a circle section to this `Path` that curves the Path by a certain angle.
@@ -79,7 +82,7 @@ impl Path {
         }
         let center = self.cursor + self.end_direction().rotate(Angle::from_deg(90.)) * radius;
         let center_cursor_axis =
-            Axis2D::between(center, self.cursor).expect("zero radius already checked");
+            Axis::<2>::between(center, self.cursor).expect("zero radius already checked");
         let direction_factor = radius / radius.abs();
 
         let interim_point = center
@@ -105,7 +108,7 @@ impl Path {
     /// assert_eq!(path.cursor(), point!(0.m(), 2.m()));
     /// assert_eq!(path.edges(), vec![Edge::Arc(point!(0, 0), point!(1.m(), 1.m()), point!(0.m(), 2.m()))]);
     /// ```
-    pub fn arc_points(&self, mid: Point2D, end: Point2D) -> Self {
+    pub fn arc_points(&self, mid: Point<2>, end: Point<2>) -> Self {
         self.add_edge(Edge::Arc(self.cursor, mid, end))
     }
 
@@ -131,7 +134,7 @@ impl Path {
     /// let empty_path = Path::at(point!(5.m(), 6.m()));
     /// assert_eq!(empty_path.start(), point!(5.m(), 6.m()));
     /// ```
-    pub fn start(&self) -> Point2D {
+    pub fn start(&self) -> Point<2> {
         match self.edges.first() {
             Some(edge) => edge.start(),
             None => self.cursor,
@@ -151,7 +154,7 @@ impl Path {
     /// let empty_path = Path::at(point!(5.m(), 6.m()));
     /// assert_eq!(empty_path.end(), point!(5.m(), 6.m()));
     /// ```
-    pub fn end(&self) -> Point2D {
+    pub fn end(&self) -> Point<2> {
         match self.edges.iter().last() {
             Some(edge) => edge.end(),
             None => self.cursor,
@@ -160,7 +163,7 @@ impl Path {
 
     /// Return the direction the last element of this `Path` is pointing to.
     ///
-    /// If the path is empty, a `Dir2D` parallel to the positive x-direction is returned.
+    /// If the path is empty, a `Dir` parallel to the positive x-direction is returned.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Path, dir, point};
@@ -174,12 +177,12 @@ impl Path {
     ///     dir!(1, 0)
     /// )
     /// ```
-    pub fn end_direction(&self) -> Dir2D {
+    pub fn end_direction(&self) -> Dir<2> {
         match self.edges.last() {
             Some(last_edge) => last_edge
                 .end_direction()
                 .expect("edge has already been checked for zero length"),
-            None => Dir2D::from(Angle::zero()),
+            None => Dir::from(Angle::zero()),
         }
     }
 
@@ -189,7 +192,7 @@ impl Path {
     }
 
     /// Return the current cursor position of this `Path`.
-    pub fn cursor(&self) -> Point2D {
+    pub fn cursor(&self) -> Point<2> {
         self.cursor
     }
 
@@ -216,14 +219,14 @@ mod tests {
     use super::*;
     use crate::{IntoAngle, IntoLength, dir, point};
 
-    fn assert_dir_eq(dir1: Dir2D, dir2: Dir2D) {
+    fn assert_dir_eq(dir1: Dir<2>, dir2: Dir<2>) {
         assert_float_relative_eq!(dir1.x(), dir2.x());
         assert_float_relative_eq!(dir1.y(), dir2.y());
     }
 
-    fn assert_point_eq(point1: Point2D, point2: Point2D) {
-        assert_float_relative_eq!(point1.x.m(), point2.x.m());
-        assert_float_relative_eq!(point1.y.m(), point2.y.m());
+    fn assert_point_eq(point1: Point<2>, point2: Point<2>) {
+        assert_float_relative_eq!(point1.x().m(), point2.x().m());
+        assert_float_relative_eq!(point1.y().m(), point2.y().m());
     }
 
     #[test]
