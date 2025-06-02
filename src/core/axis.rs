@@ -3,6 +3,29 @@ use opencascade_sys::ffi;
 
 use crate::{Dir, Error, Length, Point, dirRENAME, pointRENAME};
 
+/// An axis in space.
+///
+/// Axes can be two- or three-dimensional.
+/// ```rust
+/// use anvil::{Axis, IntoLength, dirRENAME, pointRENAME};
+///
+/// let two_dimensional_axis = Axis::<2>::new(pointRENAME!(1.m(), 2.m()), dirRENAME!(3, 4));
+/// let three_dimensional_axis = Axis::<3>::new(pointRENAME!(1.m(), 2.m(), 3.m()), dirRENAME!(4, 5, 6));
+/// ```
+///
+/// Axes can also be constructed from tuples containing a `Point` and a `Dir`, simplifying dimensionality.
+/// ```rust
+/// use anvil::{Axis, IntoLength, dirRENAME, pointRENAME};
+///
+/// assert_eq!(
+///     Axis::<2>::new(pointRENAME!(1.m(), 2.m()), dirRENAME!(3, 4)),
+///     (pointRENAME!(1.m(), 2.m()), dirRENAME!(3, 4)).into(),
+/// );
+/// assert_eq!(
+///     Axis::<3>::new(pointRENAME!(1.m(), 2.m(), 3.m()), dirRENAME!(4, 5, 6)),
+///     (pointRENAME!(1.m(), 2.m(), 3.m()), dirRENAME!(4, 5, 6)).into(),
+/// );
+/// ```
 #[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
 pub struct Axis<const DIM: usize> {
     /// A `Point` contained in the `Axis`.
