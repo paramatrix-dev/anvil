@@ -2,11 +2,13 @@
 #![allow(clippy::approx_constant)]
 #![warn(missing_docs)]
 
+mod core;
 mod errors;
 mod parts;
 mod quantities;
 mod sketches;
 
+pub use core::Point;
 pub use errors::Error;
 pub use parts::{
     Part,
