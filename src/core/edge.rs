@@ -3,16 +3,16 @@ use core::f64;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Angle, Axis2D, Dir2D, Error, Length, Plane, Point2D};
+use crate::{Angle, Axis, Dir, Error, Length, Plane, Point};
 
 /// A one-dimensional object in two-dimensional space.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Edge {
     /// A circle section defined by the start point, a mid point and the end point.
-    Arc(Point2D, Point2D, Point2D),
+    Arc(Point<2>, Point<2>, Point<2>),
 
     /// A line between two points.
-    Line(Point2D, Point2D),
+    Line(Point<2>, Point<2>),
 }
 impl Edge {
     /// Return the starting point of the edge.
@@ -23,7 +23,7 @@ impl Edge {
     /// let edge = Edge::Line(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
     /// assert_eq!(edge.start(), point!(1.m(), 1.m()))
     /// ```
-    pub fn start(&self) -> Point2D {
+    pub fn start(&self) -> Point<2> {
         match self {
             Self::Arc(start, _, _) => *start,
             Self::Line(start, _) => *start,
@@ -37,7 +37,7 @@ impl Edge {
     /// let edge = Edge::Line(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
     /// assert_eq!(edge.end(), point!(2.m(), 2.m()))
     /// ```
-    pub fn end(&self) -> Point2D {
+    pub fn end(&self) -> Point<2> {
         match self {
             Self::Arc(_, _, end) => *end,
             Self::Line(_, end) => *end,
@@ -60,9 +60,9 @@ impl Edge {
         match self {
             Self::Arc(start, mid, end) => {
                 // Works for now but needs to be refactored in the future
-                let (x1, y1) = (start.x.m(), start.y.m());
-                let (x2, y2) = (mid.x.m(), mid.y.m());
-                let (x3, y3) = (end.x.m(), end.y.m());
+                let (x1, y1) = (start.x().m(), start.y().m());
+                let (x2, y2) = (mid.x().m(), mid.y().m());
+                let (x3, y3) = (end.x().m(), end.y().m());
 
                 let b = (x1.powi(2) + y1.powi(2)) * (y3 - y2)
                     + (x2.powi(2) + y2.powi(2)) * (y1 - y3)
@@ -100,7 +100,7 @@ impl Edge {
             }
             Self::Line(start, end) => {
                 let diff = *start - *end;
-                Length::from_m(f64::sqrt(diff.x.m().powi(2) + diff.y.m().powi(2)))
+                Length::from_m(f64::sqrt(diff.x().m().powi(2) + diff.y().m().powi(2)))
             }
         }
     }
@@ -108,12 +108,12 @@ impl Edge {
     /// Return the direction this `Edge` is pointing to at its end point.
     ///
     /// ```rust
-    /// use anvil::{Dir2D, Edge, IntoLength, point};
+    /// use anvil::{Edge, IntoLength, dir, point};
     ///
     /// let line = Edge::Line(point!(0, 0), point!(1.m(), 2.m()));
-    /// assert_eq!(line.end_direction(), Dir2D::try_from(1., 2.));
+    /// assert_eq!(line.end_direction(), Ok(dir!(1, 2)));
     /// ```
-    pub fn end_direction(&self) -> Result<Dir2D, Error> {
+    pub fn end_direction(&self) -> Result<Dir<2>, Error> {
         match self {
             Self::Arc(start, interior, end) => {
                 let (center, _) = arc_center_radius(*start, *interior, *end)?;
@@ -126,12 +126,14 @@ impl Edge {
                     && interior_angle > end_angle;
 
                 if arc_is_clockwise {
-                    Ok(Dir2D::from(end_angle - Angle::from_deg(90.)))
+                    Ok(Dir::from(end_angle - Angle::from_deg(90.)))
                 } else {
-                    Ok(Dir2D::from(end_angle + Angle::from_deg(90.)))
+                    Ok(Dir::from(end_angle + Angle::from_deg(90.)))
                 }
             }
-            Self::Line(start, end) => Dir2D::try_from((*end - *start).x.m(), (*end - *start).y.m()),
+            Self::Line(start, end) => {
+                Dir::<2>::try_from([(*end - *start).x().m(), (*end - *start).y().m()])
+            }
         }
     }
 
@@ -168,17 +170,20 @@ impl Edge {
 }
 
 fn arc_center_radius(
-    start: Point2D,
-    interior: Point2D,
-    end: Point2D,
-) -> Result<(Point2D, Length), Error> {
+    start: Point<2>,
+    interior: Point<2>,
+    end: Point<2>,
+) -> Result<(Point<2>, Length), Error> {
     if start == interior || interior == end || end == start {
         return Err(Error::ZeroVector);
     }
 
-    let start_interior_midpoint =
-        Point2D::new((start.x + interior.x) / 2., (start.y + interior.y) / 2.);
-    let interior_end_midpoint = Point2D::new((end.x + interior.x) / 2., (end.y + interior.y) / 2.);
+    let start_interior_midpoint = Point::<2>::new([
+        (start.x() + interior.x()) / 2.,
+        (start.y() + interior.y()) / 2.,
+    ]);
+    let interior_end_midpoint =
+        Point::<2>::new([(end.x() + interior.x()) / 2., (end.y() + interior.y()) / 2.]);
 
     let start_interior_direction = interior
         .direction_from(start)
@@ -187,11 +192,11 @@ fn arc_center_radius(
         .direction_from(interior)
         .expect("zero vector already checked above");
 
-    let start_interior_axis = Axis2D::new(
+    let start_interior_axis = Axis::<2>::new(
         start_interior_midpoint,
         start_interior_direction.rotate(Angle::from_deg(90.)),
     );
-    let interior_end_axis = Axis2D::new(
+    let interior_end_axis = Axis::<2>::new(
         interior_end_midpoint,
         interior_end_direction.rotate(Angle::from_deg(90.)),
     );
@@ -200,12 +205,12 @@ fn arc_center_radius(
         .intersect(interior_end_axis)
         .expect("zero vector already checked above");
 
-    let radius = (center - start).distance_to_origin();
+    let radius = (center - start).distance_to(Point::<2>::origin());
 
     Ok((center, radius))
 }
 
-fn arc_point_angle_on_unit_circle(center: Point2D, point: Point2D) -> Angle {
+fn arc_point_angle_on_unit_circle(center: Point<2>, point: Point<2>) -> Angle {
     point
         .direction_from(center)
         .expect("center and point can not be the same")

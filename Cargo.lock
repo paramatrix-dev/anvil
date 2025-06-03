@@ -10,10 +10,11 @@ checksum = "55cc3b69f167a1ef2e161439aa98aed94e6028e5f9a59be9a6ffb47aef1651f9"
 
 [[package]]
 name = "anvil"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "assert_float_eq",
  "cxx",
+ "iter_fixed",
  "opencascade-sys",
  "tempdir",
  "tempfile",
@@ -190,6 +191,12 @@ dependencies = [
  "r-efi",
  "wasi",
 ]
+
+[[package]]
+name = "iter_fixed"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "592ff74cdc6a923b2ae357dad7db2f5dcbf5d4ace9afcf3ab7c7f20b209fd949"
 
 [[package]]
 name = "libc"

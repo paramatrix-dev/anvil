@@ -1,4 +1,4 @@
-use crate::{Length, Path, Point2D, Sketch};
+use crate::{Length, Path, Point, Sketch, point};
 
 /// Builder for a rectangular `Sketch`.
 ///
@@ -18,15 +18,7 @@ impl Rectangle {
     /// assert_eq!(rect.center(), Ok(point!(0, 0)));
     /// ```
     pub fn from_dim(x: Length, y: Length) -> Sketch {
-        let corner1 = Point2D {
-            x: x * -0.5,
-            y: y * -0.5,
-        };
-        let corner2 = Point2D {
-            x: x * 0.5,
-            y: y * 0.5,
-        };
-        Self::from_corners(corner1, corner2)
+        Self::from_corners(point!(x * -0.5, y * -0.5), point!(x * 0.5, y * 0.5))
     }
 
     /// Construct a rectangular `Sketch` from its corner locations.
@@ -38,14 +30,14 @@ impl Rectangle {
     /// let rect = Rectangle::from_corners(point!(0, 0), point!(2.m(), 2.m()));
     /// assert_eq!(rect.area(), 4.);
     /// ```
-    pub fn from_corners(corner1: Point2D, corner2: Point2D) -> Sketch {
-        if corner1.x == corner2.x || corner1.y == corner2.y {
+    pub fn from_corners(corner1: Point<2>, corner2: Point<2>) -> Sketch {
+        if corner1.x() == corner2.x() || corner1.y() == corner2.y() {
             return Sketch::empty();
         }
         Path::at(corner1)
-            .line_to(Point2D::new(corner2.x, corner1.y))
+            .line_to(Point::<2>::new([corner2.x(), corner1.y()]))
             .line_to(corner2)
-            .line_to(Point2D::new(corner1.x, corner2.y))
+            .line_to(Point::<2>::new([corner1.x(), corner2.y()]))
             .close()
     }
 

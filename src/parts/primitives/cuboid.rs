@@ -1,6 +1,6 @@
 use opencascade_sys::ffi;
 
-use crate::{Length, Part, Point3D, quantities::is_zero};
+use crate::{Length, Part, Point, core::is_zero, point};
 
 /// Builder for a cuboidal `Part`.
 ///
@@ -20,18 +20,10 @@ impl Cuboid {
     /// assert!((part.volume() - 6.).abs() < 1e-5);
     /// ```
     pub fn from_dim(x: Length, y: Length, z: Length) -> Part {
-        let corner1 = Point3D {
-            x: x * -0.5,
-            y: y * -0.5,
-            z: z * -0.5,
-        };
-        let corner2 = Point3D {
-            x: x * 0.5,
-            y: y * 0.5,
-            z: z * 0.5,
-        };
-
-        Self::from_corners(corner1, corner2)
+        Self::from_corners(
+            point!(x * -0.5, y * -0.5, z * -0.5),
+            point!(x * 0.5, y * 0.5, z * 0.5),
+        )
     }
     /// Construct a centered cuboidal `Part` from its corner locations.
     ///
@@ -43,22 +35,22 @@ impl Cuboid {
     /// assert_eq!(part.center(), Ok(point!(1.m(), 1.m(), 1.m())));
     /// assert!((part.volume() - 8.).abs() < 1e-5);
     /// ```
-    pub fn from_corners(corner1: Point3D, corner2: Point3D) -> Part {
+    pub fn from_corners(corner1: Point<3>, corner2: Point<3>) -> Part {
         let volume_is_zero = is_zero(&[
-            corner1.x - corner2.x,
-            corner1.y - corner2.y,
-            corner1.z - corner2.z,
+            corner1.x() - corner2.x(),
+            corner1.y() - corner2.y(),
+            corner1.z() - corner2.z(),
         ]);
         if volume_is_zero {
             return Part::empty();
         }
 
-        let min_x = corner1.x.min(&corner2.x).m();
-        let min_y = corner1.y.min(&corner2.y).m();
-        let min_z = corner1.z.min(&corner2.z).m();
-        let max_x = corner1.x.max(&corner2.x).m();
-        let max_y = corner1.y.max(&corner2.y).m();
-        let max_z = corner1.z.max(&corner2.z).m();
+        let min_x = corner1.x().min(&corner2.x()).m();
+        let min_y = corner1.y().min(&corner2.y()).m();
+        let min_z = corner1.z().min(&corner2.z()).m();
+        let max_x = corner1.x().max(&corner2.x()).m();
+        let max_y = corner1.y().max(&corner2.y()).m();
+        let max_z = corner1.z().max(&corner2.z()).m();
 
         let point = ffi::new_point(min_x, min_y, min_z);
         let mut cuboid =

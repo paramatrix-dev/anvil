@@ -3,11 +3,7 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{
-    Angle, Axis2D, Axis3D, Error, IntoAngle, IntoLength, Length, Part, Plane, Point2D, Point3D,
-};
-
-use super::Edge;
+use crate::{Angle, Axis, Edge, Error, IntoAngle, IntoLength, Length, Part, Plane, Point};
 
 /// A closed shape in 2D space.
 #[derive(Debug, Clone)]
@@ -59,13 +55,10 @@ impl Sketch {
     /// assert_eq!(moved_rect.center(), Ok(point!(3.m(), 3.m())));
     /// assert_eq!(Sketch::empty().center(), Err(Error::EmptySketch));
     /// ```
-    pub fn center(&self) -> Result<Point2D, Error> {
+    pub fn center(&self) -> Result<Point<2>, Error> {
         let occt = self.to_occt(Plane::xy())?;
         let point_3d = occt_center(&occt);
-        Ok(Point2D {
-            x: point_3d.x,
-            y: point_3d.y,
-        })
+        Ok(Point::<2>::new([point_3d.x(), point_3d.y()]))
     }
 
     /// Merge this `Sketch` with another.
@@ -100,7 +93,7 @@ impl Sketch {
     ///         .add(&rect.rotate_around(point!(0, 0), 270.deg()))
     /// )
     /// ```
-    pub fn circular_pattern(&self, around: Point2D, instances: u8) -> Self {
+    pub fn circular_pattern(&self, around: Point<2>, instances: u8) -> Self {
         let angle_step = 360.deg() / instances as f64;
         let mut new_shape = self.clone();
         let mut angle = 0.rad();
@@ -143,17 +136,17 @@ impl Sketch {
     ///         .add(&rect.move_to(point!(4.m(), 0.m())))
     /// )
     /// ```
-    pub fn linear_pattern(&self, until: Point2D, instances: u8) -> Self {
+    pub fn linear_pattern(&self, until: Point<2>, instances: u8) -> Self {
         let start = match self.center() {
             Ok(p) => p,
             Err(_) => return self.clone(),
         };
-        let axis = match Axis2D::between(start, until) {
+        let axis = match Axis::<2>::between(start, until) {
             Ok(axis) => axis,
             Err(_) => return self.clone(),
         };
 
-        let len_step = (start - until).distance_to_origin() / instances as f64;
+        let len_step = (start - until).distance_to(Point::<2>::origin()) / instances as f64;
         let mut new_part = self.clone();
         let mut pos = Length::zero();
         for _ in 0..instances {
@@ -181,7 +174,7 @@ impl Sketch {
             Ok(c) => c,
             Err(_) => return self.clone(),
         };
-        self.move_to(center + Point2D::new(dx, dy))
+        self.move_to(center + Point::<2>::new([dx, dy]))
     }
     /// Return a clone of this `Sketch` moved to a specified point.
     ///
@@ -193,7 +186,7 @@ impl Sketch {
     /// assert_eq!(rect.center(), Ok(point!(0, 0)));
     /// assert_eq!(moved_rect.center(), Ok(point!(2.m(), 2.m())));
     /// ```
-    pub fn move_to(&self, loc: Point2D) -> Self {
+    pub fn move_to(&self, loc: Point<2>) -> Self {
         let mut new_actions = self.0.clone();
         new_actions.push(SketchAction::MoveTo(loc));
         Self(new_actions)
@@ -230,7 +223,7 @@ impl Sketch {
     ///     Rectangle::from_corners(point!(0, 0), point!(-1.m(), 1.m()))
     /// )
     /// ```
-    pub fn rotate_around(&self, point: Point2D, angle: Angle) -> Self {
+    pub fn rotate_around(&self, point: Point<2>, angle: Angle) -> Self {
         let mut new_actions = self.0.clone();
         new_actions.push(SketchAction::RotateAround(point, angle));
         Self(new_actions)
@@ -359,16 +352,16 @@ fn occt_area(occt: &ffi::TopoDS_Shape) -> f64 {
     gprops.Mass()
 }
 
-fn occt_center(occt: &ffi::TopoDS_Shape) -> Point3D {
+fn occt_center(occt: &ffi::TopoDS_Shape) -> Point<3> {
     let mut gprops = ffi::GProp_GProps_ctor();
     ffi::BRepGProp_VolumeProperties(occt, gprops.pin_mut());
 
     let centre_of_mass = ffi::GProp_GProps_CentreOfMass(&gprops);
-    Point3D::new(
+    Point::<3>::new([
         centre_of_mass.X().m(),
         centre_of_mass.Y().m(),
         centre_of_mass.X().m(),
-    )
+    ])
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -376,8 +369,8 @@ enum SketchAction {
     Add(Sketch),
     AddEdges(Vec<Edge>),
     Intersect(Sketch),
-    MoveTo(Point2D),
-    RotateAround(Point2D, Angle),
+    MoveTo(Point<2>),
+    RotateAround(Point<2>, Angle),
     Scale(f64),
     Subtract(Sketch),
 }
@@ -432,7 +425,7 @@ impl SketchAction {
                 Some(shape) => {
                     let mut transform = ffi::new_transform();
                     transform.pin_mut().SetRotation(
-                        &Axis3D {
+                        &Axis::<3> {
                             origin: point.to_3d(plane),
                             direction: plane.normal(),
                         }
@@ -475,7 +468,7 @@ impl SketchAction {
 #[cfg(test)]
 mod tests {
     use crate::{
-        Cuboid, Cylinder, IntoLength, Path, Point3D, Rectangle, point, sketches::primitives::Circle,
+        Cuboid, Cylinder, IntoLength, Path, Point, Rectangle, point, sketches::primitives::Circle,
     };
 
     use super::*;
@@ -568,7 +561,7 @@ mod tests {
         assert_eq!(
             sketch.extrude(Plane::xz(), Length::from_m(-3.)),
             Ok(Cuboid::from_corners(
-                Point3D::origin(),
+                Point::<3>::origin(),
                 point!(1.m(), 3.m(), 2.m())
             ))
         )
