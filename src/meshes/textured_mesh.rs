@@ -2,6 +2,7 @@ use opencascade_sys::ffi;
 
 use crate::{Dir, Error, Face, IntoLength, Length, Point};
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct TexturedMesh {
     points: Vec<Point<3>>,
     indices: Vec<[usize; 3]>,
@@ -30,6 +31,11 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
 
         if let Ok(triangulation) = ffi::HandlePoly_Triangulation_Get(&triangulation_handle) {
             let mut points = vec![];
+            let mut indices = vec![];
+            let mut normals = vec![];
+            let mut uvs = vec![];
+
+            let orientation = face.Orientation();
             let face_point_count = triangulation.NbNodes();
             ffi::compute_normals(face, &triangulation_handle);
 
@@ -41,12 +47,60 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
                     point.Y().m(),
                     point.Z().m(),
                 ]));
+
+                let uv = ffi::Poly_Triangulation_UV(triangulation, node_index);
+                uvs.push([uv.X(), uv.Y()]);
+
+                let normal = ffi::Poly_Triangulation_Normal(triangulation, node_index);
+                let m = if orientation == ffi::TopAbs_Orientation::TopAbs_REVERSED {
+                    -1.
+                } else {
+                    1.
+                };
+                normals.push(
+                    Dir::try_from([normal.X() * m, normal.Y() * m, normal.Z() * m])
+                        .expect("normals should not be zero"),
+                );
             }
+
+            let mut u_min = f64::INFINITY;
+            let mut v_min = f64::INFINITY;
+            let mut u_max = f64::NEG_INFINITY;
+            let mut v_max = f64::NEG_INFINITY;
+
+            for &[u, v] in &uvs {
+                u_min = u_min.min(u);
+                v_min = v_min.min(v);
+                u_max = u_max.max(u);
+                v_max = v_max.max(v);
+            }
+
+            for [u, v] in &mut uvs {
+                *u = (*u - u_min) / (u_max - u_min);
+                *v = (*v - v_min) / (v_max - v_min);
+
+                if orientation == ffi::TopAbs_Orientation::TopAbs_REVERSED {
+                    *u = 1.0 - *u;
+                }
+            }
+
+            for triangle_index in 1..=triangulation.NbTriangles() {
+                let triangle = triangulation.Triangle(triangle_index);
+                let mut node_ids = [triangle.Value(1), triangle.Value(2), triangle.Value(3)]
+                    .map(|id| id as usize + 0 - 1);
+
+                if orientation == ffi::TopAbs_Orientation::TopAbs_REVERSED {
+                    node_ids.swap(1, 2);
+                }
+
+                indices.push(node_ids);
+            }
+
             Ok(TexturedMesh {
-                points: points,
-                indices: vec![],
-                normals: vec![],
-                uvs: vec![],
+                points,
+                indices,
+                normals,
+                uvs,
             })
         } else {
             Err(Error::Triangulation)
@@ -56,7 +110,7 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
 
 #[cfg(test)]
 mod tests {
-    use crate::{IntoLength, Path, Plane, point};
+    use crate::{IntoLength, Path, Plane, Rectangle, dir, point};
 
     use super::*;
 
@@ -68,14 +122,41 @@ mod tests {
             .close()
             .to_face(Plane::xy())
             .unwrap();
-        let actual = TexturedMesh::try_from(face).unwrap();
+
         assert_eq!(
-            actual.points,
-            vec![
-                point!(0, 0, 0),
-                point!(1.m(), 0.m(), 0.m()),
-                point!(0.m(), 1.m(), 0.m())
-            ]
-        );
+            TexturedMesh::try_from(face),
+            Ok(TexturedMesh {
+                points: vec![
+                    point!(0, 0, 0),
+                    point!(1.m(), 0.m(), 0.m()),
+                    point!(0.m(), 1.m(), 0.m())
+                ],
+                indices: vec![[1, 2, 0]],
+                normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
+                uvs: vec![[0., 0.], [1., 0.], [0., 1.]]
+            })
+        )
+    }
+
+    #[test]
+    fn rectangle() {
+        let face = Rectangle::from_corners(point!(0, 0), point!(1.m(), 1.m()))
+            .to_face(Plane::xy())
+            .unwrap();
+
+        assert_eq!(
+            TexturedMesh::try_from(face),
+            Ok(TexturedMesh {
+                points: vec![
+                    point!(0, 0, 0),
+                    point!(1.m(), 0.m(), 0.m()),
+                    point!(1.m(), 1.m(), 0.m()),
+                    point!(0.m(), 1.m(), 0.m()),
+                ],
+                indices: vec![[2, 0, 1], [2, 3, 0]],
+                normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
+                uvs: vec![[0., 0.], [1., 0.], [1., 1.], [0., 1.]]
+            })
+        )
     }
 }
