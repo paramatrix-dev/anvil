@@ -397,10 +397,7 @@ impl SketchAction {
                     Some(ffi::TopoDS_Shape_to_owned(operation.pin_mut().Shape()))
                 }
             },
-            SketchAction::AddEdges(edges) => match sketch {
-                None => edges_to_occt(edges, plane).ok(),
-                Some(_) => todo!(),
-            },
+            SketchAction::AddEdges(edges) => edges_to_occt(edges, plane).ok(),
             SketchAction::Intersect(other) => match (sketch, other.to_occt(plane).ok()) {
                 (Some(self_shape), Some(other_shape)) => {
                     let mut operation = ffi::BRepAlgoAPI_Common_ctor(&self_shape, &other_shape);
