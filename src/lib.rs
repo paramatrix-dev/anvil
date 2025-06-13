@@ -1,6 +1,8 @@
 #![doc = "A CAD engine."]
 #![allow(clippy::approx_constant)]
 #![warn(missing_docs)]
+#![warn(clippy::todo)]
+#![warn(clippy::unimplemented)]
 
 mod core;
 mod errors;
