@@ -7,6 +7,7 @@
 mod core;
 mod errors;
 mod faces;
+mod meshes;
 mod parts;
 mod sketches;
 

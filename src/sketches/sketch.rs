@@ -3,7 +3,7 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::{Angle, Axis, Edge, Error, IntoAngle, IntoLength, Length, Part, Plane, Point};
+use crate::{Angle, Axis, Edge, Error, Face, IntoAngle, IntoLength, Length, Part, Plane, Point};
 
 /// A closed shape in 2D space.
 #[derive(Debug, Clone)]
@@ -290,6 +290,13 @@ impl Sketch {
         );
 
         Ok(Part::from_occt(make_solid.pin_mut().Shape()))
+    }
+
+    /// Try to convert this `Sketch` into a `Face`.
+    pub fn to_face(self, plane: Plane) -> Result<Face, Error> {
+        Ok(Face::from_occt(ffi::TopoDS_cast_to_face(
+            self.to_occt(plane)?.as_ref().unwrap(),
+        )))
     }
 
     pub(crate) fn from_edges(edges: Vec<Edge>) -> Self {
