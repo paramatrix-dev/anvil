@@ -1,4 +1,7 @@
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::{
+    fmt::Debug,
+    ops::{Add, Div, Mul, Neg, Sub},
+};
 
 use crate::{Dir, IntoF64, Point};
 
@@ -27,7 +30,7 @@ use crate::{Dir, IntoF64, Point};
 /// assert_eq!(4.5.cm(), Length::from_cm(4.5));
 /// assert_eq!(12.in_(), Length::from_in(12.));
 /// ```
-#[derive(Debug, PartialEq, Copy, Clone, PartialOrd)]
+#[derive(PartialEq, Copy, Clone, PartialOrd)]
 pub struct Length {
     meters: f64,
 }
@@ -200,6 +203,11 @@ impl Length {
     /// ```
     pub fn max(&self, other: &Self) -> Self {
         Length::from_m(self.m().max(other.m()))
+    }
+}
+impl Debug for Length {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(format!("{}m", self.m()).as_str())
     }
 }
 
