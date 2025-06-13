@@ -11,7 +11,6 @@ use super::face::Face;
 /// use anvil::{Cube, Face, FaceIterator, IntoLength};
 ///
 /// let face_iterator: FaceIterator = Cube::from_size(1.m()).faces();
-/// assert_eq!(face_iterator.clone().len(), 6);
 /// for face in face_iterator {
 ///     // ...
 /// }
@@ -46,9 +45,8 @@ impl ExactSizeIterator for FaceIterator {
     fn len(&self) -> usize {
         match self {
             Self::NotEmpty(_, _) => {
-                let self_clone = self.clone();
                 let mut len = 0;
-                for _ in self_clone {
+                for _ in self.clone_without_position() {
                     len += 1;
                 }
                 len
@@ -62,12 +60,7 @@ impl FaceIterator {
     pub fn is_empty(self) -> bool {
         self.len() == 0
     }
-}
-impl Clone for FaceIterator {
-    /// Return a clone of this `FaceIterator`.
-    ///
-    /// WARNING: Iterator position will not be cloned.
-    fn clone(&self) -> Self {
+    fn clone_without_position(&self) -> Self {
         match self {
             Self::NotEmpty(part, _) => part.faces(),
             Self::Empty => Self::Empty,
