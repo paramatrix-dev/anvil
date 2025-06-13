@@ -42,13 +42,8 @@ impl Iterator for FaceIterator {
         }
     }
 }
-impl FaceIterator {
-    /// Return `true` if this `FaceIterator` has a length of 0.
-    pub fn is_empty(self) -> bool {
-        self.len() == 0
-    }
-    /// Return the number of `Face`s in this `FaceIterator`.
-    pub fn len(self) -> usize {
+impl ExactSizeIterator for FaceIterator {
+    fn len(&self) -> usize {
         match self {
             Self::NotEmpty(_, _) => {
                 let self_clone = self.clone();
@@ -60,6 +55,12 @@ impl FaceIterator {
             }
             Self::Empty => 0,
         }
+    }
+}
+impl FaceIterator {
+    /// Return `true` if this `FaceIterator` has a length of 0.
+    pub fn is_empty(self) -> bool {
+        self.len() == 0
     }
 }
 impl Clone for FaceIterator {
