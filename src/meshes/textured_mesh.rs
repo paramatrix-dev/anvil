@@ -87,12 +87,9 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
             for triangle_index in 1..=triangulation.NbTriangles() {
                 let triangle = triangulation.Triangle(triangle_index);
                 let mut node_ids = [triangle.Value(1), triangle.Value(2), triangle.Value(3)]
-                    .map(|id| id as usize + 0 - 1);
+                    .map(|id| id as usize - 1);
 
-                if orientation == ffi::TopAbs_Orientation::TopAbs_REVERSED {
-                    node_ids.swap(1, 2);
-                }
-
+                node_ids.sort(); // depending on device, nodes may be sorted differently - sorting them makes the order deterministic
                 indices.push(node_ids);
             }
 
@@ -131,7 +128,7 @@ mod tests {
                     point!(1.m(), 0.m(), 0.m()),
                     point!(0.m(), 1.m(), 0.m())
                 ],
-                indices: vec![[1, 2, 0]],
+                indices: vec![[0, 1, 2]],
                 normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
                 uvs: vec![[0., 0.], [1., 0.], [0., 1.]]
             })
@@ -153,7 +150,7 @@ mod tests {
                     point!(1.m(), 1.m(), 0.m()),
                     point!(0.m(), 1.m(), 0.m()),
                 ],
-                indices: vec![[2, 0, 1], [2, 3, 0]],
+                indices: vec![[0, 1, 2], [0, 2, 3]],
                 normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
                 uvs: vec![[0., 0.], [1., 0.], [1., 1.], [0., 1.]]
             })
