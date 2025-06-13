@@ -23,7 +23,6 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
             value.1.m(),
         );
         let face = ffi::TopoDS_cast_to_face(mesh.as_ref().unwrap().Shape());
-
         let mut location = ffi::TopLoc_Location_ctor();
 
         let triangulation_handle = ffi::BRep_Tool_Triangulation(face, location.pin_mut());
@@ -51,7 +50,8 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
                 let uv = ffi::Poly_Triangulation_UV(triangulation, node_index);
                 uvs.push([uv.X(), uv.Y()]);
 
-                let normal = ffi::Poly_Triangulation_Normal(triangulation, node_index);
+                let mut normal = ffi::Poly_Triangulation_Normal(triangulation, node_index);
+                normal.pin_mut().Transform(&transformation);
                 let m = if orientation == ffi::TopAbs_Orientation::TopAbs_REVERSED {
                     -1.
                 } else {
@@ -89,7 +89,9 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
                 let mut node_ids = [triangle.Value(1), triangle.Value(2), triangle.Value(3)]
                     .map(|id| id as usize - 1);
 
-                node_ids.sort(); // depending on device, nodes may be sorted differently - sorting them makes the order deterministic
+                if orientation == ffi::TopAbs_Orientation::TopAbs_REVERSED {
+                    node_ids.swap(1, 2);
+                }
                 indices.push(node_ids);
             }
 
@@ -128,7 +130,7 @@ mod tests {
                     point!(1.m(), 0.m(), 0.m()),
                     point!(0.m(), 1.m(), 0.m())
                 ],
-                indices: vec![[0, 1, 2]],
+                indices: vec![[1, 2, 0]],
                 normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
                 uvs: vec![[0., 0.], [1., 0.], [0., 1.]]
             })
@@ -150,7 +152,7 @@ mod tests {
                     point!(1.m(), 1.m(), 0.m()),
                     point!(0.m(), 1.m(), 0.m()),
                 ],
-                indices: vec![[0, 1, 2], [0, 2, 3]],
+                indices: vec![[2, 0, 1], [2, 3, 0]],
                 normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
                 uvs: vec![[0., 0.], [1., 0.], [1., 1.], [0., 1.]]
             })
