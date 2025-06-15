@@ -1,6 +1,8 @@
 use opencascade_sys::ffi;
 
-use crate::{Dir, Error, Face, IntoLength, Length, Point};
+use crate::{Dir, Error, Face, IntoLength, Length, Part, Point};
+
+const DEFAULT_TOLERANCE: Length = Length::from_m(0.000001);
 
 /// A triangular mesh of one or more `Face`s optimized for 3D rendering.
 #[derive(Clone, Debug, PartialEq)]
@@ -48,20 +50,42 @@ impl RenderMesh {
     pub fn uvs(&self) -> &Vec<[f64; 2]> {
         &self.uvs
     }
+
+    fn empty() -> Self {
+        Self {
+            points: vec![],
+            indices: vec![],
+            normals: vec![],
+            uvs: vec![],
+        }
+    }
+
+    fn merge_with(&mut self, other: Self) {
+        self.indices.extend(other.indices().iter().map(|t| {
+            [
+                t[0] + self.points.len(),
+                t[1] + self.points.len(),
+                t[2] + self.points.len(),
+            ]
+        }));
+        self.points.extend(other.points());
+        self.normals.extend(other.normals());
+        self.uvs.extend(other.uvs());
+    }
 }
 
 impl TryFrom<Face> for RenderMesh {
     type Error = Error;
-    fn try_from(value: Face) -> Result<Self, Self::Error> {
-        Self::try_from((value, 0.1.mm()))
+    fn try_from(face: Face) -> Result<Self, Self::Error> {
+        (face, DEFAULT_TOLERANCE).try_into()
     }
 }
 impl TryFrom<(Face, Length)> for RenderMesh {
     type Error = Error;
-    fn try_from(value: (Face, Length)) -> Result<Self, Self::Error> {
+    fn try_from((face, tolerance): (Face, Length)) -> Result<Self, Self::Error> {
         let mesh = ffi::BRepMesh_IncrementalMesh_ctor(
-            ffi::cast_face_to_shape(value.0.0.as_ref().unwrap()),
-            value.1.m(),
+            ffi::cast_face_to_shape(face.0.as_ref().unwrap()),
+            tolerance.m(),
         );
         let face = ffi::TopoDS_cast_to_face(mesh.as_ref().unwrap().Shape());
         let mut location = ffi::TopLoc_Location_ctor();
@@ -147,6 +171,30 @@ impl TryFrom<(Face, Length)> for RenderMesh {
         }
     }
 }
+impl TryFrom<Part> for RenderMesh {
+    type Error = Error;
+    fn try_from(part: Part) -> Result<Self, Self::Error> {
+        (part, DEFAULT_TOLERANCE).try_into()
+    }
+}
+impl TryFrom<(Part, Length)> for RenderMesh {
+    type Error = Error;
+    fn try_from((part, tolerance): (Part, Length)) -> Result<Self, Self::Error> {
+        let meshes = part
+            .faces()
+            .map(|face| RenderMesh::try_from((face, tolerance)))
+            .collect::<Result<Vec<RenderMesh>, Error>>()?;
+        Ok(merge(meshes))
+    }
+}
+
+fn merge(meshes: Vec<RenderMesh>) -> RenderMesh {
+    let mut merged_mesh = RenderMesh::empty();
+    for mesh in meshes {
+        merged_mesh.merge_with(mesh);
+    }
+    merged_mesh
+}
 
 #[cfg(test)]
 mod tests {
@@ -211,5 +259,105 @@ mod tests {
         for normal in mesh.normals {
             assert!(normal.approx_eq(dir!(-1, -1, 0)))
         }
+    }
+
+    #[test]
+    fn cube() {
+        let cube_mesh = RenderMesh::try_from(Cube::from_size(2.m()))
+            .unwrap()
+            .sorted();
+        assert_eq!(
+            cube_mesh.points(),
+            &vec![
+                // -x face
+                point!(-1.m(), -1.m(), -1.m()),
+                point!(-1.m(), -1.m(), 1.m()),
+                point!(-1.m(), 1.m(), -1.m()),
+                point!(-1.m(), 1.m(), 1.m()),
+                // +x face
+                point!(1.m(), -1.m(), -1.m()),
+                point!(1.m(), -1.m(), 1.m()),
+                point!(1.m(), 1.m(), -1.m()),
+                point!(1.m(), 1.m(), 1.m()),
+                // -y face
+                point!(-1.m(), -1.m(), -1.m()),
+                point!(1.m(), -1.m(), -1.m()),
+                point!(-1.m(), -1.m(), 1.m()),
+                point!(1.m(), -1.m(), 1.m()),
+                // +y face
+                point!(-1.m(), 1.m(), -1.m()),
+                point!(1.m(), 1.m(), -1.m()),
+                point!(-1.m(), 1.m(), 1.m()),
+                point!(1.m(), 1.m(), 1.m()),
+                // -z face
+                point!(-1.m(), -1.m(), -1.m()),
+                point!(-1.m(), 1.m(), -1.m()),
+                point!(1.m(), -1.m(), -1.m()),
+                point!(1.m(), 1.m(), -1.m()),
+                // +z face
+                point!(-1.m(), -1.m(), 1.m()),
+                point!(-1.m(), 1.m(), 1.m()),
+                point!(1.m(), -1.m(), 1.m()),
+                point!(1.m(), 1.m(), 1.m()),
+            ]
+        );
+        assert_eq!(
+            cube_mesh.indices(),
+            &vec![
+                // -x face
+                [0, 1, 2],
+                [1, 2, 3],
+                // +x face
+                [4, 5, 6],
+                [5, 6, 7],
+                // -y face
+                [8, 9, 11],
+                [8, 10, 11],
+                // +y face
+                [12, 13, 15],
+                [12, 14, 15],
+                // -z face
+                [16, 17, 19],
+                [16, 18, 19],
+                // +z face
+                [20, 21, 23],
+                [20, 22, 23],
+            ]
+        );
+        assert_eq!(
+            cube_mesh.normals(),
+            &vec![
+                // -x face
+                dir!(-1, 0, 0),
+                dir!(-1, 0, 0),
+                dir!(-1, 0, 0),
+                dir!(-1, 0, 0),
+                // +x face
+                dir!(1, 0, 0),
+                dir!(1, 0, 0),
+                dir!(1, 0, 0),
+                dir!(1, 0, 0),
+                // -y face
+                dir!(0, -1, 0),
+                dir!(0, -1, 0),
+                dir!(0, -1, 0),
+                dir!(0, -1, 0),
+                // +y face
+                dir!(0, 1, 0),
+                dir!(0, 1, 0),
+                dir!(0, 1, 0),
+                dir!(0, 1, 0),
+                // -z face
+                dir!(0, 0, -1),
+                dir!(0, 0, -1),
+                dir!(0, 0, -1),
+                dir!(0, 0, -1),
+                // +z face
+                dir!(0, 0, 1),
+                dir!(0, 0, 1),
+                dir!(0, 0, 1),
+                dir!(0, 0, 1),
+            ]
+        )
     }
 }
