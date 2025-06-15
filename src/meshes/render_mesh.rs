@@ -109,7 +109,7 @@ impl TryFrom<(Face, Length)> for RenderMesh {
 
 #[cfg(test)]
 mod tests {
-    use crate::{IntoLength, Path, Plane, Rectangle, dir, point};
+    use crate::{Axis, Cube, IntoAngle, IntoLength, Path, Plane, Rectangle, dir, point};
 
     use super::*;
 
@@ -157,5 +157,18 @@ mod tests {
                 uvs: vec![[0., 0.], [1., 0.], [1., 1.], [0., 1.]]
             })
         )
+    }
+
+    #[test]
+    fn rotated_cube_has_correct_normals() {
+        let cube = Cube::from_size(1.m())
+            .rotate_around(Axis::<3>::x(), 45.deg())
+            .rotate_around(Axis::<3>::z(), 45.deg());
+        let mesh =
+            RenderMesh::try_from(cube.faces().collect::<Vec<Face>>().first().unwrap().clone())
+                .unwrap();
+        for normal in mesh.normals {
+            assert!(normal.approx_eq(dir!(-1, -1, 0)))
+        }
     }
 }

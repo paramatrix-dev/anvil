@@ -64,7 +64,7 @@ impl<const DIM: usize> Dir<DIM> {
         self.0.into_iter().zip(other.0).map(|(a, b)| a * b).sum()
     }
 
-    /// Return true if this `Dir` has less than a 0.001% difference to another.
+    /// Return true if this `Dir` has less than a 0.000001% difference to another.
     ///
     /// ```rust
     /// use anvil::dir;
@@ -74,7 +74,7 @@ impl<const DIM: usize> Dir<DIM> {
     /// ```
     pub fn approx_eq(&self, other: Dir<DIM>) -> bool {
         for (s, o) in self.0.iter().zip(other.0) {
-            if (s / o - 1.).abs() > 0.0001 {
+            if (s / o - 1.).abs() > 0.0000001 {
                 return false;
             }
         }
