@@ -9,6 +9,29 @@ pub struct RenderMesh {
     normals: Vec<Dir<3>>,
     uvs: Vec<[f64; 2]>,
 }
+impl RenderMesh {
+    /// Return a clone of this `RenderMesh` with the individual indices sorted.
+    ///
+    /// Sorting of the triangle indices depends on the machine executing the tests which introduces
+    /// non-deterministic behavior. This function enables comparing `RenderMesh`es across devices.
+    pub fn sorted(&self) -> Self {
+        Self {
+            points: self.points.clone(),
+            indices: {
+                let mut sorted_indices = vec![];
+                for triangle in self.indices.clone() {
+                    let mut sorted_triangle = triangle;
+                    sorted_triangle.sort();
+                    sorted_indices.push(sorted_triangle);
+                }
+                sorted_indices
+            },
+            normals: self.normals.clone(),
+            uvs: self.uvs.clone(),
+        }
+    }
+}
+
 impl TryFrom<Face> for RenderMesh {
     type Error = Error;
     fn try_from(value: Face) -> Result<Self, Self::Error> {
@@ -123,17 +146,17 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            RenderMesh::try_from(face),
-            Ok(RenderMesh {
+            RenderMesh::try_from(face).unwrap().sorted(),
+            RenderMesh {
                 points: vec![
                     point!(0, 0, 0),
                     point!(1.m(), 0.m(), 0.m()),
                     point!(0.m(), 1.m(), 0.m())
                 ],
-                indices: vec![[1, 2, 0]],
+                indices: vec![[0, 1, 2]],
                 normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
                 uvs: vec![[0., 0.], [1., 0.], [0., 1.]]
-            })
+            }
         )
     }
 
@@ -144,18 +167,18 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            RenderMesh::try_from(face),
-            Ok(RenderMesh {
+            RenderMesh::try_from(face).unwrap().sorted(),
+            RenderMesh {
                 points: vec![
                     point!(0, 0, 0),
                     point!(1.m(), 0.m(), 0.m()),
                     point!(1.m(), 1.m(), 0.m()),
                     point!(0.m(), 1.m(), 0.m()),
                 ],
-                indices: vec![[2, 0, 1], [2, 3, 0]],
+                indices: vec![[0, 1, 2], [0, 2, 3]],
                 normals: vec![dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1), dir!(0, 0, 1)],
                 uvs: vec![[0., 0.], [1., 0.], [1., 1.], [0., 1.]]
-            })
+            }
         )
     }
 
