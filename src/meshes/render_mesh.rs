@@ -3,19 +3,19 @@ use opencascade_sys::ffi;
 use crate::{Dir, Error, Face, IntoLength, Length, Point};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct TexturedMesh {
+pub struct RenderMesh {
     points: Vec<Point<3>>,
     indices: Vec<[usize; 3]>,
     normals: Vec<Dir<3>>,
     uvs: Vec<[f64; 2]>,
 }
-impl TryFrom<Face> for TexturedMesh {
+impl TryFrom<Face> for RenderMesh {
     type Error = Error;
     fn try_from(value: Face) -> Result<Self, Self::Error> {
         Self::try_from((value, 0.1.mm()))
     }
 }
-impl TryFrom<(Face, Length)> for TexturedMesh {
+impl TryFrom<(Face, Length)> for RenderMesh {
     type Error = Error;
     fn try_from(value: (Face, Length)) -> Result<Self, Self::Error> {
         let mesh = ffi::BRepMesh_IncrementalMesh_ctor(
@@ -95,7 +95,7 @@ impl TryFrom<(Face, Length)> for TexturedMesh {
                 indices.push(node_ids);
             }
 
-            Ok(TexturedMesh {
+            Ok(RenderMesh {
                 points,
                 indices,
                 normals,
@@ -123,8 +123,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            TexturedMesh::try_from(face),
-            Ok(TexturedMesh {
+            RenderMesh::try_from(face),
+            Ok(RenderMesh {
                 points: vec![
                     point!(0, 0, 0),
                     point!(1.m(), 0.m(), 0.m()),
@@ -144,8 +144,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            TexturedMesh::try_from(face),
-            Ok(TexturedMesh {
+            RenderMesh::try_from(face),
+            Ok(RenderMesh {
                 points: vec![
                     point!(0, 0, 0),
                     point!(1.m(), 0.m(), 0.m()),
