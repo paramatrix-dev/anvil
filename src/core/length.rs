@@ -44,7 +44,7 @@ impl Length {
     /// let len = Length::zero();
     /// assert_eq!(len.m(), 0.);
     /// ```
-    pub fn zero() -> Self {
+    pub const fn zero() -> Self {
         Self { meters: 0. }
     }
     /// Construct a `Length` from a value of unit meters.
@@ -56,11 +56,11 @@ impl Length {
     /// let len = Length::from_m(3.2);
     /// assert_eq!(len.mm(), 3200.);
     /// ```
-    pub fn from_m(value: f64) -> Self {
+    pub const fn from_m(value: f64) -> Self {
         Self { meters: value }
     }
     /// Return the value of this `Length` in millimeters.
-    pub fn m(&self) -> f64 {
+    pub const fn m(&self) -> f64 {
         self.meters
     }
     /// Construct a `Length` from a value of unit yards.
@@ -72,11 +72,11 @@ impl Length {
     /// let len = Length::from_yd(1.);
     /// assert_eq!(len.m(), 0.9144);
     /// ```
-    pub fn from_yd(value: f64) -> Self {
+    pub const fn from_yd(value: f64) -> Self {
         Self::from_m(value * 0.9144)
     }
     /// Return the value of this `Length` in yards.
-    pub fn yd(&self) -> f64 {
+    pub const fn yd(&self) -> f64 {
         self.m() / 0.9144
     }
     /// Construct a `Length` from a value of unit feet.
@@ -88,11 +88,11 @@ impl Length {
     /// let len = Length::from_ft(1.);
     /// assert_eq!(len.cm(), 30.48);
     /// ```
-    pub fn from_ft(value: f64) -> Self {
+    pub const fn from_ft(value: f64) -> Self {
         Self::from_m(value * 0.3048)
     }
     /// Return the value of this `Length` in feet.
-    pub fn ft(&self) -> f64 {
+    pub const fn ft(&self) -> f64 {
         self.m() / 0.3048
     }
     /// Construct a `Length` from a value of unit decimeters.
@@ -104,11 +104,11 @@ impl Length {
     /// let len = Length::from_dm(5.1);
     /// assert_eq!(len.mm(), 510.);
     /// ```
-    pub fn from_dm(value: f64) -> Self {
+    pub const fn from_dm(value: f64) -> Self {
         Self::from_m(value / 10.)
     }
     /// Return the value of this `Length` in decimeters.
-    pub fn dm(&self) -> f64 {
+    pub const fn dm(&self) -> f64 {
         self.m() * 10.
     }
     /// Construct a `Length` from a value of unit inches.
@@ -120,14 +120,14 @@ impl Length {
     /// let len = Length::from_in(1.);
     /// assert_eq!(len.cm(), 2.54);
     /// ```
-    pub fn from_in(value: f64) -> Self {
+    pub const fn from_in(value: f64) -> Self {
         Self::from_m(value * 0.0254)
     }
     /// Return the value of this `Length` in inches.
     ///
     /// This method breaks the pattern with the trailing underscore, because `in` is a reserved
     /// keyword in Rust.
-    pub fn in_(&self) -> f64 {
+    pub const fn in_(&self) -> f64 {
         self.m() / 0.0254
     }
     /// Construct a `Length` from a value of unit centimeters.
@@ -139,11 +139,11 @@ impl Length {
     /// let len = Length::from_cm(5.1);
     /// assert_eq!(len.mm(), 51.);
     /// ```
-    pub fn from_cm(value: f64) -> Self {
+    pub const fn from_cm(value: f64) -> Self {
         Self::from_m(value / 100.)
     }
     /// Return the value of this `Length` in centimeters.
-    pub fn cm(&self) -> f64 {
+    pub const fn cm(&self) -> f64 {
         self.m() * 100.
     }
     /// Construct a `Length` from a value of unit millimeters.
@@ -155,11 +155,11 @@ impl Length {
     /// let len = Length::from_mm(5.4);
     /// assert_eq!(len.m(), 0.0054);
     /// ```
-    pub fn from_mm(value: f64) -> Self {
+    pub const fn from_mm(value: f64) -> Self {
         Self::from_m(value / 1000.)
     }
     /// Return the value of this `Length` in millimeters.
-    pub fn mm(&self) -> f64 {
+    pub const fn mm(&self) -> f64 {
         self.m() * 1000.
     }
 
@@ -171,7 +171,7 @@ impl Length {
     /// assert_eq!((-5).m().abs(), 5.m());
     /// assert_eq!(5.m().abs(), 5.m());
     /// ```
-    pub fn abs(&self) -> Self {
+    pub const fn abs(&self) -> Self {
         Self {
             meters: self.meters.abs(),
         }
@@ -187,7 +187,7 @@ impl Length {
     /// assert_eq!(len1.min(&len2), len1);
     /// assert_eq!(len2.min(&len1), len1);
     /// ```
-    pub fn min(&self, other: &Self) -> Self {
+    pub const fn min(&self, other: &Self) -> Self {
         Length::from_m(self.m().min(other.m()))
     }
     /// Return the larger of two lengths.
@@ -201,7 +201,7 @@ impl Length {
     /// assert_eq!(len1.max(&len2), len2);
     /// assert_eq!(len2.max(&len1), len2);
     /// ```
-    pub fn max(&self, other: &Self) -> Self {
+    pub const fn max(&self, other: &Self) -> Self {
         Length::from_m(self.m().max(other.m()))
     }
 }
