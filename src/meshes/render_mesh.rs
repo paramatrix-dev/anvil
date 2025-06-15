@@ -2,6 +2,7 @@ use opencascade_sys::ffi;
 
 use crate::{Dir, Error, Face, IntoLength, Length, Point};
 
+/// A triangular mesh of one or more `Face`s optimized for 3D rendering.
 #[derive(Clone, Debug, PartialEq)]
 pub struct RenderMesh {
     points: Vec<Point<3>>,
@@ -29,6 +30,23 @@ impl RenderMesh {
             normals: self.normals.clone(),
             uvs: self.uvs.clone(),
         }
+    }
+
+    /// Return the `Point`s of this `RenderMesh`.
+    pub fn points(&self) -> &Vec<Point<3>> {
+        &self.points
+    }
+    /// Return the `Point` indices defining the triangles of this `RenderMesh`.
+    pub fn indices(&self) -> &Vec<[usize; 3]> {
+        &self.indices
+    }
+    /// Return the normal `Dir` of every `Point` in this `RenderMesh`.
+    pub fn normals(&self) -> &Vec<Dir<3>> {
+        &self.normals
+    }
+    /// Return the relative position of every `Point` on the 2D-grid of this `RenderMesh`.
+    pub fn uvs(&self) -> &Vec<[f64; 2]> {
+        &self.uvs
     }
 }
 

@@ -16,6 +16,7 @@ pub use core::{
 };
 pub use errors::Error;
 pub use faces::{Face, FaceIterator};
+pub use meshes::RenderMesh;
 pub use parts::{
     Part,
     primitives::{Cube, Cuboid, Cylinder, Sphere},
