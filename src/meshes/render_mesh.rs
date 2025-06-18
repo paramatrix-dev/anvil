@@ -51,6 +51,67 @@ impl RenderMesh {
         &self.uvs
     }
 
+    /// Return the collective area spanned by the triangles in a `RenderedMesh` in square meters.
+    ///
+    /// ```rust
+    /// use anvil::{Cube, IntoLength, Plane, Rectangle, RenderMesh};
+    ///
+    /// let rect = Rectangle::from_dim(2.m(), 3.m());
+    /// let mesh = RenderMesh::try_from(rect.to_face(Plane::xy()).unwrap()).unwrap();
+    /// assert!((mesh.area() - 6.).abs() < 0.0001);
+    ///
+    /// let cube = Cube::from_size(2.m());
+    /// let mesh = RenderMesh::try_from(cube).unwrap();
+    /// assert!((mesh.area() - 24.).abs() < 0.0001);
+    /// ```
+    pub fn area(&self) -> f64 {
+        let mut total_area = 0.;
+        for triangle in &self.indices {
+            let point1 = *self
+                .points
+                .get(triangle[0])
+                .expect("index should be a valid point");
+            let point2 = *self
+                .points
+                .get(triangle[1])
+                .expect("index should be a valid point");
+            let point3 = *self
+                .points
+                .get(triangle[2])
+                .expect("index should be a valid point");
+            let edge_1 = point2 - point1;
+            let edge_2 = point3 - point1;
+
+            let cross = (
+                edge_1.y().m() * edge_2.z().m() - edge_1.z().m() * edge_2.y().m(),
+                edge_1.z().m() * edge_2.x().m() - edge_1.x().m() * edge_2.z().m(),
+                edge_1.x().m() * edge_2.y().m() - edge_1.y().m() * edge_2.x().m(),
+            );
+
+            total_area += 0.5 * f64::sqrt(cross.0.powi(2) + cross.1.powi(2) + cross.2.powi(2));
+        }
+        total_area
+    }
+    /// Return the center point of the `RenderMesh`, i.e. the average of all mesh points.
+    ///
+    /// ```rust
+    /// use anvil::{IntoLength, Plane, Rectangle, RenderMesh, point};
+    ///
+    /// let rect = Rectangle::from_dim(1.m(), 1.m()).move_to(point!(2.m(), 3.m()));
+    /// let mesh = RenderMesh::try_from(rect.to_face(Plane::xy()).unwrap()).unwrap();
+    /// let mesh_center = mesh.center();
+    /// assert!((mesh_center.x() - 2.m()).abs() < 0.0001.m());
+    /// assert!((mesh_center.y() - 3.m()).abs() < 0.0001.m());
+    /// assert!(mesh_center.z().abs() < 0.0001.m());
+    /// ```
+    pub fn center(&self) -> Point<3> {
+        let mut sum_of_points = Point::<3>::origin();
+        for point in &self.points {
+            sum_of_points = sum_of_points + *point;
+        }
+        sum_of_points / self.points.len() as f64
+    }
+
     fn empty() -> Self {
         Self {
             points: vec![],
@@ -198,7 +259,9 @@ fn merge(meshes: Vec<RenderMesh>) -> RenderMesh {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Axis, Cube, IntoAngle, IntoLength, Path, Plane, Rectangle, dir, point};
+    use core::f64;
+
+    use crate::{Axis, Circle, Cube, IntoAngle, IntoLength, Path, Plane, Rectangle, dir, point};
 
     use super::*;
 
@@ -246,6 +309,18 @@ mod tests {
                 uvs: vec![[0., 0.], [1., 0.], [1., 1.], [0., 1.]]
             }
         )
+    }
+
+    #[test]
+    fn circle() {
+        let mesh =
+            RenderMesh::try_from(Circle::from_radius(1.m()).to_face(Plane::xy()).unwrap()).unwrap();
+        assert!(mesh.center().x().abs().m() < 0.00001);
+        assert!(mesh.center().y().abs().m() < 0.00001);
+        assert!(mesh.center().z().abs().m() < 0.00001);
+        assert!((mesh.area() - f64::consts::PI).abs() < 0.00001);
+
+        assert_eq!(mesh.normals(), &vec![dir!(0, 0, -1); mesh.normals().len()]);
     }
 
     #[test]
