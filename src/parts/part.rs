@@ -279,9 +279,10 @@ impl Part {
     ///
     /// ```rust
     /// use anvil::{Cuboid, IntoLength};
+    /// use approx::assert_relative_eq;
     ///
     /// let cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
-    /// assert!((cuboid.volume() - 1.).abs() < 1e-9)
+    /// assert_relative_eq!(cuboid.volume(), 1.);
     /// ```
     pub fn volume(&self) -> f64 {
         match &self.inner {
@@ -445,40 +446,42 @@ fn round(x: f64, n_digits: u8) -> f64 {
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_relative_eq;
+
     use super::*;
     use crate::{Cuboid, IntoLength, Sphere, point};
 
     #[test]
     fn eq_both_none() {
-        assert!(Part::empty() == Part::empty())
+        assert_eq!(Part::empty(), Part::empty())
     }
 
     #[test]
     fn eq_both_cuboid() {
         let cuboid1 = Cuboid::from_m(1., 1., 1.);
         let cuboid2 = Cuboid::from_m(1., 1., 1.);
-        assert!(cuboid1 == cuboid2)
+        assert_eq!(cuboid1, cuboid2)
     }
 
     #[test]
     fn neq_both_cuboid() {
         let cuboid1 = Cuboid::from_m(1., 1., 1.);
         let cuboid2 = Cuboid::from_m(2., 2., 2.);
-        assert!(cuboid1 != cuboid2)
+        assert_ne!(cuboid1, cuboid2)
     }
 
     #[test]
     fn eq_both_sphere() {
         let sphere1 = Sphere::from_radius(2.m());
         let sphere2 = Sphere::from_radius(2.m());
-        assert!(sphere1 == sphere2)
+        assert_eq!(sphere1, sphere2)
     }
 
     #[test]
     fn neq_both_sphere() {
         let sphere1 = Sphere::from_radius(1.m());
         let sphere2 = Sphere::from_radius(2.m());
-        assert!(sphere1 != sphere2)
+        assert_ne!(sphere1, sphere2)
     }
 
     #[test]
@@ -494,7 +497,7 @@ mod tests {
     #[test]
     fn volume() {
         let cuboid = Cuboid::from_m(1., 1., 1.);
-        assert!((cuboid.volume() - 1.).abs() < 1e-9)
+        assert_relative_eq!(cuboid.volume(), 1.)
     }
 
     #[test]

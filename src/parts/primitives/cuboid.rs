@@ -14,10 +14,11 @@ impl Cuboid {
     /// # Example
     /// ```rust
     /// use anvil::{Cuboid, IntoLength, Part, point};
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Cuboid::from_dim(1.m(), 2.m(), 3.m());
     /// assert_eq!(part.center(), Ok(point!(0, 0, 0)));
-    /// assert!((part.volume() - 6.).abs() < 1e-5);
+    /// assert_relative_eq!(part.volume(), 6.);
     /// ```
     pub fn from_dim(x: Length, y: Length, z: Length) -> Part {
         Self::from_corners(
@@ -30,10 +31,11 @@ impl Cuboid {
     /// # Example
     /// ```rust
     /// use anvil::{Cuboid, IntoLength, Part, point};
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Cuboid::from_corners(point!(0, 0, 0), point!(2.m(), 2.m(), 2.m()));
     /// assert_eq!(part.center(), Ok(point!(1.m(), 1.m(), 1.m())));
-    /// assert!((part.volume() - 8.).abs() < 1e-5);
+    /// assert_relative_eq!(part.volume(), 8.);
     /// ```
     pub fn from_corners(corner1: Point<3>, corner2: Point<3>) -> Part {
         let volume_is_zero = is_zero(&[
@@ -101,8 +103,8 @@ mod tests {
 
     #[test]
     fn from_dim_empty() {
-        assert!(Cuboid::from_dim(0.m(), 1.m(), 1.m()) == Part::empty());
-        assert!(Cuboid::from_dim(1.m(), 0.m(), 1.m()) == Part::empty());
-        assert!(Cuboid::from_dim(1.m(), 1.m(), 0.m()) == Part::empty())
+        assert_eq!(Cuboid::from_dim(0.m(), 1.m(), 1.m()), Part::empty());
+        assert_eq!(Cuboid::from_dim(1.m(), 0.m(), 1.m()), Part::empty());
+        assert_eq!(Cuboid::from_dim(1.m(), 1.m(), 0.m()), Part::empty())
     }
 }

@@ -10,13 +10,13 @@ pub struct Cylinder;
 impl Cylinder {
     /// Construct a centered cylindrical `Part` from a given radius.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::{Cylinder, IntoLength, Point, Part};
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Cylinder::from_radius(1.m(), 2.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert!((part.volume() - 6.28319).abs() < 1e-5);
+    /// assert_relative_eq!(part.volume(), 6.283185307179587);
     /// ```
     pub fn from_radius(radius: Length, height: Length) -> Part {
         if is_zero(&[radius, height]) {
@@ -35,10 +35,11 @@ impl Cylinder {
     /// # Example
     /// ```rust
     /// use anvil::{Cylinder, IntoLength, Point, Part};
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Cylinder::from_diameter(1.m(), 2.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert!((part.volume() - 1.57080).abs() < 1e-5);
+    /// assert_relative_eq!(part.volume(), 1.5707963267948968);
     /// ```
     pub fn from_diameter(diameter: Length, height: Length) -> Part {
         Self::from_radius(diameter / 2., height)
@@ -52,13 +53,13 @@ mod tests {
 
     #[test]
     fn from_radius_empty() {
-        assert!(Cylinder::from_radius(0.m(), 1.m()) == Part::empty());
-        assert!(Cylinder::from_radius(1.m(), 0.m()) == Part::empty());
+        assert_eq!(Cylinder::from_radius(0.m(), 1.m()), Part::empty());
+        assert_eq!(Cylinder::from_radius(1.m(), 0.m()), Part::empty());
     }
 
     #[test]
     fn from_diameter_empty() {
-        assert!(Cylinder::from_diameter(0.m(), 1.m()) == Part::empty());
-        assert!(Cylinder::from_diameter(1.m(), 0.m()) == Part::empty());
+        assert_eq!(Cylinder::from_diameter(0.m(), 1.m()), Part::empty());
+        assert_eq!(Cylinder::from_diameter(1.m(), 0.m()), Part::empty());
     }
 }

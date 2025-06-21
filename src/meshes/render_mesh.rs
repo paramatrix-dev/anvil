@@ -55,14 +55,15 @@ impl RenderMesh {
     ///
     /// ```rust
     /// use anvil::{Cube, IntoLength, Plane, Rectangle, RenderMesh};
+    /// use approx::assert_relative_eq;
     ///
     /// let rect = Rectangle::from_dim(2.m(), 3.m());
     /// let mesh = RenderMesh::try_from(rect.to_face(Plane::xy()).unwrap()).unwrap();
-    /// assert!((mesh.area() - 6.).abs() < 0.0001);
+    /// assert_relative_eq!(mesh.area(), 6.);
     ///
     /// let cube = Cube::from_size(2.m());
     /// let mesh = RenderMesh::try_from(cube).unwrap();
-    /// assert!((mesh.area() - 24.).abs() < 0.0001);
+    /// assert_relative_eq!(mesh.area(), 24.);
     /// ```
     pub fn area(&self) -> f64 {
         let mut total_area = 0.;
@@ -96,13 +97,15 @@ impl RenderMesh {
     ///
     /// ```rust
     /// use anvil::{IntoLength, Plane, Rectangle, RenderMesh, point};
+    /// use approx::assert_relative_eq;
     ///
     /// let rect = Rectangle::from_dim(1.m(), 1.m()).move_to(point!(2.m(), 3.m()));
     /// let mesh = RenderMesh::try_from(rect.to_face(Plane::xy()).unwrap()).unwrap();
     /// let mesh_center = mesh.center();
-    /// assert!((mesh_center.x() - 2.m()).abs() < 0.0001.m());
-    /// assert!((mesh_center.y() - 3.m()).abs() < 0.0001.m());
-    /// assert!(mesh_center.z().abs() < 0.0001.m());
+    /// assert_relative_eq!(
+    ///     mesh_center,
+    ///     point!(2.m(), 3.m(), 0.m())
+    /// );
     /// ```
     pub fn center(&self) -> Point<3> {
         let mut sum_of_points = Point::<3>::origin();
@@ -261,6 +264,8 @@ fn merge(meshes: Vec<RenderMesh>) -> RenderMesh {
 mod tests {
     use core::f64;
 
+    use approx::{assert_abs_diff_eq, assert_relative_eq};
+
     use crate::{Axis, Circle, Cube, IntoAngle, IntoLength, Path, Plane, Rectangle, dir, point};
 
     use super::*;
@@ -315,11 +320,8 @@ mod tests {
     fn circle() {
         let mesh =
             RenderMesh::try_from(Circle::from_radius(1.m()).to_face(Plane::xy()).unwrap()).unwrap();
-        assert!(mesh.center().x().abs().m() < 0.00001);
-        assert!(mesh.center().y().abs().m() < 0.00001);
-        assert!(mesh.center().z().abs().m() < 0.00001);
-        assert!((mesh.area() - f64::consts::PI).abs() < 0.00001);
-
+        assert_abs_diff_eq!(mesh.center(), point!(0, 0, 0), epsilon = 1e-6);
+        assert_abs_diff_eq!(mesh.area(), f64::consts::PI, epsilon = 1e-4);
         assert_eq!(mesh.normals(), &vec![dir!(0, 0, -1); mesh.normals().len()]);
     }
 
@@ -332,7 +334,7 @@ mod tests {
             RenderMesh::try_from(cube.faces().collect::<Vec<Face>>().first().unwrap().clone())
                 .unwrap();
         for normal in mesh.normals {
-            assert!(normal.approx_eq(dir!(-1, -1, 0)))
+            assert_relative_eq!(normal, dir!(-1, -1, 0))
         }
     }
 

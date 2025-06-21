@@ -32,9 +32,10 @@ impl Sketch {
     ///
     /// ```rust
     /// use anvil::{Rectangle, IntoLength};
+    /// use approx::assert_relative_eq;
     ///
     /// let sketch = Rectangle::from_dim(2.m(), 3.m());
-    /// assert!((sketch.area() - 6.).abs() < 1e-9)
+    /// assert_relative_eq!(sketch.area(), 6.)
     /// ```
     pub fn area(&self) -> f64 {
         match self.to_occt(Plane::xy()) {

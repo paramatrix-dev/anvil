@@ -13,10 +13,11 @@ impl Sphere {
     /// # Example
     /// ```rust
     /// use anvil::{Sphere, IntoLength, Point, Part};
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Sphere::from_radius(1.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert!((part.volume() - 4.18879).abs() < 1e-5);
+    /// assert_relative_eq!(part.volume(), 4.188790204786391);
     /// ```
     pub fn from_radius(radius: Length) -> Part {
         if is_zero(&[radius]) {
@@ -33,10 +34,11 @@ impl Sphere {
     /// # Example
     /// ```rust
     /// use anvil::{Sphere, IntoLength, Point, Part};
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Sphere::from_diameter(1.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert!((part.volume() - 0.523599).abs() < 1e-5);
+    /// assert_relative_eq!(part.volume(), 0.5235987755982989);
     /// ```
     pub fn from_diameter(diameter: Length) -> Part {
         Self::from_radius(diameter / 2.)
@@ -50,11 +52,11 @@ mod tests {
 
     #[test]
     fn from_radius_empty() {
-        assert!(Sphere::from_radius(0.m()) == Part::empty())
+        assert_eq!(Sphere::from_radius(0.m()), Part::empty())
     }
 
     #[test]
     fn from_diameter_empty() {
-        assert!(Sphere::from_diameter(0.m()) == Part::empty())
+        assert_eq!(Sphere::from_diameter(0.m()), Part::empty())
     }
 }

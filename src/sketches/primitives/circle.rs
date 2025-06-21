@@ -11,10 +11,12 @@ impl Circle {
     ///
     /// # Example
     /// ```rust
+    /// use core::f64;
     /// use anvil::{Circle, IntoLength, Point};
+    /// use approx::assert_relative_eq;
     ///
     /// let circle = Circle::from_radius(1.m());
-    /// assert!((circle.area() - 3.141593).abs() < 1e-5);
+    /// assert_relative_eq!(circle.area(), f64::consts::PI);
     /// assert_eq!(circle.center(), Ok(Point::<2>::origin()));
     /// ```
     pub fn from_radius(radius: Length) -> Sketch {
@@ -34,10 +36,12 @@ impl Circle {
     ///
     /// # Example
     /// ```rust
+    /// use core::f64;
     /// use anvil::{Circle, IntoLength, Point};
+    /// use approx::assert_relative_eq;
     ///
-    /// let circle = Circle::from_diameter(1.m());
-    /// assert!((circle.area() - 0.785398).abs() < 1e-5);
+    /// let circle = Circle::from_diameter(2.m());
+    /// assert_relative_eq!(circle.area(), f64::consts::PI);
     /// assert_eq!(circle.center(), Ok(Point::<2>::origin()));
     /// ```
     pub fn from_diameter(diameter: Length) -> Sketch {

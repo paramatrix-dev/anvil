@@ -1,5 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
+use approx::{AbsDiffEq, RelativeEq};
 use cxx::UniquePtr;
 use iter_fixed::IntoIteratorFixed;
 use opencascade_sys::ffi;
@@ -265,6 +266,36 @@ impl<const DIM: usize> Div<f64> for Point<DIM> {
     /// ```
     fn div(self, other: f64) -> Self {
         Self(self.0.into_iter_fixed().map(|n| n / other).collect())
+    }
+}
+
+impl<const DIM: usize> AbsDiffEq for Point<DIM> {
+    type Epsilon = f64;
+    fn default_epsilon() -> Self::Epsilon {
+        f64::default_epsilon()
+    }
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.0
+            .iter()
+            .zip(other.0.iter())
+            .all(|(a, b)| Length::abs_diff_eq(a, b, epsilon))
+    }
+}
+
+impl<const DIM: usize> RelativeEq for Point<DIM> {
+    fn default_max_relative() -> Self::Epsilon {
+        f64::default_max_relative()
+    }
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.0
+            .iter()
+            .zip(other.0.iter())
+            .all(|(a, b)| Length::relative_eq(a, b, epsilon, max_relative))
     }
 }
 

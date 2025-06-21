@@ -12,10 +12,11 @@ impl Square {
     /// # Example
     /// ```rust
     /// use anvil::{Square, IntoLength, Sketch, point};
+    /// use approx::assert_relative_eq;
     ///
     /// let Sketch = Square::from_size(1.m());
     /// assert_eq!(Sketch.center(), Ok(point!(0, 0)));
-    /// assert!((Sketch.area() - 1.).abs() < 1e-5);
+    /// assert_relative_eq!(Sketch.area(), 1.);
     /// ```
     pub fn from_size(size: Length) -> Sketch {
         Rectangle::from_dim(size, size)

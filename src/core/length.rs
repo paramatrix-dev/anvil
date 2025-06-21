@@ -1,3 +1,4 @@
+use approx::{AbsDiffEq, RelativeEq};
 use std::{
     fmt::Debug,
     ops::{Add, Div, Mul, Neg, Sub},
@@ -12,6 +13,7 @@ use crate::{Dir, IntoF64, Point};
 ///
 /// ```rust
 /// use anvil::Length;
+/// use approx::assert_relative_eq;
 ///
 /// // You can construct a `Length` using the Length::from_[unit] methods like
 /// let meters_length = Length::from_m(1.2);
@@ -19,9 +21,9 @@ use crate::{Dir, IntoF64, Point};
 /// let inches_length = Length::from_in(12.);
 ///
 /// // To get back a `Length` value in a specific unit, call the Length.[unit] method
-/// assert_eq!(meters_length.cm(), 120.);
-/// assert_eq!(centimeters_length.m(), 0.045);
-/// assert!((inches_length.ft() - 1.).abs() < 1e-9);
+/// assert_relative_eq!(meters_length.cm(), 120.);
+/// assert_relative_eq!(centimeters_length.m(), 0.045);
+/// assert_relative_eq!(inches_length.ft(), 1.);
 ///
 /// // Length construction can be simplified using the `IntoLength` trait.
 /// use anvil::IntoLength;
@@ -287,6 +289,30 @@ impl Neg for Length {
     type Output = Length;
     fn neg(self) -> Self::Output {
         self * -1.
+    }
+}
+
+impl AbsDiffEq for Length {
+    type Epsilon = f64;
+    fn default_epsilon() -> Self::Epsilon {
+        f64::default_epsilon()
+    }
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        f64::abs_diff_eq(&self.meters, &other.meters, epsilon)
+    }
+}
+
+impl RelativeEq for Length {
+    fn default_max_relative() -> Self::Epsilon {
+        f64::default_max_relative()
+    }
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        f64::relative_eq(&self.meters, &other.meters, epsilon, max_relative)
     }
 }
 

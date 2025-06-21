@@ -1,6 +1,8 @@
 use core::f64;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+use approx::{AbsDiffEq, RelativeEq};
+
 use super::IntoF64;
 
 /// A physical angle (i.e. a distance).
@@ -189,6 +191,30 @@ impl Neg for Angle {
     type Output = Angle;
     fn neg(self) -> Self::Output {
         self * -1.
+    }
+}
+
+impl AbsDiffEq for Angle {
+    type Epsilon = f64;
+    fn default_epsilon() -> Self::Epsilon {
+        f64::default_epsilon()
+    }
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        f64::abs_diff_eq(&self.rad, &other.rad, epsilon)
+    }
+}
+
+impl RelativeEq for Angle {
+    fn default_max_relative() -> Self::Epsilon {
+        f64::default_max_relative()
+    }
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        f64::relative_eq(&self.rad, &other.rad, epsilon, max_relative)
     }
 }
 
