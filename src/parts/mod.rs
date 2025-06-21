@@ -1,3 +1,4 @@
+mod methods;
 mod part;
 pub mod primitives;
 
