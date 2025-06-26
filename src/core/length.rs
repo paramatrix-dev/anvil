@@ -1,8 +1,6 @@
-use approx::{AbsDiffEq, RelativeEq};
-use std::{
-    fmt::Debug,
-    ops::{Add, Div, Mul, Neg, Sub},
-};
+use std::ops::Mul;
+
+use uom::si::length::{centimeter, decimeter, foot, inch, meter, millimeter, yard};
 
 use crate::{Dir, IntoF64, Point};
 
@@ -10,256 +8,7 @@ use crate::{Dir, IntoF64, Point};
 ///
 /// Length exists to remove ambiguity about distance units, which are not supported by default by
 /// major CAD kernels.
-///
-/// ```rust
-/// use anvil::Length;
-/// use approx::assert_relative_eq;
-///
-/// // You can construct a `Length` using the Length::from_[unit] methods like
-/// let meters_length = Length::from_m(1.2);
-/// let centimeters_length = Length::from_cm(4.5);
-/// let inches_length = Length::from_in(12.);
-///
-/// // To get back a `Length` value in a specific unit, call the Length.[unit] method
-/// assert_relative_eq!(meters_length.cm(), 120.);
-/// assert_relative_eq!(centimeters_length.m(), 0.045);
-/// assert_relative_eq!(inches_length.ft(), 1.);
-///
-/// // Length construction can be simplified using the `IntoLength` trait.
-/// use anvil::IntoLength;
-///
-/// assert_eq!(1.2.m(), Length::from_m(1.2));
-/// assert_eq!(4.5.cm(), Length::from_cm(4.5));
-/// assert_eq!(12.in_(), Length::from_in(12.));
-/// ```
-#[derive(PartialEq, Copy, Clone, PartialOrd)]
-pub struct Length {
-    meters: f64,
-}
-impl Length {
-    /// Construct a `Length` with a value of zero.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::zero();
-    /// assert_eq!(len.m(), 0.);
-    /// ```
-    pub const fn zero() -> Self {
-        Self { meters: 0. }
-    }
-    /// Construct a `Length` from a value of unit meters.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::from_m(3.2);
-    /// assert_eq!(len.mm(), 3200.);
-    /// ```
-    pub const fn from_m(value: f64) -> Self {
-        Self { meters: value }
-    }
-    /// Return the value of this `Length` in millimeters.
-    pub const fn m(&self) -> f64 {
-        self.meters
-    }
-    /// Construct a `Length` from a value of unit yards.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::from_yd(1.);
-    /// assert_eq!(len.m(), 0.9144);
-    /// ```
-    pub const fn from_yd(value: f64) -> Self {
-        Self::from_m(value * 0.9144)
-    }
-    /// Return the value of this `Length` in yards.
-    pub const fn yd(&self) -> f64 {
-        self.m() / 0.9144
-    }
-    /// Construct a `Length` from a value of unit feet.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::from_ft(1.);
-    /// assert_eq!(len.cm(), 30.48);
-    /// ```
-    pub const fn from_ft(value: f64) -> Self {
-        Self::from_m(value * 0.3048)
-    }
-    /// Return the value of this `Length` in feet.
-    pub const fn ft(&self) -> f64 {
-        self.m() / 0.3048
-    }
-    /// Construct a `Length` from a value of unit decimeters.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::from_dm(5.1);
-    /// assert_eq!(len.mm(), 510.);
-    /// ```
-    pub const fn from_dm(value: f64) -> Self {
-        Self::from_m(value / 10.)
-    }
-    /// Return the value of this `Length` in decimeters.
-    pub const fn dm(&self) -> f64 {
-        self.m() * 10.
-    }
-    /// Construct a `Length` from a value of unit inches.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::from_in(1.);
-    /// assert_eq!(len.cm(), 2.54);
-    /// ```
-    pub const fn from_in(value: f64) -> Self {
-        Self::from_m(value * 0.0254)
-    }
-    /// Return the value of this `Length` in inches.
-    ///
-    /// This method breaks the pattern with the trailing underscore, because `in` is a reserved
-    /// keyword in Rust.
-    pub const fn in_(&self) -> f64 {
-        self.m() / 0.0254
-    }
-    /// Construct a `Length` from a value of unit centimeters.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::from_cm(5.1);
-    /// assert_eq!(len.mm(), 51.);
-    /// ```
-    pub const fn from_cm(value: f64) -> Self {
-        Self::from_m(value / 100.)
-    }
-    /// Return the value of this `Length` in centimeters.
-    pub const fn cm(&self) -> f64 {
-        self.m() * 100.
-    }
-    /// Construct a `Length` from a value of unit millimeters.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::Length;
-    ///
-    /// let len = Length::from_mm(5.4);
-    /// assert_eq!(len.m(), 0.0054);
-    /// ```
-    pub const fn from_mm(value: f64) -> Self {
-        Self::from_m(value / 1000.)
-    }
-    /// Return the value of this `Length` in millimeters.
-    pub const fn mm(&self) -> f64 {
-        self.m() * 1000.
-    }
-
-    /// Return the absolute value of this `Length`.
-    ///
-    /// ```rust
-    /// use anvil::IntoLength;
-    ///
-    /// assert_eq!((-5).m().abs(), 5.m());
-    /// assert_eq!(5.m().abs(), 5.m());
-    /// ```
-    pub const fn abs(&self) -> Self {
-        Self {
-            meters: self.meters.abs(),
-        }
-    }
-    /// Return the smaller of two lengths.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::IntoLength;
-    ///
-    /// let len1 = 1.m();
-    /// let len2 = 2.m();
-    /// assert_eq!(len1.min(&len2), len1);
-    /// assert_eq!(len2.min(&len1), len1);
-    /// ```
-    pub const fn min(&self, other: &Self) -> Self {
-        Length::from_m(self.m().min(other.m()))
-    }
-    /// Return the larger of two lengths.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::IntoLength;
-    ///
-    /// let len1 = 1.m();
-    /// let len2 = 2.m();
-    /// assert_eq!(len1.max(&len2), len2);
-    /// assert_eq!(len2.max(&len1), len2);
-    /// ```
-    pub const fn max(&self, other: &Self) -> Self {
-        Length::from_m(self.m().max(other.m()))
-    }
-}
-impl Debug for Length {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(format!("{}m", self.m()).as_str())
-    }
-}
-
-impl Add<Length> for Length {
-    type Output = Length;
-    fn add(self, other: Length) -> Length {
-        Length::from_m(self.m() + other.m())
-    }
-}
-
-impl Sub<Length> for Length {
-    type Output = Length;
-    fn sub(self, other: Length) -> Length {
-        Length::from_m(self.m() - other.m())
-    }
-}
-
-impl Mul<f64> for Length {
-    type Output = Length;
-    fn mul(self, other: f64) -> Length {
-        Length::from_m(self.m() * other)
-    }
-}
-
-impl Mul<Length> for f64 {
-    type Output = Length;
-    fn mul(self, other: Length) -> Length {
-        other * self
-    }
-}
-
-impl Div<f64> for Length {
-    type Output = Length;
-    fn div(self, other: f64) -> Length {
-        Length::from_m(self.m() / other)
-    }
-}
-
-impl Div<Length> for Length {
-    type Output = f64;
-    /// Divide this `Length` by another `Length`.
-    /// ```rust
-    /// use anvil::IntoLength;
-    ///
-    /// assert_eq!(6.m() / 2.m(), 3.)
-    /// ```
-    fn div(self, other: Length) -> f64 {
-        self.meters / other.meters
-    }
-}
+pub type Length = uom::si::f64::Length;
 
 impl<const DIM: usize> Mul<Dir<DIM>> for Length {
     type Output = Point<DIM>;
@@ -285,41 +34,10 @@ impl<const DIM: usize> Mul<Dir<DIM>> for Length {
     }
 }
 
-impl Neg for Length {
-    type Output = Length;
-    fn neg(self) -> Self::Output {
-        self * -1.
-    }
-}
-
-impl AbsDiffEq for Length {
-    type Epsilon = f64;
-    fn default_epsilon() -> Self::Epsilon {
-        f64::default_epsilon()
-    }
-    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
-        f64::abs_diff_eq(&self.meters, &other.meters, epsilon)
-    }
-}
-
-impl RelativeEq for Length {
-    fn default_max_relative() -> Self::Epsilon {
-        f64::default_max_relative()
-    }
-    fn relative_eq(
-        &self,
-        other: &Self,
-        epsilon: Self::Epsilon,
-        max_relative: Self::Epsilon,
-    ) -> bool {
-        f64::relative_eq(&self.meters, &other.meters, epsilon, max_relative)
-    }
-}
-
 /// Return true if any IntoLength in the input array is zero.
 pub fn is_zero(lengths: &[Length]) -> bool {
     for length in lengths {
-        if length.m() == 0. {
+        if length.get::<meter>() == 0. {
             return true;
         }
     }
@@ -330,80 +48,88 @@ pub fn is_zero(lengths: &[Length]) -> bool {
 ///
 /// ```rust
 /// use anvil::{IntoLength, Length};
+/// use uom::si::length::{foot, meter};
 ///
-/// assert_eq!(5.m(), Length::from_m(5.));
-/// assert_eq!(5.123.ft(), Length::from_ft(5.123));
+/// assert_eq!(5.m(), Length::new::<meter>(5.));
+/// assert_eq!(5.123.ft(), Length::new::<foot>(5.123));
 /// ```
 pub trait IntoLength: IntoF64 {
     /// Convert this number into a `Length` in yard.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Length};
+    /// use uom::si::length::yard;
     ///
-    /// assert_eq!(5.yd(), Length::from_yd(5.));
+    /// assert_eq!(5.yd(), Length::new::<yard>(5.));
     /// ```
     fn yd(&self) -> Length {
-        Length::from_yd(self.to_f64())
+        Length::new::<yard>(self.to_f64())
     }
     /// Convert this number into a `Length` in meters.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Length};
+    /// use uom::si::length::meter;
     ///
-    /// assert_eq!(5.m(), Length::from_m(5.));
+    /// assert_eq!(5.m(), Length::new::<meter>(5.));
     /// ```
     fn m(&self) -> Length {
-        Length::from_m(self.to_f64())
+        Length::new::<meter>(self.to_f64())
     }
     /// Convert this number into a `Length` in feet.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Length};
+    /// use uom::si::length::foot;
     ///
-    /// assert_eq!(5.ft(), Length::from_ft(5.));
+    /// assert_eq!(5.ft(), Length::new::<foot>(5.));
     /// ```
     fn ft(&self) -> Length {
-        Length::from_ft(self.to_f64())
+        Length::new::<foot>(self.to_f64())
     }
     /// Convert this number into a `Length` in decimeters.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Length};
+    /// use uom::si::length::decimeter;
     ///
-    /// assert_eq!(5.dm(), Length::from_dm(5.));
+    /// assert_eq!(5.dm(), Length::new::<decimeter>(5.));
     /// ```
     fn dm(&self) -> Length {
-        Length::from_dm(self.to_f64())
+        Length::new::<decimeter>(self.to_f64())
     }
     /// Convert this number into a `Length` in inches.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Length};
+    /// use uom::si::length::inch;
     ///
-    /// assert_eq!(5.in_(), Length::from_in(5.));
+    /// assert_eq!(5.in_(), Length::new::<inch>(5.));
     /// ```
     fn in_(&self) -> Length {
-        Length::from_in(self.to_f64())
+        Length::new::<inch>(self.to_f64())
     }
     /// Convert this number into a `Length` in centimeters.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Length};
+    /// use uom::si::length::centimeter;
     ///
-    /// assert_eq!(5.cm(), Length::from_cm(5.));
+    /// assert_eq!(5.cm(), Length::new::<centimeter>(5.));
     /// ```
     fn cm(&self) -> Length {
-        Length::from_cm(self.to_f64())
+        Length::new::<centimeter>(self.to_f64())
     }
     /// Convert this number into a `Length` in millimeters.
     ///
     /// ```rust
     /// use anvil::{IntoLength, Length};
+    /// use uom::si::length::millimeter;
     ///
-    /// assert_eq!(5.mm(), Length::from_mm(5.));
+    /// assert_eq!(5.mm(), Length::new::<millimeter>(5.));
     /// ```
     fn mm(&self) -> Length {
-        Length::from_mm(self.to_f64())
+        Length::new::<millimeter>(self.to_f64())
     }
 }
 
@@ -438,12 +164,12 @@ mod tests {
 
     #[test]
     fn multiply_with_f64() {
-        assert_eq!(5.m() * 4., Length::from_m(20.));
-        assert_eq!(4. * 5.m(), Length::from_m(20.));
+        assert_eq!(5.m() * 4., 20.m());
+        assert_eq!(4. * 5.m(), 20.m());
     }
 
     #[test]
     fn divide_with_f64() {
-        assert_eq!(Length::from_m(6.) / 2., 3.m());
+        assert_eq!(6.m() / 2., 3.m());
     }
 }

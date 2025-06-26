@@ -1,3 +1,5 @@
+use uom::si::length::{meter, millimeter};
+
 use crate::{Length, Path, Point, Sketch, point};
 
 /// Builder for a rectangular `Sketch`.
@@ -56,7 +58,7 @@ impl Rectangle {
     /// )
     /// ```
     pub fn from_m(x: f64, y: f64) -> Sketch {
-        Self::from_dim(Length::from_m(x), Length::from_m(y))
+        Self::from_dim(Length::new::<meter>(x), Length::new::<meter>(y))
     }
 
     /// Construct a centered rectangular `Sketch` directly from the x and y millimeter values.
@@ -74,7 +76,7 @@ impl Rectangle {
     /// )
     /// ```
     pub fn from_mm(x: f64, y: f64) -> Sketch {
-        Self::from_dim(Length::from_mm(x), Length::from_mm(y))
+        Self::from_dim(Length::new::<millimeter>(x), Length::new::<millimeter>(y))
     }
 }
 

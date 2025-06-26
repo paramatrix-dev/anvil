@@ -1,5 +1,6 @@
 use crate::{Length, Part, core::is_zero};
 use opencascade_sys::ffi;
+use uom::si::length::meter;
 
 /// Builder for a spherical `Part`.
 ///
@@ -26,7 +27,7 @@ impl Sphere {
 
         let axis = ffi::gp_Ax2_ctor(&ffi::new_point(0., 0., 0.), &ffi::gp_Dir_ctor(0., 0., 1.));
         let mut make_sphere =
-            ffi::BRepPrimAPI_MakeSphere_ctor(&axis, radius.m(), std::f64::consts::TAU);
+            ffi::BRepPrimAPI_MakeSphere_ctor(&axis, radius.get::<meter>(), std::f64::consts::TAU);
         Part::from_occt(make_sphere.pin_mut().Shape())
     }
     /// Construct a centered spherical `Part` from a given diameter.

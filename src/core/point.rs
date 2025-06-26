@@ -4,6 +4,7 @@ use approx::{AbsDiffEq, RelativeEq};
 use cxx::UniquePtr;
 use iter_fixed::IntoIteratorFixed;
 use opencascade_sys::ffi;
+use uom::si::length::meter;
 
 use crate::{Dir, Error, Length, Plane};
 
@@ -70,7 +71,7 @@ impl<const DIM: usize> Point<DIM> {
     /// assert_eq!(point3d.z(), 0.m());
     /// ```
     pub fn origin() -> Self {
-        Self([Length::zero(); DIM])
+        Self([Length::new::<meter>(0.); DIM])
     }
 
     /// Return the absolute distance between this `Point` to another.
@@ -88,14 +89,24 @@ impl<const DIM: usize> Point<DIM> {
     /// assert_eq!(point3.distance_to(point!(0, 0, 0)), 5.m());
     /// ```
     pub fn distance_to(&self, other: Self) -> Length {
-        Length::from_m(f64::sqrt(
-            (*self - other).0.iter().map(|n| n.m().powi(2)).sum(),
+        Length::new::<meter>(f64::sqrt(
+            (*self - other)
+                .0
+                .iter()
+                .map(|n| n.get::<meter>().powi(2))
+                .sum(),
         ))
     }
 
     /// Return the direction this `Point` lies in with respect to another point.
     pub fn direction_from(&self, other: Self) -> Result<Dir<DIM>, Error> {
-        Dir::<DIM>::try_from((*self - other).0.into_iter_fixed().map(|n| n.m()).collect())
+        Dir::<DIM>::try_from(
+            (*self - other)
+                .0
+                .into_iter_fixed()
+                .map(|n| n.get::<meter>())
+                .collect(),
+        )
     }
 }
 
@@ -130,10 +141,18 @@ impl Point<3> {
     }
 
     pub(crate) fn to_occt_point(self) -> UniquePtr<ffi::gp_Pnt> {
-        ffi::new_point(self.x().m(), self.y().m(), self.z().m())
+        ffi::new_point(
+            self.x().get::<meter>(),
+            self.y().get::<meter>(),
+            self.z().get::<meter>(),
+        )
     }
     pub(crate) fn to_occt_vec(self) -> UniquePtr<ffi::gp_Vec> {
-        ffi::new_vec(self.x().m(), self.y().m(), self.z().m())
+        ffi::new_vec(
+            self.x().get::<meter>(),
+            self.y().get::<meter>(),
+            self.z().get::<meter>(),
+        )
     }
 }
 
@@ -278,7 +297,7 @@ impl<const DIM: usize> AbsDiffEq for Point<DIM> {
         self.0
             .iter()
             .zip(other.0.iter())
-            .all(|(a, b)| Length::abs_diff_eq(a, b, epsilon))
+            .all(|(a, b)| a.get::<meter>().abs_diff_eq(&b.get::<meter>(), epsilon))
     }
 }
 
@@ -292,10 +311,10 @@ impl<const DIM: usize> RelativeEq for Point<DIM> {
         epsilon: Self::Epsilon,
         max_relative: Self::Epsilon,
     ) -> bool {
-        self.0
-            .iter()
-            .zip(other.0.iter())
-            .all(|(a, b)| Length::relative_eq(a, b, epsilon, max_relative))
+        self.0.iter().zip(other.0.iter()).all(|(a, b)| {
+            a.get::<meter>()
+                .relative_eq(&b.get::<meter>(), epsilon, max_relative)
+        })
     }
 }
 

@@ -1,4 +1,5 @@
 use opencascade_sys::ffi;
+use uom::si::length::meter;
 
 use crate::{Error, Length, Part, Point, point};
 
@@ -27,9 +28,9 @@ impl Part {
                 let centre_of_mass = ffi::GProp_GProps_CentreOfMass(&gprops);
 
                 Ok(point!(
-                    Length::from_m(round(centre_of_mass.X(), 9)),
-                    Length::from_m(round(centre_of_mass.Y(), 9)),
-                    Length::from_m(round(centre_of_mass.Z(), 9))
+                    Length::new::<meter>(round(centre_of_mass.X(), 9)),
+                    Length::new::<meter>(round(centre_of_mass.Y(), 9)),
+                    Length::new::<meter>(round(centre_of_mass.Z(), 9))
                 ))
             }
             None => Err(Error::EmptyPart),

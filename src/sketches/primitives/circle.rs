@@ -1,3 +1,5 @@
+use uom::si::length::meter;
+
 use crate::{Length, Path, Point, Sketch};
 
 /// Builder for a circular `Sketch`.
@@ -20,14 +22,14 @@ impl Circle {
     /// assert_eq!(circle.center(), Ok(Point::<2>::origin()));
     /// ```
     pub fn from_radius(radius: Length) -> Sketch {
-        Path::at(Point::<2>::new([radius * -1., Length::zero()]))
+        Path::at(Point::<2>::new([radius * -1., Length::new::<meter>(0.)]))
             .arc_points(
-                Point::<2>::new([Length::zero(), radius]),
-                Point::<2>::new([radius, Length::zero()]),
+                Point::<2>::new([Length::new::<meter>(0.), radius]),
+                Point::<2>::new([radius, Length::new::<meter>(0.)]),
             )
             .arc_points(
-                Point::<2>::new([Length::zero(), radius * -1.]),
-                Point::<2>::new([radius * -1., Length::zero()]),
+                Point::<2>::new([Length::new::<meter>(0.), radius * -1.]),
+                Point::<2>::new([radius * -1., Length::new::<meter>(0.)]),
             )
             .close()
     }

@@ -1,4 +1,5 @@
 use opencascade_sys::ffi;
+use uom::si::length::{meter, millimeter};
 
 use crate::{Length, Part, Point, core::is_zero, point};
 
@@ -47,12 +48,12 @@ impl Cuboid {
             return Part::empty();
         }
 
-        let min_x = corner1.x().min(&corner2.x()).m();
-        let min_y = corner1.y().min(&corner2.y()).m();
-        let min_z = corner1.z().min(&corner2.z()).m();
-        let max_x = corner1.x().max(&corner2.x()).m();
-        let max_y = corner1.y().max(&corner2.y()).m();
-        let max_z = corner1.z().max(&corner2.z()).m();
+        let min_x = corner1.x().min(corner2.x()).get::<meter>();
+        let min_y = corner1.y().min(corner2.y()).get::<meter>();
+        let min_z = corner1.z().min(corner2.z()).get::<meter>();
+        let max_x = corner1.x().max(corner2.x()).get::<meter>();
+        let max_y = corner1.y().max(corner2.y()).get::<meter>();
+        let max_z = corner1.z().max(corner2.z()).get::<meter>();
 
         let point = ffi::new_point(min_x, min_y, min_z);
         let mut cuboid =
@@ -75,7 +76,12 @@ impl Cuboid {
     /// )
     /// ```
     pub fn from_m(x: f64, y: f64, z: f64) -> Part {
-        Self::from_dim(Length::from_m(x), Length::from_m(y), Length::from_m(z))
+        // todo: remove
+        Self::from_dim(
+            Length::new::<meter>(x),
+            Length::new::<meter>(y),
+            Length::new::<meter>(z),
+        )
     }
     /// Construct a centered cuboidal `Part` directly from the x, y, and z millimeter values.
     ///
@@ -92,7 +98,12 @@ impl Cuboid {
     /// )
     /// ```
     pub fn from_mm(x: f64, y: f64, z: f64) -> Part {
-        Self::from_dim(Length::from_mm(x), Length::from_mm(y), Length::from_mm(z))
+        // todo: remove
+        Self::from_dim(
+            Length::new::<millimeter>(x),
+            Length::new::<millimeter>(y),
+            Length::new::<millimeter>(z),
+        )
     }
 }
 

@@ -2,6 +2,7 @@ use std::vec;
 
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
+use uom::si::length::meter;
 
 use crate::{Angle, Axis, Edge, Error, Face, IntoAngle, IntoLength, Length, Part, Plane, Point};
 
@@ -149,9 +150,9 @@ impl Sketch {
 
         let len_step = (start - until).distance_to(Point::<2>::origin()) / instances as f64;
         let mut new_part = self.clone();
-        let mut pos = Length::zero();
+        let mut pos = Length::new::<meter>(0.);
         for _ in 0..instances {
-            pos = pos + len_step;
+            pos += len_step;
             new_part = new_part.add(&self.move_to(axis.point_at(pos)));
         }
         new_part
@@ -278,7 +279,7 @@ impl Sketch {
     /// );
     /// ```
     pub fn extrude(&self, plane: Plane, thickness: Length) -> Result<Part, Error> {
-        if thickness == Length::zero() {
+        if thickness == Length::new::<meter>(0.) {
             return Err(Error::EmptySketch);
         }
 
@@ -551,7 +552,7 @@ mod tests {
     fn extrude_zero_thickness() {
         let sketch = Rectangle::from_dim(1.m(), 2.m());
         assert_eq!(
-            sketch.extrude(Plane::xy(), Length::zero()),
+            sketch.extrude(Plane::xy(), Length::new::<meter>(0.)),
             Err(Error::EmptySketch)
         )
     }
@@ -564,7 +565,7 @@ mod tests {
             .line_to(point!(0.m(), 2.m()))
             .close();
         assert_eq!(
-            sketch.extrude(Plane::xz(), Length::from_m(-3.)),
+            sketch.extrude(Plane::xz(), Length::new::<meter>(-3.)),
             Ok(Cuboid::from_corners(
                 Point::<3>::origin(),
                 point!(1.m(), 3.m(), 2.m())

@@ -1,5 +1,7 @@
-use crate::{Length, Part, core::is_zero};
 use opencascade_sys::ffi;
+use uom::si::length::meter;
+
+use crate::{Length, Part, core::is_zero};
 
 /// Builder for a cylindrical `Part`.
 ///
@@ -23,10 +25,11 @@ impl Cylinder {
             return Part::empty();
         }
         let axis = ffi::gp_Ax2_ctor(
-            &ffi::new_point(0., 0., -height.m() / 2.),
+            &ffi::new_point(0., 0., -height.get::<meter>() / 2.),
             &ffi::gp_Dir_ctor(0., 0., 1.),
         );
-        let mut make = ffi::BRepPrimAPI_MakeCylinder_ctor(&axis, radius.m(), height.m());
+        let mut make =
+            ffi::BRepPrimAPI_MakeCylinder_ctor(&axis, radius.get::<meter>(), height.get::<meter>());
         Part::from_occt(make.pin_mut().Shape())
     }
 

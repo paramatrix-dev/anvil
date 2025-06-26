@@ -1,3 +1,5 @@
+use uom::si::length::meter;
+
 use crate::{Axis, Length, Part, Point};
 
 impl Part {
@@ -28,9 +30,9 @@ impl Part {
 
         let len_step = (start - until).distance_to(Point::<3>::origin()) / instances as f64;
         let mut new_part = self.clone();
-        let mut pos = Length::zero();
+        let mut pos = Length::new::<meter>(0.);
         for _ in 0..instances {
-            pos = pos + len_step;
+            pos += len_step;
             new_part = new_part.add(&self.move_to(axis.point_at(pos)));
         }
         new_part

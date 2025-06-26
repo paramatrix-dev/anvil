@@ -2,6 +2,7 @@ use core::f64;
 
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
+use uom::si::length::meter;
 
 use crate::{Angle, Axis, Dir, Error, Length, Plane, Point};
 
@@ -19,6 +20,7 @@ impl Edge {
     ///
     /// ```rust
     /// use anvil::{Edge, IntoLength, point};
+    /// use uom::si::length::meter;
     ///
     /// let edge = Edge::Line(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
     /// assert_eq!(edge.start(), point!(1.m(), 1.m()))
@@ -33,6 +35,7 @@ impl Edge {
     ///
     /// ```rust
     /// use anvil::{Edge, IntoLength, point};
+    /// use uom::si::length::meter;
     ///
     /// let edge = Edge::Line(point!(1.m(), 1.m()), point!(2.m(), 2.m()));
     /// assert_eq!(edge.end(), point!(2.m(), 2.m()))
@@ -49,6 +52,7 @@ impl Edge {
     /// ```rust
     /// use core::f64;
     /// use anvil::{Edge, IntoLength, point};
+    /// use uom::si::length::meter;
     ///
     /// let line = Edge::Line(point!(1.m(), 0.m()), point!(1.m(), 2.m()));
     /// assert_eq!(line.len(), 2.m());
@@ -60,9 +64,9 @@ impl Edge {
         match self {
             Self::Arc(start, mid, end) => {
                 // Works for now but needs to be refactored in the future
-                let (x1, y1) = (start.x().m(), start.y().m());
-                let (x2, y2) = (mid.x().m(), mid.y().m());
-                let (x3, y3) = (end.x().m(), end.y().m());
+                let (x1, y1) = (start.x().get::<meter>(), start.y().get::<meter>());
+                let (x2, y2) = (mid.x().get::<meter>(), mid.y().get::<meter>());
+                let (x3, y3) = (end.x().get::<meter>(), end.y().get::<meter>());
 
                 let b = (x1.powi(2) + y1.powi(2)) * (y3 - y2)
                     + (x2.powi(2) + y2.powi(2)) * (y1 - y3)
@@ -73,7 +77,7 @@ impl Edge {
 
                 let denom = 2.0 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
                 if denom.abs() < f64::EPSILON {
-                    return Length::zero();
+                    return Length::new::<meter>(0.);
                 }
                 let cx = -b / denom;
                 let cy = -c / denom;
@@ -96,11 +100,13 @@ impl Edge {
                     angle = f64::consts::TAU - angle;
                 }
 
-                Length::from_m(r * angle)
+                Length::new::<meter>(r * angle)
             }
             Self::Line(start, end) => {
                 let diff = *start - *end;
-                Length::from_m(f64::sqrt(diff.x().m().powi(2) + diff.y().m().powi(2)))
+                Length::new::<meter>(f64::sqrt(
+                    diff.x().get::<meter>().powi(2) + diff.y().get::<meter>().powi(2),
+                ))
             }
         }
     }
@@ -109,6 +115,7 @@ impl Edge {
     ///
     /// ```rust
     /// use anvil::{Edge, IntoLength, dir, point};
+    /// use uom::si::length::meter;
     ///
     /// let line = Edge::Line(point!(0, 0), point!(1.m(), 2.m()));
     /// assert_eq!(line.end_direction(), Ok(dir!(1, 2)));
@@ -131,14 +138,15 @@ impl Edge {
                     Ok(Dir::from(end_angle + Angle::from_deg(90.)))
                 }
             }
-            Self::Line(start, end) => {
-                Dir::<2>::try_from([(*end - *start).x().m(), (*end - *start).y().m()])
-            }
+            Self::Line(start, end) => Dir::<2>::try_from([
+                (*end - *start).x().get::<meter>(),
+                (*end - *start).y().get::<meter>(),
+            ]),
         }
     }
 
     pub(crate) fn to_occt(&self, plane: Plane) -> Option<UniquePtr<ffi::TopoDS_Edge>> {
-        if self.len() == Length::zero() {
+        if self.len() == Length::new::<meter>(0.) {
             return None;
         }
         match self {

@@ -1,4 +1,5 @@
 use crate::{Angle, Axis, Dir, Edge, Length, Point, Sketch};
+use uom::si::length::meter;
 
 /// A continuous series of edges (i.e. lines, arcs, ...).
 #[derive(Debug, PartialEq, Clone)]
@@ -75,13 +76,13 @@ impl Path {
     /// )
     /// ```
     pub fn arc_by(&self, radius: Length, angle: Angle) -> Self {
-        if radius == Length::zero() || angle == Angle::zero() {
+        if radius == Length::new::<meter>(0.) || angle == Angle::zero() {
             return self.clone();
         }
         let center = self.cursor + self.end_direction().rotate(Angle::from_deg(90.)) * radius;
         let center_cursor_axis =
             Axis::<2>::between(center, self.cursor).expect("zero radius already checked");
-        let direction_factor = radius / radius.abs();
+        let direction_factor: f64 = (radius / radius.abs()).into();
 
         let interim_point = center
             + center_cursor_axis

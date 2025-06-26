@@ -18,6 +18,7 @@ dependencies = [
  "opencascade-sys",
  "tempdir",
  "tempfile",
+ "uom",
 ]
 
 [[package]]
@@ -434,6 +435,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "typenum"
+version = "1.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -444,6 +451,16 @@ name = "unicode-width"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fc81956842c57dac11422a97c3b8195a1ff727f06e85c84ed2e8aa277c9a0fd"
+
+[[package]]
+name = "uom"
+version = "0.37.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd5cfe7d84f6774726717f358a37f5bca8fca273bed4de40604ad129d1107b49"
+dependencies = [
+ "num-traits",
+ "typenum",
+]
 
 [[package]]
 name = "wasi"

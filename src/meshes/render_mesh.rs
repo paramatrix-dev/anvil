@@ -1,8 +1,14 @@
 use opencascade_sys::ffi;
+use uom::lib::marker::PhantomData;
+use uom::si::length::meter;
 
 use crate::{Dir, Error, Face, IntoLength, Length, Part, Point};
 
-const DEFAULT_TOLERANCE: Length = Length::from_m(0.000001);
+const DEFAULT_TOLERANCE: Length = Length {
+    dimension: PhantomData,
+    units: PhantomData,
+    value: 0.000001,
+};
 
 /// A triangular mesh of one or more `Face`s optimized for 3D rendering.
 #[derive(Clone, Debug, PartialEq)]
@@ -84,9 +90,12 @@ impl RenderMesh {
             let edge_2 = point3 - point1;
 
             let cross = (
-                edge_1.y().m() * edge_2.z().m() - edge_1.z().m() * edge_2.y().m(),
-                edge_1.z().m() * edge_2.x().m() - edge_1.x().m() * edge_2.z().m(),
-                edge_1.x().m() * edge_2.y().m() - edge_1.y().m() * edge_2.x().m(),
+                edge_1.y().get::<meter>() * edge_2.z().get::<meter>()
+                    - edge_1.z().get::<meter>() * edge_2.y().get::<meter>(),
+                edge_1.z().get::<meter>() * edge_2.x().get::<meter>()
+                    - edge_1.x().get::<meter>() * edge_2.z().get::<meter>(),
+                edge_1.x().get::<meter>() * edge_2.y().get::<meter>()
+                    - edge_1.y().get::<meter>() * edge_2.x().get::<meter>(),
             );
 
             total_area += 0.5 * f64::sqrt(cross.0.powi(2) + cross.1.powi(2) + cross.2.powi(2));
@@ -149,7 +158,7 @@ impl TryFrom<(Face, Length)> for RenderMesh {
     fn try_from((face, tolerance): (Face, Length)) -> Result<Self, Self::Error> {
         let mesh = ffi::BRepMesh_IncrementalMesh_ctor(
             ffi::cast_face_to_shape(face.0.as_ref().unwrap()),
-            tolerance.m(),
+            tolerance.get::<meter>(),
         );
         let face = ffi::TopoDS_cast_to_face(mesh.as_ref().unwrap().Shape());
         let mut location = ffi::TopLoc_Location_ctor();
