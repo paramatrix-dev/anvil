@@ -1,5 +1,3 @@
-use uom::si::length::{meter, millimeter};
-
 use crate::{Length, Path, Point, Sketch, point};
 
 /// Builder for a rectangular `Sketch`.
@@ -53,42 +51,6 @@ impl Rectangle {
             .line_to(corner2)
             .line_to(Point::<2>::new([corner1.x(), corner2.y()]))
             .close()
-    }
-
-    /// Construct a centered rectangular `Sketch` directly from the x and y meter values.
-    ///
-    /// This function is primarily intended to simplify tests and should not be exptected in
-    /// similar structs.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{IntoLength, Rectangle};
-    ///
-    /// assert_eq!(
-    ///     Rectangle::from_m(1., 2.),
-    ///     Rectangle::from_dim(1.m(), 2.m())
-    /// )
-    /// ```
-    pub fn from_m(x: f64, y: f64) -> Sketch {
-        Self::from_dim(Length::new::<meter>(x), Length::new::<meter>(y))
-    }
-
-    /// Construct a centered rectangular `Sketch` directly from the x and y millimeter values.
-    ///
-    /// This function is primarily intended to simplify tests and should not be exptected in
-    /// similar structs.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{IntoLength, Rectangle};
-    ///
-    /// assert_eq!(
-    ///     Rectangle::from_mm(1., 2.),
-    ///     Rectangle::from_dim(1.mm(), 2.mm())
-    /// )
-    /// ```
-    pub fn from_mm(x: f64, y: f64) -> Sketch {
-        Self::from_dim(Length::new::<millimeter>(x), Length::new::<millimeter>(y))
     }
 }
 
