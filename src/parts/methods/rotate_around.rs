@@ -1,4 +1,5 @@
 use opencascade_sys::ffi;
+use uom::si::angle::radian;
 
 use crate::{Angle, Axis, Part};
 
@@ -22,7 +23,7 @@ impl Part {
                 let mut transform = ffi::new_transform();
                 transform
                     .pin_mut()
-                    .SetRotation(&axis.to_occt_ax1(), angle.rad());
+                    .SetRotation(&axis.to_occt_ax1(), angle.get::<radian>());
                 let mut operation = ffi::BRepBuilderAPI_Transform_ctor(inner, &transform, false);
                 Self::from_occt(operation.pin_mut().Shape())
             }

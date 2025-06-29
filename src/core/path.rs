@@ -1,5 +1,7 @@
-use crate::{Angle, Axis, Dir, Edge, Length, Point, Sketch};
+use uom::si::angle::{degree, radian};
 use uom::si::length::meter;
+
+use crate::{Angle, Axis, Dir, Edge, Length, Point, Sketch};
 
 /// A continuous series of edges (i.e. lines, arcs, ...).
 #[derive(Debug, PartialEq, Clone)]
@@ -76,10 +78,10 @@ impl Path {
     /// )
     /// ```
     pub fn arc_by(&self, radius: Length, angle: Angle) -> Self {
-        if radius == Length::new::<meter>(0.) || angle == Angle::zero() {
+        if radius == Length::new::<meter>(0.) || angle == Angle::new::<radian>(0.) {
             return self.clone();
         }
-        let center = self.cursor + self.end_direction().rotate(Angle::from_deg(90.)) * radius;
+        let center = self.cursor + self.end_direction().rotate(Angle::new::<degree>(90.)) * radius;
         let center_cursor_axis =
             Axis::<2>::between(center, self.cursor).expect("zero radius already checked");
         let direction_factor: f64 = (radius / radius.abs()).into();
@@ -181,7 +183,7 @@ impl Path {
             Some(last_edge) => last_edge
                 .end_direction()
                 .expect("edge has already been checked for zero length"),
-            None => Dir::from(Angle::zero()),
+            None => Dir::from(Angle::new::<radian>(0.)),
         }
     }
 

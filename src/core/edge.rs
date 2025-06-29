@@ -2,6 +2,7 @@ use core::f64;
 
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
+use uom::si::angle::degree;
 use uom::si::length::meter;
 
 use crate::{Angle, Axis, Dir, Error, Length, Plane, Point};
@@ -133,9 +134,9 @@ impl Edge {
                     && interior_angle > end_angle;
 
                 if arc_is_clockwise {
-                    Ok(Dir::from(end_angle - Angle::from_deg(90.)))
+                    Ok(Dir::from(end_angle - Angle::new::<degree>(90.)))
                 } else {
-                    Ok(Dir::from(end_angle + Angle::from_deg(90.)))
+                    Ok(Dir::from(end_angle + Angle::new::<degree>(90.)))
                 }
             }
             Self::Line(start, end) => Dir::<2>::try_from([
@@ -202,11 +203,11 @@ fn arc_center_radius(
 
     let start_interior_axis = Axis::<2>::new(
         start_interior_midpoint,
-        start_interior_direction.rotate(Angle::from_deg(90.)),
+        start_interior_direction.rotate(Angle::new::<degree>(90.)),
     );
     let interior_end_axis = Axis::<2>::new(
         interior_end_midpoint,
-        interior_end_direction.rotate(Angle::from_deg(90.)),
+        interior_end_direction.rotate(Angle::new::<degree>(90.)),
     );
 
     let center = start_interior_axis

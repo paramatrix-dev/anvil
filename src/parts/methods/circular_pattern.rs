@@ -21,7 +21,7 @@ impl Part {
         let mut angle = 0.rad();
         for _ in 0..instances {
             new_shape = new_shape.add(&self.rotate_around(around, angle));
-            angle = angle + angle_step;
+            angle += angle_step;
         }
         new_shape
     }

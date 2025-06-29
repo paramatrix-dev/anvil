@@ -2,6 +2,7 @@ use std::vec;
 
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
+use uom::si::angle::radian;
 use uom::si::length::meter;
 
 use crate::{Angle, Axis, Edge, Error, Face, IntoAngle, IntoLength, Length, Part, Plane, Point};
@@ -101,7 +102,7 @@ impl Sketch {
         let mut angle = 0.rad();
         for _ in 0..instances {
             new_shape = new_shape.add(&self.rotate_around(around, angle));
-            angle = angle + angle_step;
+            angle += angle_step;
         }
         new_shape
     }
@@ -436,7 +437,7 @@ impl SketchAction {
                             direction: plane.normal(),
                         }
                         .to_occt_ax1(),
-                        angle.rad(),
+                        angle.get::<radian>(),
                     );
                     let mut operation =
                         ffi::BRepBuilderAPI_Transform_ctor(&shape, &transform, false);

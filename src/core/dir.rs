@@ -4,6 +4,7 @@ use approx::{AbsDiffEq, RelativeEq};
 use cxx::UniquePtr;
 use iter_fixed::IntoIteratorFixed;
 use opencascade_sys::ffi;
+use uom::si::angle::radian;
 
 use crate::{Angle, Error, Length, Point};
 
@@ -80,21 +81,20 @@ impl Dir<2> {
     ///
     /// ```rust
     /// use anvil::{dir, IntoAngle};
-    /// use approx::assert_relative_eq;
     ///
-    /// assert_relative_eq!(dir!(1, 0).angle(), 0.deg());
-    /// assert_relative_eq!(dir!(1, 1).angle(), 45.deg());
-    /// assert_relative_eq!(dir!(0, 1).angle(), 90.deg());
-    /// assert_relative_eq!(dir!(-1, 1).angle(), 135.deg());
-    /// assert_relative_eq!(dir!(-1, 0).angle(), 180.deg());
-    /// assert_relative_eq!(dir!(-1, -1).angle(), 225.deg());
-    /// assert_relative_eq!(dir!(0, -1).angle(), 270.deg());
-    /// assert_relative_eq!(dir!(1, -1).angle(), 315.deg());
+    /// assert_eq!(dir!(1, 0).angle(), 0.deg());
+    /// assert_eq!(dir!(1, 1).angle(), 45.deg());
+    /// assert_eq!(dir!(0, 1).angle(), 90.deg());
+    /// assert_eq!(dir!(-1, 1).angle(), 135.deg());
+    /// assert_eq!(dir!(-1, 0).angle(), 180.deg());
+    /// assert_eq!(dir!(-1, -1).angle(), 225.deg());
+    /// assert_eq!(dir!(0, -1).angle(), 270.deg());
+    /// assert_eq!(dir!(1, -1).angle(), 315.deg());
     /// ```
     pub fn angle(&self) -> Angle {
-        let angle = Angle::from_rad(self.y().atan2(self.x()));
-        if angle.rad() < 0. {
-            Angle::from_rad(angle.rad() + std::f64::consts::TAU)
+        let angle = Angle::new::<radian>(self.y().atan2(self.x()));
+        if angle.get::<radian>() < 0. {
+            angle + Angle::FULL_TURN
         } else {
             angle
         }
@@ -112,7 +112,7 @@ impl From<Angle> for Dir<2> {
     /// An angle of 0 points in the positive x-direction and positive angles rotate counter
     /// clockwise.
     fn from(value: Angle) -> Self {
-        Self([f64::cos(value.rad()), f64::sin(value.rad())])
+        Self([value.cos().into(), value.sin().into()])
     }
 }
 
