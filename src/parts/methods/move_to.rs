@@ -33,7 +33,7 @@ mod tests {
 
     #[test]
     fn move_to_deepcopied() {
-        let cuboid1 = Cuboid::from_m(1., 1., 1.);
+        let cuboid1 = Cuboid::from_dim(1.m(), 1.m(), 1.m());
         let loc = point!(2.m(), 2.m(), 2.m());
         let cuboid2 = cuboid1.move_to(loc);
 
@@ -43,21 +43,21 @@ mod tests {
 
     #[test]
     fn part_move_to_twice() {
-        let part = Cuboid::from_m(1., 1., 1.);
+        let part = Cuboid::from_dim(1.m(), 1.m(), 1.m());
         assert_eq!(
             part.move_to(point!(1.m(), 1.m(), 1.m()))
                 .move_to(point!(-1.m(), -1.m(), -1.m())),
-            Cuboid::from_m(1., 1., 1.).move_to(point!(-1.m(), -1.m(), -1.m())),
+            Cuboid::from_dim(1.m(), 1.m(), 1.m()).move_to(point!(-1.m(), -1.m(), -1.m())),
         )
     }
 
     #[test]
     fn move_after_rotate_should_not_reset_rotate() {
-        let part = Cuboid::from_m(1., 1., 2.);
+        let part = Cuboid::from_dim(1.m(), 1.m(), 2.m());
         assert_eq!(
             part.rotate_around(Axis::<3>::y(), 90.deg())
                 .move_to(Point::<3>::origin()),
-            Cuboid::from_m(2., 1., 1.)
+            Cuboid::from_dim(2.m(), 1.m(), 1.m())
         )
     }
 }

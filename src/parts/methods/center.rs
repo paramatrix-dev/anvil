@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn centre_at_origin() {
-        let cuboid = Cuboid::from_m(1., 1., 1.);
+        let cuboid = Cuboid::from_dim(1.m(), 1.m(), 1.m());
         assert_eq!(cuboid.center(), Ok(point!(0, 0, 0)))
     }
 

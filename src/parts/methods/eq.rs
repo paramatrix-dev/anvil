@@ -28,15 +28,15 @@ mod tests {
 
     #[test]
     fn eq_both_cuboid() {
-        let cuboid1 = Cuboid::from_m(1., 1., 1.);
-        let cuboid2 = Cuboid::from_m(1., 1., 1.);
+        let cuboid1 = Cuboid::from_dim(1.m(), 1.m(), 1.m());
+        let cuboid2 = Cuboid::from_dim(1.m(), 1.m(), 1.m());
         assert_eq!(cuboid1, cuboid2)
     }
 
     #[test]
     fn neq_both_cuboid() {
-        let cuboid1 = Cuboid::from_m(1., 1., 1.);
-        let cuboid2 = Cuboid::from_m(2., 2., 2.);
+        let cuboid1 = Cuboid::from_dim(1.m(), 1.m(), 1.m());
+        let cuboid2 = Cuboid::from_dim(2.m(), 2.m(), 2.m());
         assert_ne!(cuboid1, cuboid2)
     }
 

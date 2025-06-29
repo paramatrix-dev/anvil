@@ -1,5 +1,5 @@
 use opencascade_sys::ffi;
-use uom::si::length::{meter, millimeter};
+use uom::si::length::meter;
 
 use crate::{Length, Part, Point, core::is_zero, point};
 
@@ -63,50 +63,6 @@ impl Cuboid {
             ffi::BRepPrimAPI_MakeBox_ctor(&point, max_x - min_x, max_y - min_y, max_z - min_z);
 
         Part::from_occt(cuboid.pin_mut().Shape())
-    }
-    /// Construct a centered cuboidal `Part` directly from the x, y, and z meter values.
-    ///
-    /// This function is primarily intended to simplify tests and should not be exptected in
-    /// similar structs.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{Cuboid, IntoLength, Part};
-    ///
-    /// assert_eq!(
-    ///     Cuboid::from_m(1., 2., 3.),
-    ///     Cuboid::from_dim(1.m(), 2.m(), 3.m())
-    /// )
-    /// ```
-    pub fn from_m(x: f64, y: f64, z: f64) -> Part {
-        // todo: remove
-        Self::from_dim(
-            Length::new::<meter>(x),
-            Length::new::<meter>(y),
-            Length::new::<meter>(z),
-        )
-    }
-    /// Construct a centered cuboidal `Part` directly from the x, y, and z millimeter values.
-    ///
-    /// This function is primarily intended to simplify tests and should not be exptected in
-    /// similar structs.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{Cuboid, IntoLength, Part};
-    ///
-    /// assert_eq!(
-    ///     Cuboid::from_mm(1., 2., 3.),
-    ///     Cuboid::from_dim(1.mm(), 2.mm(), 3.mm())
-    /// )
-    /// ```
-    pub fn from_mm(x: f64, y: f64, z: f64) -> Part {
-        // todo: remove
-        Self::from_dim(
-            Length::new::<millimeter>(x),
-            Length::new::<millimeter>(y),
-            Length::new::<millimeter>(z),
-        )
     }
 }
 
