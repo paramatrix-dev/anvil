@@ -15,11 +15,12 @@ impl Cuboid {
     /// # Example
     /// ```rust
     /// use anvil::{Cuboid, IntoLength, Part, point};
-    /// use approx::assert_relative_eq;
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
     ///
     /// let part = Cuboid::from_dim(1.m(), 2.m(), 3.m());
     /// assert_eq!(part.center(), Ok(point!(0, 0, 0)));
-    /// assert_relative_eq!(part.volume(), 6.);
+    /// assert_eq!(part.volume(), Volume::new::<cubic_meter>(6.));
     /// ```
     pub fn from_dim(x: Length, y: Length, z: Length) -> Part {
         Self::from_corners(
@@ -32,11 +33,13 @@ impl Cuboid {
     /// # Example
     /// ```rust
     /// use anvil::{Cuboid, IntoLength, Part, point};
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
     /// use approx::assert_relative_eq;
     ///
     /// let part = Cuboid::from_corners(point!(0, 0, 0), point!(2.m(), 2.m(), 2.m()));
     /// assert_eq!(part.center(), Ok(point!(1.m(), 1.m(), 1.m())));
-    /// assert_relative_eq!(part.volume(), 8.);
+    /// assert_relative_eq!(part.volume().value, Volume::new::<cubic_meter>(8.).value);
     /// ```
     pub fn from_corners(corner1: Point<3>, corner2: Point<3>) -> Part {
         let volume_is_zero = is_zero(&[

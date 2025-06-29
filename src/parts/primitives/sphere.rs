@@ -14,11 +14,16 @@ impl Sphere {
     /// # Example
     /// ```rust
     /// use anvil::{Sphere, IntoLength, Point, Part};
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
     /// use approx::assert_relative_eq;
     ///
     /// let part = Sphere::from_radius(1.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert_relative_eq!(part.volume(), 4.188790204786391);
+    /// assert_relative_eq!(
+    ///     part.volume().value,
+    ///     Volume::new::<cubic_meter>(4.188790204786391).value
+    /// );
     /// ```
     pub fn from_radius(radius: Length) -> Part {
         if is_zero(&[radius]) {
@@ -35,11 +40,16 @@ impl Sphere {
     /// # Example
     /// ```rust
     /// use anvil::{Sphere, IntoLength, Point, Part};
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
     /// use approx::assert_relative_eq;
     ///
     /// let part = Sphere::from_diameter(1.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert_relative_eq!(part.volume(), 0.5235987755982989);
+    /// assert_relative_eq!(
+    ///     part.volume().value,
+    ///     Volume::new::<cubic_meter>(0.5235987755982989).value
+    /// );
     /// ```
     pub fn from_diameter(diameter: Length) -> Part {
         Self::from_radius(diameter / 2.)

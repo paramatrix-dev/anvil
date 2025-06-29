@@ -1,3 +1,5 @@
+use uom::si::volume::cubic_meter;
+
 use crate::Part;
 
 impl Part {
@@ -5,9 +7,11 @@ impl Part {
     ///
     /// ```rust
     /// use anvil::Part;
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
     ///
     /// let part = Part::empty();
-    /// assert_eq!(part.volume(), 0.);
+    /// assert_eq!(part.volume(), Volume::new::<cubic_meter>(0.));
     /// ```
     pub fn empty() -> Self {
         Self { inner: None }
@@ -23,6 +27,6 @@ impl Part {
     /// assert!(cube.subtract(&cube).is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
-        self.volume() < 1e-9
+        self.volume().get::<cubic_meter>() < 1e-9
     }
 }
