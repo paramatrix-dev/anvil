@@ -16,10 +16,15 @@ impl Circle {
     /// use core::f64;
     /// use anvil::{Circle, IntoLength, Point};
     /// use approx::assert_relative_eq;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
     /// let circle = Circle::from_radius(1.m());
-    /// assert_relative_eq!(circle.area(), f64::consts::PI);
     /// assert_eq!(circle.center(), Ok(Point::<2>::origin()));
+    /// assert_relative_eq!(
+    ///     circle.area().value,
+    ///     Area::new::<square_meter>(f64::consts::PI).value
+    /// );
     /// ```
     pub fn from_radius(radius: Length) -> Sketch {
         Path::at(Point::<2>::new([radius * -1., Length::new::<meter>(0.)]))
@@ -41,10 +46,15 @@ impl Circle {
     /// use core::f64;
     /// use anvil::{Circle, IntoLength, Point};
     /// use approx::assert_relative_eq;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
     /// let circle = Circle::from_diameter(2.m());
-    /// assert_relative_eq!(circle.area(), f64::consts::PI);
     /// assert_eq!(circle.center(), Ok(Point::<2>::origin()));
+    /// assert_relative_eq!(
+    ///     circle.area().value,
+    ///     Area::new::<square_meter>(f64::consts::PI).value
+    /// );
     /// ```
     pub fn from_diameter(diameter: Length) -> Sketch {
         Self::from_radius(diameter / 2.)

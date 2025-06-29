@@ -3,6 +3,8 @@ use std::vec;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 use uom::si::angle::radian;
+use uom::si::area::square_meter;
+use uom::si::f64::Area;
 use uom::si::length::meter;
 
 use crate::{Angle, Axis, Edge, Error, Face, IntoAngle, IntoLength, Length, Part, Plane, Point};
@@ -15,9 +17,11 @@ impl Sketch {
     ///
     /// ```rust
     /// use anvil::Sketch;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
     /// let sketch = Sketch::empty();
-    /// assert_eq!(sketch.area(), 0.);
+    /// assert_eq!(sketch.area(), Area::new::<square_meter>(0.));
     /// ```
     pub fn empty() -> Self {
         Self(vec![])
@@ -30,19 +34,19 @@ impl Sketch {
 
     /// Return the area occupied by this `Sketch` in square meters.
     ///
-    /// Warning: the area is susceptibility to floating point errors.
-    ///
     /// ```rust
     /// use anvil::{Rectangle, IntoLength};
+    /// use uom::si::f64::Area;
+    /// use uom::si::area::square_meter;
     /// use approx::assert_relative_eq;
     ///
     /// let sketch = Rectangle::from_dim(2.m(), 3.m());
-    /// assert_relative_eq!(sketch.area(), 6.)
+    /// assert_relative_eq!(sketch.area().value, Area::new::<square_meter>(6.).value)
     /// ```
-    pub fn area(&self) -> f64 {
+    pub fn area(&self) -> Area {
         match self.to_occt(Plane::xy()) {
             Ok(occt) => occt_area(&occt),
-            Err(_) => 0.,
+            Err(_) => Area::new::<square_meter>(0.),
         }
     }
     /// Return the center of mass of the `Sketch`.
@@ -327,8 +331,8 @@ impl PartialEq for Sketch {
 
         match self.intersect(other).to_occt(Plane::xy()) {
             Ok(intersection) => {
-                (occt_area(&intersection) - self.area()).abs() < 1e-7
-                    && (occt_area(&intersection) - other.area()).abs() < 1e-7
+                (occt_area(&intersection) - self.area()).abs().value < 1e-7
+                    && (occt_area(&intersection) - other.area()).abs().value < 1e-7
             }
             Err(_) => true,
         }
@@ -356,10 +360,10 @@ fn edges_to_occt(edges: &[Edge], plane: Plane) -> Result<UniquePtr<ffi::TopoDS_S
     Ok(ffi::TopoDS_Shape_to_owned(ffi::cast_face_to_shape(face)))
 }
 
-fn occt_area(occt: &ffi::TopoDS_Shape) -> f64 {
+fn occt_area(occt: &ffi::TopoDS_Shape) -> Area {
     let mut gprops = ffi::GProp_GProps_ctor();
     ffi::BRepGProp_SurfaceProperties(occt, gprops.pin_mut());
-    gprops.Mass()
+    Area::new::<square_meter>(gprops.Mass())
 }
 
 fn occt_center(occt: &ffi::TopoDS_Shape) -> Point<3> {
@@ -405,7 +409,7 @@ impl SketchAction {
                 (Some(self_shape), Some(other_shape)) => {
                     let mut operation = ffi::BRepAlgoAPI_Common_ctor(&self_shape, &other_shape);
                     let new_shape = ffi::TopoDS_Shape_to_owned(operation.pin_mut().Shape());
-                    if occt_area(&new_shape) == 0. {
+                    if occt_area(&new_shape) == Area::new::<square_meter>(0.) {
                         None
                     } else {
                         Some(new_shape)
