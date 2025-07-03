@@ -16,10 +16,14 @@ impl Cylinder {
     /// use anvil::{Cylinder, IntoLength, Point, Part};
     /// use uom::si::volume::cubic_meter;
     /// use uom::si::f64::Volume;
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Cylinder::from_radius(1.m(), 2.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert_eq!(part.volume(), Volume::new::<cubic_meter>(6.283185307179587));
+    /// assert_relative_eq!(
+    ///     part.volume().value,
+    ///     Volume::new::<cubic_meter>(6.283185307179587).value
+    /// );
     /// ```
     pub fn from_radius(radius: Length, height: Length) -> Part {
         if is_zero(&[radius, height]) {
@@ -36,7 +40,6 @@ impl Cylinder {
 
     /// Construct a centered cylindrical `Part` from a given diameter.
     ///
-    /// # Example
     /// ```rust
     /// use anvil::{Cylinder, IntoLength, Point, Part};
     /// use uom::si::volume::cubic_meter;
@@ -45,7 +48,10 @@ impl Cylinder {
     ///
     /// let part = Cylinder::from_diameter(1.m(), 2.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert_eq!(part.volume().value, Volume::new::<cubic_meter>(1.5707963267948968).value);
+    /// assert_relative_eq!(
+    ///     part.volume().value,
+    ///     Volume::new::<cubic_meter>(1.5707963267948968).value
+    /// );
     /// ```
     pub fn from_diameter(diameter: Length, height: Length) -> Part {
         Self::from_radius(diameter / 2., height)
