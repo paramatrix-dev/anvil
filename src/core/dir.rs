@@ -1,8 +1,10 @@
 use std::ops::{Add, Mul, Sub};
 
+use approx::{AbsDiffEq, RelativeEq};
 use cxx::UniquePtr;
 use iter_fixed::IntoIteratorFixed;
 use opencascade_sys::ffi;
+use uom::si::angle::radian;
 
 use crate::{Angle, Error, Length, Point};
 
@@ -63,23 +65,6 @@ impl<const DIM: usize> Dir<DIM> {
     pub fn dot(&self, other: Self) -> f64 {
         self.0.into_iter().zip(other.0).map(|(a, b)| a * b).sum()
     }
-
-    /// Return true if this `Dir` has less than a 0.000001% difference to another.
-    ///
-    /// ```rust
-    /// use anvil::dir;
-    ///
-    /// assert!(dir!(1, 1).approx_eq(dir!(1.00000001, 1)));
-    /// assert!(!dir!(1, 1).approx_eq(dir!(0.5, 1)));
-    /// ```
-    pub fn approx_eq(&self, other: Dir<DIM>) -> bool {
-        for (s, o) in self.0.iter().zip(other.0) {
-            if (s / o - 1.).abs() > 0.0000001 {
-                return false;
-            }
-        }
-        true
-    }
 }
 
 impl Dir<2> {
@@ -97,19 +82,19 @@ impl Dir<2> {
     /// ```rust
     /// use anvil::{dir, IntoAngle};
     ///
-    /// assert!((dir!(1, 0).angle() - 0.deg()).rad().abs() < 1e-9);
-    /// assert!((dir!(1, 1).angle() - 45.deg()).rad().abs() < 1e-9);
-    /// assert!((dir!(0, 1).angle() - 90.deg()).rad().abs() < 1e-9);
-    /// assert!((dir!(-1, 1).angle() - 135.deg()).rad().abs() < 1e-9);
-    /// assert!((dir!(-1, 0).angle() - 180.deg()).rad().abs() < 1e-9);
-    /// assert!((dir!(-1, -1).angle() - 225.deg()).rad().abs() < 1e-9);
-    /// assert!((dir!(0, -1).angle() - 270.deg()).rad().abs() < 1e-9);
-    /// assert!((dir!(1, -1).angle() - 315.deg()).rad().abs() < 1e-9);
+    /// assert_eq!(dir!(1, 0).angle(), 0.deg());
+    /// assert_eq!(dir!(1, 1).angle(), 45.deg());
+    /// assert_eq!(dir!(0, 1).angle(), 90.deg());
+    /// assert_eq!(dir!(-1, 1).angle(), 135.deg());
+    /// assert_eq!(dir!(-1, 0).angle(), 180.deg());
+    /// assert_eq!(dir!(-1, -1).angle(), 225.deg());
+    /// assert_eq!(dir!(0, -1).angle(), 270.deg());
+    /// assert_eq!(dir!(1, -1).angle(), 315.deg());
     /// ```
     pub fn angle(&self) -> Angle {
-        let angle = Angle::from_rad(self.y().atan2(self.x()));
-        if angle.rad() < 0. {
-            Angle::from_rad(angle.rad() + std::f64::consts::TAU)
+        let angle = Angle::new::<radian>(self.y().atan2(self.x()));
+        if angle.get::<radian>() < 0. {
+            angle + Angle::FULL_TURN
         } else {
             angle
         }
@@ -127,7 +112,7 @@ impl From<Angle> for Dir<2> {
     /// An angle of 0 points in the positive x-direction and positive angles rotate counter
     /// clockwise.
     fn from(value: Angle) -> Self {
-        Self([f64::cos(value.rad()), f64::sin(value.rad())])
+        Self([value.cos().into(), value.sin().into()])
     }
 }
 
@@ -256,6 +241,36 @@ impl<const DIM: usize> Mul<Length> for Dir<DIM> {
     /// ```
     fn mul(self, other: Length) -> Point<DIM> {
         Point::new(self.0.into_iter_fixed().map(|n| n * other).collect())
+    }
+}
+
+impl<const DIM: usize> AbsDiffEq for Dir<DIM> {
+    type Epsilon = f64;
+    fn default_epsilon() -> Self::Epsilon {
+        f64::default_epsilon()
+    }
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.0
+            .iter()
+            .zip(other.0.iter())
+            .all(|(a, b)| f64::abs_diff_eq(a, b, epsilon))
+    }
+}
+
+impl<const DIM: usize> RelativeEq for Dir<DIM> {
+    fn default_max_relative() -> Self::Epsilon {
+        f64::default_max_relative()
+    }
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.0
+            .iter()
+            .zip(other.0.iter())
+            .all(|(a, b)| f64::relative_eq(a, b, epsilon, max_relative))
     }
 }
 

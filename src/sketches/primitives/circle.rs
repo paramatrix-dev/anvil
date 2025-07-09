@@ -1,3 +1,5 @@
+use uom::si::length::meter;
+
 use crate::{Length, Path, Point, Sketch};
 
 /// Builder for a circular `Sketch`.
@@ -11,21 +13,28 @@ impl Circle {
     ///
     /// # Example
     /// ```rust
+    /// use core::f64;
     /// use anvil::{Circle, IntoLength, Point};
+    /// use approx::assert_relative_eq;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
     /// let circle = Circle::from_radius(1.m());
-    /// assert!((circle.area() - 3.141593).abs() < 1e-5);
     /// assert_eq!(circle.center(), Ok(Point::<2>::origin()));
+    /// assert_relative_eq!(
+    ///     circle.area().value,
+    ///     Area::new::<square_meter>(f64::consts::PI).value
+    /// );
     /// ```
     pub fn from_radius(radius: Length) -> Sketch {
-        Path::at(Point::<2>::new([radius * -1., Length::zero()]))
+        Path::at(Point::<2>::new([radius * -1., Length::new::<meter>(0.)]))
             .arc_points(
-                Point::<2>::new([Length::zero(), radius]),
-                Point::<2>::new([radius, Length::zero()]),
+                Point::<2>::new([Length::new::<meter>(0.), radius]),
+                Point::<2>::new([radius, Length::new::<meter>(0.)]),
             )
             .arc_points(
-                Point::<2>::new([Length::zero(), radius * -1.]),
-                Point::<2>::new([radius * -1., Length::zero()]),
+                Point::<2>::new([Length::new::<meter>(0.), radius * -1.]),
+                Point::<2>::new([radius * -1., Length::new::<meter>(0.)]),
             )
             .close()
     }
@@ -34,11 +43,18 @@ impl Circle {
     ///
     /// # Example
     /// ```rust
+    /// use core::f64;
     /// use anvil::{Circle, IntoLength, Point};
+    /// use approx::assert_relative_eq;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
-    /// let circle = Circle::from_diameter(1.m());
-    /// assert!((circle.area() - 0.785398).abs() < 1e-5);
+    /// let circle = Circle::from_diameter(2.m());
     /// assert_eq!(circle.center(), Ok(Point::<2>::origin()));
+    /// assert_relative_eq!(
+    ///     circle.area().value,
+    ///     Area::new::<square_meter>(f64::consts::PI).value
+    /// );
     /// ```
     pub fn from_diameter(diameter: Length) -> Sketch {
         Self::from_radius(diameter / 2.)

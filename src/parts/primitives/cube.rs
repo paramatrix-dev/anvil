@@ -12,10 +12,13 @@ impl Cube {
     /// # Example
     /// ```rust
     /// use anvil::{Cube, IntoLength, Part, point};
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Cube::from_size(1.m());
     /// assert_eq!(part.center(), Ok(point!(0, 0, 0)));
-    /// assert!((part.volume() - 1.).abs() < 1e-5);
+    /// assert_relative_eq!(part.volume().value, Volume::new::<cubic_meter>(1.).value);
     /// ```
     pub fn from_size(size: Length) -> Part {
         Cuboid::from_dim(size, size, size)

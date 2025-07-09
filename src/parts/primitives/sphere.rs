@@ -1,5 +1,6 @@
 use crate::{Length, Part, core::is_zero};
 use opencascade_sys::ffi;
+use uom::si::length::meter;
 
 /// Builder for a spherical `Part`.
 ///
@@ -13,10 +14,16 @@ impl Sphere {
     /// # Example
     /// ```rust
     /// use anvil::{Sphere, IntoLength, Point, Part};
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Sphere::from_radius(1.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert!((part.volume() - 4.18879).abs() < 1e-5);
+    /// assert_relative_eq!(
+    ///     part.volume().value,
+    ///     Volume::new::<cubic_meter>(4.188790204786391).value
+    /// );
     /// ```
     pub fn from_radius(radius: Length) -> Part {
         if is_zero(&[radius]) {
@@ -25,7 +32,7 @@ impl Sphere {
 
         let axis = ffi::gp_Ax2_ctor(&ffi::new_point(0., 0., 0.), &ffi::gp_Dir_ctor(0., 0., 1.));
         let mut make_sphere =
-            ffi::BRepPrimAPI_MakeSphere_ctor(&axis, radius.m(), std::f64::consts::TAU);
+            ffi::BRepPrimAPI_MakeSphere_ctor(&axis, radius.get::<meter>(), std::f64::consts::TAU);
         Part::from_occt(make_sphere.pin_mut().Shape())
     }
     /// Construct a centered spherical `Part` from a given diameter.
@@ -33,10 +40,16 @@ impl Sphere {
     /// # Example
     /// ```rust
     /// use anvil::{Sphere, IntoLength, Point, Part};
+    /// use uom::si::volume::cubic_meter;
+    /// use uom::si::f64::Volume;
+    /// use approx::assert_relative_eq;
     ///
     /// let part = Sphere::from_diameter(1.m());
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
-    /// assert!((part.volume() - 0.523599).abs() < 1e-5);
+    /// assert_relative_eq!(
+    ///     part.volume().value,
+    ///     Volume::new::<cubic_meter>(0.5235987755982989).value
+    /// );
     /// ```
     pub fn from_diameter(diameter: Length) -> Part {
         Self::from_radius(diameter / 2.)
@@ -50,11 +63,11 @@ mod tests {
 
     #[test]
     fn from_radius_empty() {
-        assert!(Sphere::from_radius(0.m()) == Part::empty())
+        assert_eq!(Sphere::from_radius(0.m()), Part::empty())
     }
 
     #[test]
     fn from_diameter_empty() {
-        assert!(Sphere::from_diameter(0.m()) == Part::empty())
+        assert_eq!(Sphere::from_diameter(0.m()), Part::empty())
     }
 }

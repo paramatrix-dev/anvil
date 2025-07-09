@@ -11,11 +11,17 @@ impl Square {
     ///
     /// # Example
     /// ```rust
-    /// use anvil::{Square, IntoLength, Sketch, point};
+    /// use anvil::{Square, IntoLength, point};
+    /// use approx::assert_relative_eq;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
-    /// let Sketch = Square::from_size(1.m());
-    /// assert_eq!(Sketch.center(), Ok(point!(0, 0)));
-    /// assert!((Sketch.area() - 1.).abs() < 1e-5);
+    /// let square = Square::from_size(1.m());
+    /// assert_eq!(square.center(), Ok(point!(0, 0)));
+    /// assert_relative_eq!(
+    ///     square.area().value,
+    ///     Area::new::<square_meter>(1.).value
+    /// );
     /// ```
     pub fn from_size(size: Length) -> Sketch {
         Rectangle::from_dim(size, size)

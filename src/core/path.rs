@@ -1,3 +1,6 @@
+use uom::si::angle::{degree, radian};
+use uom::si::length::meter;
+
 use crate::{Angle, Axis, Dir, Edge, Length, Point, Sketch};
 
 /// A continuous series of edges (i.e. lines, arcs, ...).
@@ -75,13 +78,13 @@ impl Path {
     /// )
     /// ```
     pub fn arc_by(&self, radius: Length, angle: Angle) -> Self {
-        if radius == Length::zero() || angle == Angle::zero() {
+        if radius == Length::new::<meter>(0.) || angle == Angle::new::<radian>(0.) {
             return self.clone();
         }
-        let center = self.cursor + self.end_direction().rotate(Angle::from_deg(90.)) * radius;
+        let center = self.cursor + self.end_direction().rotate(Angle::new::<degree>(90.)) * radius;
         let center_cursor_axis =
             Axis::<2>::between(center, self.cursor).expect("zero radius already checked");
-        let direction_factor = radius / radius.abs();
+        let direction_factor: f64 = (radius / radius.abs()).into();
 
         let interim_point = center
             + center_cursor_axis
@@ -180,7 +183,7 @@ impl Path {
             Some(last_edge) => last_edge
                 .end_direction()
                 .expect("edge has already been checked for zero length"),
-            None => Dir::from(Angle::zero()),
+            None => Dir::from(Angle::new::<radian>(0.)),
         }
     }
 
@@ -212,49 +215,38 @@ impl Path {
 
 #[cfg(test)]
 mod tests {
-    use assert_float_eq::assert_float_relative_eq;
-
     use super::*;
     use crate::{IntoAngle, IntoLength, dir, point};
-
-    fn assert_dir_eq(dir1: Dir<2>, dir2: Dir<2>) {
-        assert_float_relative_eq!(dir1.x(), dir2.x());
-        assert_float_relative_eq!(dir1.y(), dir2.y());
-    }
-
-    fn assert_point_eq(point1: Point<2>, point2: Point<2>) {
-        assert_float_relative_eq!(point1.x().m(), point2.x().m());
-        assert_float_relative_eq!(point1.y().m(), point2.y().m());
-    }
+    use approx::assert_relative_eq;
 
     #[test]
     fn end_arc_positive_radius_angle() {
         let path = Path::at(point!(0, 0)).arc_by(1.m(), 90.deg());
-        assert_point_eq(path.end(), point!(1.m(), 1.m()))
+        assert_relative_eq!(path.end(), point!(1.m(), 1.m()))
     }
 
     #[test]
     fn end_arc_positive_radius_negative_angle() {
         let path = Path::at(point!(0, 0)).arc_by(1.m(), -90.deg());
-        assert_point_eq(path.end(), point!(-1.m(), 1.m()))
+        assert_relative_eq!(path.end(), point!(-1.m(), 1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_positive_angle() {
         let path = Path::at(point!(0, 0)).arc_by(-1.m(), 90.deg());
-        assert_point_eq(path.end(), point!(1.m(), -1.m()))
+        assert_relative_eq!(path.end(), point!(1.m(), -1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_angle() {
         let path = Path::at(point!(0, 0)).arc_by(-1.m(), -90.deg());
-        assert_point_eq(path.end(), point!(-1.m(), -1.m()))
+        assert_relative_eq!(path.end(), point!(-1.m(), -1.m()))
     }
 
     #[test]
     fn end_arc_negative_radius_positive_angle_45deg() {
         let path = Path::at(point!(0.m(), 1.m())).arc_by(-1.m(), 45.deg());
-        assert_point_eq(
+        assert_relative_eq!(
             path.end(),
             point!(1.m() / f64::sqrt(2.), 1.m() / f64::sqrt(2.)),
         )
@@ -263,36 +255,36 @@ mod tests {
     #[test]
     fn end_direction_empty_path() {
         let path = Path::at(point!(0, 0));
-        assert_dir_eq(path.end_direction(), dir!(1, 0))
+        assert_relative_eq!(path.end_direction(), dir!(1, 0))
     }
 
     #[test]
     fn end_direction_line() {
         let path = Path::at(point!(0, 0)).line_to(point!(1.m(), 1.m()));
-        assert_dir_eq(path.end_direction(), dir!(1, 1))
+        assert_relative_eq!(path.end_direction(), dir!(1, 1))
     }
 
     #[test]
     fn end_direction_arc_positive_radius_angle() {
         let path = Path::at(point!(0, 0)).arc_by(1.m(), 45.deg());
-        assert_dir_eq(path.end_direction(), dir!(1, 1))
+        assert_relative_eq!(path.end_direction(), dir!(1, 1), epsilon = 1e-9)
     }
 
     #[test]
     fn end_direction_arc_positive_radius_negative_angle() {
         let path = Path::at(point!(0, 0)).arc_by(1.m(), -45.deg());
-        assert_dir_eq(path.end_direction(), dir!(-1, 1))
+        assert_relative_eq!(path.end_direction(), dir!(-1, 1), epsilon = 1e-9)
     }
 
     #[test]
     fn end_direction_arc_negative_radius_positive_angle() {
         let path = Path::at(point!(0, 0)).arc_by(-1.m(), 45.deg());
-        assert_dir_eq(path.end_direction(), dir!(1, -1))
+        assert_relative_eq!(path.end_direction(), dir!(1, -1))
     }
 
     #[test]
     fn end_direction_arc_negative_radius_angle() {
         let path = Path::at(point!(0, 0)).arc_by(-1.m(), -45.deg());
-        assert_dir_eq(path.end_direction(), dir!(-1, -1))
+        assert_relative_eq!(path.end_direction(), dir!(-1, -1))
     }
 }

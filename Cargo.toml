@@ -33,11 +33,12 @@ default = ["builtin"]
 builtin = [ "opencascade-sys/builtin" ]
 
 [dependencies]
+approx = "0.5"
 cxx = "1"
 iter_fixed = "0.4.0"
 opencascade-sys = { git = "https://github.com/bschwind/opencascade-rs", rev = "c30da56647c2a60393984458439180886ecaf951" }
 tempfile = "3.19.1"
+uom = "0.37.0"
 
 [dev-dependencies]
 tempdir = "0.3.7"
-assert_float_eq = "1.1.4"

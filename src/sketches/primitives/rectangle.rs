@@ -12,10 +12,16 @@ impl Rectangle {
     /// # Example
     /// ```rust
     /// use anvil::{IntoLength, Rectangle, point};
+    /// use approx::assert_relative_eq;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
     /// let rect = Rectangle::from_dim(1.m(), 1.m());
-    /// assert_eq!(rect.area(), 1.);
     /// assert_eq!(rect.center(), Ok(point!(0, 0)));
+    /// assert_relative_eq!(
+    ///     rect.area().value,
+    ///     Area::new::<square_meter>(1.).value
+    /// );
     /// ```
     pub fn from_dim(x: Length, y: Length) -> Sketch {
         Self::from_corners(point!(x * -0.5, y * -0.5), point!(x * 0.5, y * 0.5))
@@ -26,9 +32,15 @@ impl Rectangle {
     /// # Example
     /// ```rust
     /// use anvil::{IntoLength, Rectangle, point};
+    /// use approx::assert_relative_eq;
+    /// use uom::si::area::square_meter;
+    /// use uom::si::f64::Area;
     ///
     /// let rect = Rectangle::from_corners(point!(0, 0), point!(2.m(), 2.m()));
-    /// assert_eq!(rect.area(), 4.);
+    /// assert_relative_eq!(
+    ///     rect.area().value,
+    ///     Area::new::<square_meter>(4.).value
+    /// );
     /// ```
     pub fn from_corners(corner1: Point<2>, corner2: Point<2>) -> Sketch {
         if corner1.x() == corner2.x() || corner1.y() == corner2.y() {
@@ -39,42 +51,6 @@ impl Rectangle {
             .line_to(corner2)
             .line_to(Point::<2>::new([corner1.x(), corner2.y()]))
             .close()
-    }
-
-    /// Construct a centered rectangular `Sketch` directly from the x and y meter values.
-    ///
-    /// This function is primarily intended to simplify tests and should not be exptected in
-    /// similar structs.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{IntoLength, Rectangle};
-    ///
-    /// assert_eq!(
-    ///     Rectangle::from_m(1., 2.),
-    ///     Rectangle::from_dim(1.m(), 2.m())
-    /// )
-    /// ```
-    pub fn from_m(x: f64, y: f64) -> Sketch {
-        Self::from_dim(Length::from_m(x), Length::from_m(y))
-    }
-
-    /// Construct a centered rectangular `Sketch` directly from the x and y millimeter values.
-    ///
-    /// This function is primarily intended to simplify tests and should not be exptected in
-    /// similar structs.
-    ///
-    /// # Example
-    /// ```rust
-    /// use anvil::{IntoLength, Rectangle};
-    ///
-    /// assert_eq!(
-    ///     Rectangle::from_mm(1., 2.),
-    ///     Rectangle::from_dim(1.mm(), 2.mm())
-    /// )
-    /// ```
-    pub fn from_mm(x: f64, y: f64) -> Sketch {
-        Self::from_dim(Length::from_mm(x), Length::from_mm(y))
     }
 }
 
