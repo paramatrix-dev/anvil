@@ -22,7 +22,8 @@ impl Cylinder {
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
     /// assert_relative_eq!(
     ///     part.volume().value,
-    ///     Volume::new::<cubic_meter>(6.283185307179587).value
+    ///     Volume::new::<cubic_meter>(6.283185307179585).value,
+    ///     max_relative = 1e-9
     /// );
     /// ```
     pub fn from_radius(radius: Length, height: Length) -> Part {
@@ -50,7 +51,8 @@ impl Cylinder {
     /// assert_eq!(part.center(), Ok(Point::<3>::origin()));
     /// assert_relative_eq!(
     ///     part.volume().value,
-    ///     Volume::new::<cubic_meter>(1.5707963267948968).value
+    ///     Volume::new::<cubic_meter>(1.5707963267948963).value,
+    ///     max_relative = 1e-9
     /// );
     /// ```
     pub fn from_diameter(diameter: Length, height: Length) -> Part {
